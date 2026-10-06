@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="PackedScene" path="res://levels/workshop/workshop.tscn" id="1_workshop"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="3_main"]
+[ext_resource type="Script" path="res://systems/dialogue/dialogue_controller.gd" id="4_dialogue"]
 
 [node name="Main" type="Node3D"]
 script = ExtResource("3_main")
@@ -11,6 +12,14 @@ script = ExtResource("3_main")
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector3(0, 1.0, 3.4)
+
+[node name="DialogueController" type="Node" parent="."]
+script = ExtResource("4_dialogue")
+player_path = NodePath("../Player")
+dialogue_panel_path = NodePath("../HUD/DialoguePanel")
+speaker_label_path = NodePath("../HUD/DialoguePanel/Speaker")
+text_label_path = NodePath("../HUD/DialoguePanel/Text")
+hint_label_path = NodePath("../HUD/DialoguePanel/Hint")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -75,3 +84,53 @@ vertical_alignment = 2
 theme_override_font_sizes/font_size = 18
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
 theme_override_constants/outline_size = 7
+
+[node name="DialoguePanel" type="ColorRect" parent="HUD"]
+visible = false
+anchors_preset = 15
+anchor_left = 0.12
+anchor_top = 0.68
+anchor_right = 0.88
+anchor_bottom = 0.94
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.035, 0.045, 0.065, 0.94)
+
+[node name="Speaker" type="Label" parent="HUD/DialoguePanel"]
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 48.0
+text = "Abuelo"
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.94, 0.76, 0.4, 1)
+
+[node name="Text" type="Label" parent="HUD/DialoguePanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 54.0
+offset_right = -24.0
+offset_bottom = -42.0
+text = "Texto de diálogo"
+autowrap_mode = 2
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="Hint" type="Label" parent="HUD/DialoguePanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -38.0
+offset_right = -24.0
+offset_bottom = -10.0
+text = "E / Enter / clic · Continuar"
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.72, 0.76, 0.82, 1)
