@@ -41,7 +41,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_E and _current_interactable != null:
-			_current_interactable.interact(self)
+			_current_interactable.call("interact", self)
 			return
 
 		if event.keycode == KEY_ESCAPE:
@@ -98,7 +98,7 @@ func start_inspection(interactable: Node) -> void:
 	if not interactable.has_method("create_inspection_visual"):
 		return
 
-	var visual := interactable.create_inspection_visual() as Node3D
+	var visual := interactable.call("create_inspection_visual") as Node3D
 	if visual == null:
 		return
 
@@ -111,16 +111,16 @@ func start_inspection(interactable: Node) -> void:
 	_inspection_visual = visual
 
 	if interactable.has_method("set_world_visible"):
-		interactable.set_world_visible(false)
+		interactable.call("set_world_visible", false)
 
 	var title := "Objeto"
 	var description := ""
 
 	if interactable.has_method("get_inspection_title"):
-		title = interactable.get_inspection_title()
+		title = str(interactable.call("get_inspection_title"))
 
 	if interactable.has_method("get_inspection_description"):
-		description = interactable.get_inspection_description()
+		description = str(interactable.call("get_inspection_description"))
 
 	inspection_state_changed.emit(true, title, description)
 
@@ -131,7 +131,7 @@ func stop_inspection() -> void:
 
 	if _inspected_object != null and is_instance_valid(_inspected_object):
 		if _inspected_object.has_method("set_world_visible"):
-			_inspected_object.set_world_visible(true)
+			_inspected_object.call("set_world_visible", true)
 
 	if _inspection_visual != null and is_instance_valid(_inspection_visual):
 		_inspection_visual.queue_free()
@@ -186,7 +186,7 @@ func _set_current_interactable(interactable: Node) -> void:
 	if _current_interactable == null:
 		interaction_prompt_changed.emit("")
 	else:
-		interaction_prompt_changed.emit(_current_interactable.get_interaction_prompt())
+		interaction_prompt_changed.emit(str(_current_interactable.call("get_interaction_prompt")))
 
 
 func _capture_mouse() -> void:
