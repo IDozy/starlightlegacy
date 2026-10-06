@@ -3,8 +3,8 @@ extends Node3D
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 
-const FLOOR_COLOR := Color(0.13, 0.10, 0.085)
-const WALL_COLOR := Color(0.72, 0.62, 0.49)
+const FLOOR_COLOR := Color(0.095, 0.075, 0.065)
+const WALL_COLOR := Color(0.56, 0.46, 0.36)
 const WOOD_COLOR := Color(0.34, 0.19, 0.10)
 const WOOD_LIGHT_COLOR := Color(0.50, 0.29, 0.15)
 const METAL_COLOR := Color(0.20, 0.25, 0.29)
@@ -31,7 +31,7 @@ func _build_lighting() -> void:
 	environment.background_color = NIGHT_BLUE
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.72, 0.62, 0.55)
-	environment.ambient_light_energy = 0.62
+	environment.ambient_light_energy = 0.42
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -39,7 +39,7 @@ func _build_lighting() -> void:
 	sunset_light.name = "SunsetLight"
 	sunset_light.rotation_degrees = Vector3(-42.0, 155.0, 0.0)
 	sunset_light.light_color = Color(1.0, 0.70, 0.46)
-	sunset_light.light_energy = 1.25
+	sunset_light.light_energy = 0.78
 	sunset_light.shadow_enabled = true
 	add_child(sunset_light)
 
@@ -47,7 +47,7 @@ func _build_lighting() -> void:
 	bench_light.name = "BenchWarmLight"
 	bench_light.position = Vector3(-0.4, 2.75, -2.9)
 	bench_light.omni_range = 6.5
-	bench_light.light_energy = 3.1
+	bench_light.light_energy = 1.9
 	bench_light.light_color = Color(1.0, 0.58, 0.28)
 	bench_light.shadow_enabled = true
 	add_child(bench_light)
@@ -56,7 +56,7 @@ func _build_lighting() -> void:
 	window_fill.name = "WindowFill"
 	window_fill.position = Vector3(0.0, 2.5, 4.3)
 	window_fill.omni_range = 8.0
-	window_fill.light_energy = 2.0
+	window_fill.light_energy = 1.15
 	window_fill.light_color = Color(0.53, 0.67, 1.0)
 	add_child(window_fill)
 
@@ -66,6 +66,9 @@ func _build_room() -> void:
 	_create_box("BackWall", Vector3(0.0, 2.0, -5.0), Vector3(12.0, 4.0, 0.2), WALL_COLOR)
 	_create_box("LeftWall", Vector3(-6.0, 2.0, 0.0), Vector3(0.2, 4.0, 10.0), WALL_COLOR)
 	_create_box("RightWall", Vector3(6.0, 2.0, 0.0), Vector3(0.2, 4.0, 10.0), WALL_COLOR)
+
+	# Dark warm roof panel prevents the ceiling from reading as an empty black void.
+	_create_box("Ceiling", Vector3(0.0, 3.92, 0.0), Vector3(12.0, 0.12, 10.0), Color(0.075, 0.052, 0.045), false)
 
 	# A wide front opening frames the sunset and gives the workshop a calm, airy feel.
 	_create_box("FrontWallLeft", Vector3(-4.35, 2.0, 5.0), Vector3(3.3, 4.0, 0.2), WALL_COLOR)
@@ -117,6 +120,10 @@ func _build_workshop_props() -> void:
 	_create_box("PosterWarm", Vector3(-2.2, 2.35, -4.86), Vector3(1.45, 1.35, 0.04), Color(0.77, 0.49, 0.28), false)
 	_create_box("PosterBlue", Vector3(-0.45, 2.45, -4.86), Vector3(1.45, 1.15, 0.04), Color(0.20, 0.39, 0.49), false)
 	_create_box("PosterCream", Vector3(1.35, 2.30, -4.86), Vector3(1.35, 1.45, 0.04), CREAM_COLOR, false)
+
+	# Warm trim behind the bench adds depth and separates furniture from the wall.
+	_create_box("BenchBackGlow", Vector3(0.0, 1.15, -4.76), Vector3(5.2, 1.05, 0.035), Color(0.26, 0.14, 0.085), false)
+	_create_box("BenchAccentLine", Vector3(0.0, 1.62, -4.72), Vector3(4.35, 0.055, 0.04), ORANGE_COLOR, false, 0.55)
 
 	# Stylized desk lamp with a warm emissive bulb.
 	_create_box("LampStem", Vector3(-1.40, 1.72, -3.45), Vector3(0.10, 1.15, 0.10), METAL_COLOR, false)
