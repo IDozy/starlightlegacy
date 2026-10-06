@@ -11,6 +11,7 @@ func _ready() -> void:
 	player.connect("interaction_prompt_changed", _on_interaction_prompt_changed)
 	player.connect("inspection_state_changed", _on_inspection_state_changed)
 	dialogue_controller.connect("dialogue_active_changed", _on_dialogue_active_changed)
+	dialogue_controller.connect("dialogue_finished", _on_dialogue_finished)
 
 	interaction_prompt.visible = false
 	inspection_info.visible = false
@@ -39,3 +40,15 @@ func _on_dialogue_active_changed(active: bool) -> void:
 	crosshair.visible = not active
 	if active:
 		interaction_prompt.visible = false
+
+
+func _on_dialogue_finished(dialogue_id: String) -> void:
+	if dialogue_id != "grandfather_intro":
+		return
+
+	if player.has_method("set_control_locked"):
+		player.call("set_control_locked", true)
+
+	var transition := get_node_or_null("/root/SceneTransition")
+	if transition != null and transition.has_method("fade_to_scene"):
+		transition.call("fade_to_scene", "res://levels/nasa_memory_01/nasa_memory_01.tscn")
