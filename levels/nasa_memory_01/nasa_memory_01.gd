@@ -3,7 +3,7 @@ extends Node3D
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
 
 const FLOOR_COLOR := Color(0.10, 0.13, 0.16)
-const WALL_COLOR := Color(0.60, 0.67, 0.70)
+const WALL_COLOR := Color(0.34, 0.42, 0.48)
 const CONSOLE_COLOR := Color(0.16, 0.23, 0.28)
 const PANEL_COLOR := Color(0.035, 0.075, 0.10)
 const BLUE_ACCENT := Color(0.20, 0.60, 0.92)
@@ -36,7 +36,7 @@ func _build_environment() -> void:
 	environment.background_color = Color(0.015, 0.030, 0.055)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.45, 0.60, 0.76)
-	environment.ambient_light_energy = 0.72
+	environment.ambient_light_energy = 0.38
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -44,7 +44,7 @@ func _build_environment() -> void:
 	key_light.name = "MemoryKeyLight"
 	key_light.rotation_degrees = Vector3(-48.0, 28.0, 0.0)
 	key_light.light_color = Color(0.72, 0.84, 1.0)
-	key_light.light_energy = 1.08
+	key_light.light_energy = 0.62
 	key_light.shadow_enabled = true
 	add_child(key_light)
 
@@ -52,7 +52,7 @@ func _build_environment() -> void:
 	cool_fill.name = "CoolLabFill"
 	cool_fill.position = Vector3(0.0, 3.2, -1.5)
 	cool_fill.omni_range = 11.0
-	cool_fill.light_energy = 4.0
+	cool_fill.light_energy = 1.55
 	cool_fill.light_color = Color(0.38, 0.68, 1.0)
 	cool_fill.shadow_enabled = true
 	add_child(cool_fill)
@@ -61,7 +61,7 @@ func _build_environment() -> void:
 	warm_memory.name = "WarmMemoryAccent"
 	warm_memory.position = Vector3(0.0, 1.9, -4.8)
 	warm_memory.omni_range = 7.0
-	warm_memory.light_energy = 2.4
+	warm_memory.light_energy = 0.95
 	warm_memory.light_color = Color(1.0, 0.52, 0.25)
 	add_child(warm_memory)
 
@@ -71,6 +71,7 @@ func _build_lab() -> void:
 	_create_box("BackWall", Vector3(0, 2.2, -6), Vector3(14, 4.4, 0.2), WALL_COLOR)
 	_create_box("LeftWall", Vector3(-7, 2.2, 0), Vector3(0.2, 4.4, 12), WALL_COLOR)
 	_create_box("RightWall", Vector3(7, 2.2, 0), Vector3(0.2, 4.4, 12), WALL_COLOR)
+	_create_box("Ceiling", Vector3(0, 4.22, 0), Vector3(14, 0.18, 12), Color(0.025, 0.045, 0.070), false)
 
 	# Floor guide lines visually pull the player toward the control consoles.
 	_create_box("CenterGuide", Vector3(0, 0.015, -0.7), Vector3(0.10, 0.03, 9.0), BLUE_ACCENT, false, 1.1)
@@ -83,7 +84,7 @@ func _build_lab() -> void:
 	_create_box("PanelLeft", Vector3(-2.75, 1.58, -4.08), Vector3(2.75, 1.32, 0.16), PANEL_COLOR)
 	_create_box("PanelRight", Vector3(2.75, 1.58, -4.08), Vector3(2.75, 1.32, 0.16), PANEL_COLOR)
 
-	_create_box("ScreenLeft", Vector3(-2.75, 1.72, -3.98), Vector3(1.18, 0.48, 0.06), Color(0.08, 0.28, 0.34), false, 1.7)
+	_create_box("ScreenLeft", Vector3(-2.75, 1.72, -3.98), Vector3(1.18, 0.48, 0.06), Color(0.07, 0.22, 0.28), false, 1.05)
 	_create_box("ScreenRight", Vector3(2.75, 1.72, -3.98), Vector3(1.18, 0.48, 0.06), Color(0.08, 0.28, 0.34), false, 1.7)
 
 	for x in [-3.80, -3.25, -2.25, -1.70, 1.70, 2.25, 3.25, 3.80]:
@@ -93,7 +94,7 @@ func _build_lab() -> void:
 			Vector3(0.14, 0.14, 0.06),
 			ORANGE_ACCENT,
 			false,
-			2.0
+			1.15
 		)
 
 	# Bright ceiling bars create the clean, dreamlike NASA-memory silhouette.
@@ -104,7 +105,7 @@ func _build_lab() -> void:
 			Vector3(1.7, 0.06, 0.18),
 			CYAN_ACCENT,
 			false,
-			1.65
+			0.75
 		)
 
 	# Back wall becomes a graphic mission-display wall instead of a flat grey rectangle.
@@ -113,6 +114,12 @@ func _build_lab() -> void:
 	_create_box("MissionCore", Vector3(0.0, 2.52, -5.78), Vector3(0.55, 1.15, 0.07), CREAM_COLOR, false)
 	_create_box("MissionWingLeft", Vector3(-0.64, 2.22, -5.77), Vector3(0.55, 0.12, 0.07), CREAM_COLOR, false)
 	_create_box("MissionWingRight", Vector3(0.64, 2.22, -5.77), Vector3(0.55, 0.12, 0.07), CREAM_COLOR, false)
+
+	# Warm accents keep the memory from collapsing into a single blue value.
+	_create_box("LeftOrangeTrim", Vector3(-5.55, 1.15, -5.72), Vector3(0.18, 1.65, 0.06), ORANGE_ACCENT, false, 0.45)
+	_create_box("RightOrangeTrim", Vector3(5.55, 1.15, -5.72), Vector3(0.18, 1.65, 0.06), ORANGE_ACCENT, false, 0.45)
+	_create_box("ConsoleCreamLeft", Vector3(-2.75, 0.22, -3.00), Vector3(2.7, 0.12, 0.16), CREAM_COLOR, false)
+	_create_box("ConsoleCreamRight", Vector3(2.75, 0.22, -3.00), Vector3(2.7, 0.12, 0.16), CREAM_COLOR, false)
 
 	# Chunky side frames give the room a grander, cinematic scale with very cheap geometry.
 	for z in [-4.7, -2.2, 0.3, 2.8]:
