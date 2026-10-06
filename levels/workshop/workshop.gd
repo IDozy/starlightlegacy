@@ -1,6 +1,7 @@
 extends Node3D
 
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
+const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
@@ -71,6 +72,11 @@ func _build_workshop_props() -> void:
 	prototype_device.name = "PrototypeDevice"
 	prototype_device.position = Vector3(0.0, 1.35, -3.65)
 	add_child(prototype_device)
+
+	var grandfather := GRANDFATHER.instantiate()
+	grandfather.position = Vector3(2.7, 0.0, -2.6)
+	grandfather.rotation_degrees = Vector3(0.0, -28.0, 0.0)
+	add_child(grandfather)
 
 
 func _create_static_box(
