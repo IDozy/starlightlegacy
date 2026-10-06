@@ -17,6 +17,8 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+KnowledgeRegistry="*res://systems/knowledge/knowledge_registry.gd"
+KnowledgeUI="*res://systems/knowledge/knowledge_ui.gd"
 SceneTransition="*res://systems/navigation/scene_transition.gd"
 
 [display]
