@@ -21,6 +21,7 @@ var _control_locked := false
 
 
 func _ready() -> void:
+	add_to_group("player_controller")
 	interaction_ray.target_position = Vector3(0.0, 0.0, -interaction_distance)
 	_capture_mouse()
 
@@ -101,6 +102,10 @@ func set_control_locked(locked: bool) -> void:
 		_set_current_interactable(null)
 
 
+func can_open_knowledge() -> bool:
+	return not _control_locked and not _is_inspecting
+
+
 func start_inspection(interactable: Node) -> void:
 	if _is_inspecting or interactable == null:
 		return
@@ -132,6 +137,7 @@ func start_inspection(interactable: Node) -> void:
 	if interactable.has_method("get_inspection_description"):
 		description = str(interactable.call("get_inspection_description"))
 
+	_register_discovery(interactable)
 	inspection_state_changed.emit(true, title, description)
 
 
@@ -197,6 +203,27 @@ func _set_current_interactable(interactable: Node) -> void:
 		interaction_prompt_changed.emit("")
 	else:
 		interaction_prompt_changed.emit(str(_current_interactable.call("get_interaction_prompt")))
+
+
+func _register_discovery(interactable: Node) -> void:
+	if not interactable.has_method("get_discovery_data"):
+		return
+
+	var discovery = interactable.call("get_discovery_data")
+	if not (discovery is Dictionary) or discovery.is_empty():
+		return
+
+	var registry := get_node_or_null("/root/KnowledgeRegistry")
+	if registry == null or not registry.has_method("register_discovery"):
+		return
+
+	registry.call(
+		"register_discovery",
+		str(discovery.get("id", "")),
+		str(discovery.get("title", "Descubrimiento")),
+		str(discovery.get("category", "Conocimiento")),
+		str(discovery.get("summary", ""))
+	)
 
 
 func _capture_mouse() -> void:
