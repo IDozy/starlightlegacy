@@ -10,10 +10,10 @@ signal dialogue_finished(dialogue_id: String)
 @export var hint_label_path: NodePath
 
 @onready var player = get_node(player_path)
-@onready var dialogue_panel: Control = get_node(dialogue_panel_path)
-@onready var speaker_label: Label = get_node(speaker_label_path)
-@onready var text_label: Label = get_node(text_label_path)
-@onready var hint_label: Label = get_node(hint_label_path)
+@onready var dialogue_panel := get_node(dialogue_panel_path) as Control
+@onready var speaker_label := get_node(speaker_label_path) as Label
+@onready var text_label := get_node(text_label_path) as Label
+@onready var hint_label := get_node(hint_label_path) as Label
 
 var _dialogue_id := ""
 var _speaker := ""
