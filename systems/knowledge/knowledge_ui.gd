@@ -24,7 +24,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not event is InputEventKey:
+	if not (event is InputEventKey):
 		return
 
 	if not event.pressed or event.echo or event.keycode != KEY_K:
@@ -124,8 +124,10 @@ func _build_toast() -> void:
 
 func _open_journal() -> void:
 	var player := _get_player()
+	if player == null:
+		return
 
-	if player != null and player.has_method("can_open_knowledge"):
+	if player.has_method("can_open_knowledge"):
 		if not bool(player.call("can_open_knowledge")):
 			return
 
