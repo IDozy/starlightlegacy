@@ -17,6 +17,7 @@ var _current_interactable: Node = null
 var _inspected_object: Node = null
 var _inspection_visual: Node3D = null
 var _is_inspecting := false
+var _control_locked := false
 
 
 func _ready() -> void:
@@ -25,6 +26,9 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _control_locked:
+		return
+
 	if event is InputEventMouseButton and event.pressed:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			_capture_mouse()
@@ -55,7 +59,7 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
-	if _is_inspecting:
+	if _control_locked or _is_inspecting:
 		velocity.x = move_toward(velocity.x, 0.0, move_speed * 8.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, move_speed * 8.0 * delta)
 		move_and_slide()
@@ -89,6 +93,12 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, move_speed * 8.0 * delta)
 
 	move_and_slide()
+
+
+func set_control_locked(locked: bool) -> void:
+	_control_locked = locked
+	if locked:
+		_set_current_interactable(null)
 
 
 func start_inspection(interactable: Node) -> void:
