@@ -1,14 +1,14 @@
 extends Node3D
 
-@onready var player: CharacterBody3D = $Player
+@onready var player = $Player
 @onready var crosshair: Label = $HUD/Crosshair
 @onready var interaction_prompt: Label = $HUD/InteractionPrompt
 @onready var inspection_info: Label = $HUD/InspectionInfo
 
 
 func _ready() -> void:
-	player.interaction_prompt_changed.connect(_on_interaction_prompt_changed)
-	player.inspection_state_changed.connect(_on_inspection_state_changed)
+	player.connect("interaction_prompt_changed", _on_interaction_prompt_changed)
+	player.connect("inspection_state_changed", _on_inspection_state_changed)
 
 	interaction_prompt.visible = false
 	inspection_info.visible = false
