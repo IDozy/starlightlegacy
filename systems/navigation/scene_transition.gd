@@ -10,11 +10,11 @@ func _ready() -> void:
 
 	_overlay = ColorRect.new()
 	_overlay.name = "FadeOverlay"
+	add_child(_overlay)
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_overlay.color = Color(0.015, 0.02, 0.03, 0.0)
 	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	_overlay.visible = false
-	add_child(_overlay)
 
 
 func fade_to_scene(scene_path: String, duration: float = 0.45) -> void:
