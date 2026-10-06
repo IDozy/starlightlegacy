@@ -1,10 +1,11 @@
 extends Node3D
 
+const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
+
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
 const WOOD_COLOR := Color(0.34, 0.22, 0.14)
 const METAL_COLOR := Color(0.28, 0.31, 0.34)
-const ACCENT_COLOR := Color(0.86, 0.39, 0.12)
 
 
 func _ready() -> void:
@@ -66,8 +67,10 @@ func _build_workshop_props() -> void:
 	_create_static_box("ShelfTwo", Vector3(-4.45, 1.5, -1.0), Vector3(0.9, 0.12, 3.0), WOOD_COLOR)
 	_create_static_box("ShelfThree", Vector3(-4.45, 2.4, -1.0), Vector3(0.9, 0.12, 3.0), WOOD_COLOR)
 
-	# Placeholder "space hardware" on the central bench.
-	_create_static_box("PrototypeDevice", Vector3(0.0, 1.35, -3.65), Vector3(0.9, 0.5, 0.65), ACCENT_COLOR)
+	var prototype_device := INSPECTABLE_OBJECT.instantiate()
+	prototype_device.name = "PrototypeDevice"
+	prototype_device.position = Vector3(0.0, 1.35, -3.65)
+	add_child(prototype_device)
 
 
 func _create_static_box(
