@@ -1,0 +1,59 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://systems/dialogue/talkable_npc.gd" id="1_npc"]
+
+[sub_resource type="StandardMaterial3D" id="Material_body"]
+albedo_color = Color(0.18, 0.28, 0.36, 1)
+roughness = 0.9
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+material = SubResource("Material_body")
+radius = 0.32
+height = 1.15
+
+[sub_resource type="StandardMaterial3D" id="Material_head"]
+albedo_color = Color(0.72, 0.55, 0.43, 1)
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="Mesh_head"]
+material = SubResource("Material_head")
+radius = 0.28
+height = 0.56
+
+[sub_resource type="StandardMaterial3D" id="Material_hair"]
+albedo_color = Color(0.78, 0.8, 0.82, 1)
+roughness = 0.95
+
+[sub_resource type="SphereMesh" id="Mesh_hair"]
+material = SubResource("Material_hair")
+radius = 0.3
+height = 0.36
+
+[sub_resource type="CapsuleShape3D" id="Shape_npc"]
+radius = 0.38
+height = 1.8
+
+[node name="Grandfather" type="StaticBody3D"]
+script = ExtResource("1_npc")
+display_name = "Abuelo"
+dialogue_id = "grandfather_intro"
+dialogue_lines = PackedStringArray("Vaya... no veía uno de esos desde hace muchos años.", "Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.", "¿Quieren saber para qué servía realmente?", "Entonces tendré que contarles dónde empezó todo.")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 0.68, 0)
+mesh = SubResource("Mesh_body")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.48, 0)
+mesh = SubResource("Mesh_head")
+
+[node name="Hair" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.68, -0.02)
+scale = Vector3(1.02, 0.48, 1.02)
+mesh = SubResource("Mesh_hair")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Shape_npc")
