@@ -1,39 +1,68 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://systems/interaction/inspectable_object.gd" id="1_inspectable"]
 
 [sub_resource type="StandardMaterial3D" id="Material_body"]
-albedo_color = Color(0.86, 0.39, 0.12, 1)
-roughness = 0.72
+albedo_color = Color(0.82, 0.76, 0.63, 1)
+roughness = 0.82
 
 [sub_resource type="BoxMesh" id="Box_body"]
 material = SubResource("Material_body")
-size = Vector3(0.9, 0.5, 0.65)
+size = Vector3(0.96, 0.56, 0.68)
+
+[sub_resource type="StandardMaterial3D" id="Material_trim"]
+albedo_color = Color(0.93, 0.43, 0.15, 1)
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="Box_trim"]
+material = SubResource("Material_trim")
+size = Vector3(1.02, 0.10, 0.72)
 
 [sub_resource type="StandardMaterial3D" id="Material_panel"]
-albedo_color = Color(0.08, 0.09, 0.11, 1)
-metallic = 0.35
-roughness = 0.45
+albedo_color = Color(0.055, 0.075, 0.09, 1)
+metallic = 0.28
+roughness = 0.42
 
 [sub_resource type="BoxMesh" id="Box_panel"]
 material = SubResource("Material_panel")
-size = Vector3(0.7, 0.3, 0.05)
+size = Vector3(0.78, 0.34, 0.055)
+
+[sub_resource type="StandardMaterial3D" id="Material_screen"]
+albedo_color = Color(0.10, 0.34, 0.40, 1)
+emission_enabled = true
+emission = Color(0.20, 0.80, 0.86, 1)
+emission_energy_multiplier = 1.9
+roughness = 0.28
+
+[sub_resource type="BoxMesh" id="Box_screen"]
+material = SubResource("Material_screen")
+size = Vector3(0.31, 0.16, 0.025)
 
 [sub_resource type="StandardMaterial3D" id="Material_dial"]
-albedo_color = Color(0.55, 0.72, 0.82, 1)
-emission_enabled = true
-emission = Color(0.08, 0.18, 0.24, 1)
-emission_energy_multiplier = 1.4
-roughness = 0.3
+albedo_color = Color(0.74, 0.80, 0.80, 1)
+metallic = 0.32
+roughness = 0.36
 
 [sub_resource type="CylinderMesh" id="Cylinder_dial"]
 material = SubResource("Material_dial")
-top_radius = 0.06
-bottom_radius = 0.06
-height = 0.06
+top_radius = 0.07
+bottom_radius = 0.07
+height = 0.065
+
+[sub_resource type="StandardMaterial3D" id="Material_light"]
+albedo_color = Color(0.95, 0.72, 0.28, 1)
+emission_enabled = true
+emission = Color(1, 0.61, 0.18, 1)
+emission_energy_multiplier = 2.6
+roughness = 0.22
+
+[sub_resource type="SphereMesh" id="Sphere_light"]
+material = SubResource("Material_light")
+radius = 0.035
+height = 0.07
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
-size = Vector3(0.9, 0.5, 0.65)
+size = Vector3(1.02, 0.62, 0.72)
 
 [node name="InspectableObject" type="StaticBody3D"]
 script = ExtResource("1_inspectable")
@@ -48,19 +77,35 @@ discovery_summary = "Los sistemas de navegación permiten a una nave conocer su 
 [node name="Body" type="MeshInstance3D" parent="Visual"]
 mesh = SubResource("Box_body")
 
+[node name="TopTrim" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 0.28, 0)
+mesh = SubResource("Box_trim")
+
+[node name="BottomTrim" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, -0.28, 0)
+mesh = SubResource("Box_trim")
+
 [node name="FacePanel" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 0, 0.34)
+position = Vector3(0, 0, 0.365)
 mesh = SubResource("Box_panel")
 
+[node name="Screen" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.16, 0.065, 0.407)
+mesh = SubResource("Box_screen")
+
 [node name="DialLeft" type="MeshInstance3D" parent="Visual"]
-position = Vector3(-0.18, 0.02, 0.39)
+position = Vector3(0.18, 0.055, 0.41)
 rotation_degrees = Vector3(90, 0, 0)
 mesh = SubResource("Cylinder_dial")
 
 [node name="DialRight" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0.18, 0.02, 0.39)
+position = Vector3(0.31, 0.055, 0.41)
 rotation_degrees = Vector3(90, 0, 0)
 mesh = SubResource("Cylinder_dial")
+
+[node name="StatusLight" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.26, -0.11, 0.415)
+mesh = SubResource("Sphere_light")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("Shape_body")
