@@ -10,7 +10,7 @@ signal dialogue_finished(dialogue_id: String)
 @export var hint_label_path: NodePath
 
 @onready var player = get_node(player_path)
-@onready var dialogue_panel := get_node(dialogue_panel_path) as Control
+@onready var _dialogue_panel := get_node(dialogue_panel_path) as Control
 @onready var speaker_label := get_node(speaker_label_path) as Label
 @onready var text_label := get_node(text_label_path) as Label
 @onready var hint_label := get_node(hint_label_path) as Label
@@ -25,7 +25,7 @@ var _started_frame := -1
 
 func _ready() -> void:
 	add_to_group("dialogue_controller")
-	dialogue_panel.visible = false
+	_dialogue_panel.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -69,7 +69,7 @@ func start_dialogue(
 	if player != null and player.has_method("set_control_locked"):
 		player.call("set_control_locked", true)
 
-	dialogue_panel.visible = true
+	_dialogue_panel.visible = true
 	hint_label.text = "E / Enter / clic · Continuar"
 	dialogue_active_changed.emit(true)
 	_show_current_line()
@@ -101,7 +101,7 @@ func _finish_dialogue() -> void:
 	var finished_id := _dialogue_id
 
 	_active = false
-	_dialogue_panel.visible = false
+	__dialogue_panel.visible = false
 	_lines.clear()
 	_line_index = 0
 	_dialogue_id = ""
