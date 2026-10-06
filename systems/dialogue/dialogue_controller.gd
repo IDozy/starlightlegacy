@@ -101,7 +101,7 @@ func _finish_dialogue() -> void:
 	var finished_id := _dialogue_id
 
 	_active = false
-	__dialogue_panel.visible = false
+	_dialogue_panel.visible = false
 	_lines.clear()
 	_line_index = 0
 	_dialogue_id = ""
