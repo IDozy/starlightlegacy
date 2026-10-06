@@ -12,7 +12,7 @@ func get_interaction_prompt() -> String:
 
 func interact(player: Node) -> void:
 	if player.has_method("start_inspection"):
-		player.start_inspection(self)
+		player.call("start_inspection", self)
 
 
 func create_inspection_visual() -> Node3D:
