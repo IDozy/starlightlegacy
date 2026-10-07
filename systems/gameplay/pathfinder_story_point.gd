@@ -6,8 +6,6 @@ signal story_completed
 const DISCOVERY_ID := "mars_pathfinder_lander"
 
 @onready var panel: Control = $StoryHUD/Panel
-@onready var title_label: Label = $StoryHUD/Panel/Title
-@onready var body_label: Label = $StoryHUD/Panel/Body
 
 var _player: Node = null
 var _active := false
