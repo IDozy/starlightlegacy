@@ -25,15 +25,7 @@ func interact(player: Node) -> void:
 		return
 
 	_debug(main_node, "3 · DialogueController encontrado")
-
-	controller.start_dialogue(
-		dialogue_id,
-		display_name,
-		dialogue_lines,
-		player
-	)
-
-	_debug(main_node, "4 · start_dialogue() invocado")
+	controller.start_dialogue_by_id(dialogue_id, display_name, player)
 
 
 func _debug(main_node: Node, message: String) -> void:
