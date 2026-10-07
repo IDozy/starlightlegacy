@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal challenge_active_changed(active: bool)
 signal challenge_completed
 
@@ -68,7 +70,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if _review_only:
-		if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			_close_panel()
 			get_viewport().set_input_as_handled()
 		return
@@ -76,21 +78,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _scanning:
 		return
 
-	if event.keycode == KEY_W or event.keycode == KEY_UP:
+	if INPUT_COMPAT.key_matches(event, KEY_W) or INPUT_COMPAT.key_matches(event, KEY_UP):
 		_drive_step = mini(_drive_step + 1, max_drive_steps)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_S or event.keycode == KEY_DOWN:
+	if INPUT_COMPAT.key_matches(event, KEY_S) or INPUT_COMPAT.key_matches(event, KEY_DOWN):
 		_drive_step = maxi(_drive_step - 1, 0)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_E or event.keycode == KEY_ENTER:
+	if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER):
 		if _drive_step >= max_drive_steps:
 			_start_scan()
 		else:
@@ -98,7 +100,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_ESCAPE:
+	if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 		_close_panel()
 		get_viewport().set_input_as_handled()
 
