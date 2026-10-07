@@ -55,7 +55,6 @@ func start_dialogue_by_id(
 ) -> bool:
 	var lines := _get_dialogue_lines(dialogue_id)
 	if lines.is_empty():
-		_set_debug("ERROR · diálogo sin líneas: %s" % dialogue_id)
 		return false
 
 	return _start_dialogue(dialogue_id, speaker, lines, source_player)
@@ -68,7 +67,6 @@ func _start_dialogue(
 	source_player: Node = null
 ) -> bool:
 	if _active:
-		_set_debug("ERROR · DialogueController ya estaba activo")
 		return false
 
 	if source_player != null:
@@ -88,7 +86,6 @@ func _start_dialogue(
 	hint_label.text = "E / Enter / clic · Continuar"
 	dialogue_active_changed.emit(true)
 	_show_current_line()
-	_set_debug("5 · DIÁLOGO ACTIVO · %d líneas" % _lines.size())
 	return true
 
 
@@ -142,8 +139,3 @@ func _finish_dialogue() -> void:
 	dialogue_active_changed.emit(false)
 	dialogue_finished.emit(finished_id)
 
-
-func _set_debug(message: String) -> void:
-	var main_node := get_parent()
-	if main_node != null and main_node.has_method("set_interaction_debug"):
-		main_node.call("set_interaction_debug", message)
