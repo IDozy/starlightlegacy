@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 var _journal_overlay: ColorRect
 var _journal_card: ColorRect
 var _journal_title: Label
@@ -27,7 +29,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey):
 		return
 
-	if not event.pressed or event.echo or event.keycode != KEY_K:
+	if not event.pressed or event.echo or not INPUT_COMPAT.key_matches(event, KEY_K):
 		return
 
 	if _journal_open:
