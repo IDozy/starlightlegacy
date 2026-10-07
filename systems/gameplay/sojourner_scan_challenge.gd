@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal challenge_active_changed(active: bool)
 signal challenge_completed
 
@@ -68,7 +70,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if _review_only:
-		if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			_close_panel()
 			get_viewport().set_input_as_handled()
 		return
@@ -76,29 +78,29 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _scanning:
 		return
 
-	if event.keycode == KEY_W or event.keycode == KEY_UP:
+	if INPUT_COMPAT.key_matches(event, KEY_W) or INPUT_COMPAT.key_matches(event, KEY_UP):
 		_drive_step = mini(_drive_step + 1, max_drive_steps)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_S or event.keycode == KEY_DOWN:
+	if INPUT_COMPAT.key_matches(event, KEY_S) or INPUT_COMPAT.key_matches(event, KEY_DOWN):
 		_drive_step = maxi(_drive_step - 1, 0)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_E or event.keycode == KEY_ENTER:
+	if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER):
 		if _drive_step >= max_drive_steps:
 			_start_scan()
 		else:
-			status_label.text = "Sojourner todavía está demasiado lejos de la roca."
+			status_label.text = "Sojourner todavía está demasiado lejos de Yogi."
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_ESCAPE:
+	if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 		_close_panel()
 		get_viewport().set_input_as_handled()
 
@@ -126,7 +128,7 @@ func _start_challenge() -> void:
 	panel.visible = true
 	scan_progress.visible = false
 	mission_label.text = "MARS PATHFINDER · SOJOURNER · ARES VALLIS · 1997"
-	instruction_label.text = "Acerca el rover a la roca para que el APXS pueda analizarla."
+	instruction_label.text = "Acerca el rover a Yogi para que el APXS pueda analizar la roca."
 	hint_label.text = "W / S · Mover rover    E · Usar APXS    Esc · Salir"
 	status_label.text = "Sojourner fue el primer vehículo con ruedas que recorrió otro planeta."
 	challenge_active_changed.emit(true)
@@ -144,7 +146,7 @@ func _open_review() -> void:
 	scan_progress.visible = false
 	mission_label.text = "MARS PATHFINDER · SOJOURNER · MISIÓN COMPLETADA"
 	instruction_label.text = "APXS · Alpha Proton X-Ray Spectrometer"
-	distance_label.text = "ROCA Y SUELO · COMPOSICIÓN QUÍMICA"
+	distance_label.text = "YOGI · COMPOSICIÓN QUÍMICA"
 	status_label.text = "Sojourner operó durante 83 días, aunque su misión principal se había planeado para solo siete."
 	hint_label.text = "E / Esc · Cerrar"
 	challenge_active_changed.emit(true)
@@ -156,7 +158,7 @@ func _start_scan() -> void:
 	scan_progress.value = 0.0
 	scan_progress.visible = true
 	instruction_label.text = "APXS en contacto · Analizando composición..."
-	status_label.text = "El instrumento mide los elementos presentes en la roca y el suelo."
+	status_label.text = "El APXS mide los elementos dominantes presentes en la roca y el suelo."
 	hint_label.text = "Analizando..."
 	set_process(true)
 
@@ -175,13 +177,13 @@ func _finish_scan() -> void:
 			DISCOVERY_ID,
 			"Sojourner y su APXS",
 			"Hardware en Marte",
-			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS analizó químicamente rocas y suelo en Ares Vallis; junto con otros datos de Mars Pathfinder, esas observaciones aportaron evidencia de un Marte pasado más cálido y húmedo."
+			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS estudió rocas y suelo en Ares Vallis. En Yogi encontró poco cuarzo y una composición más parecida a basaltos terrestres que la roca Barnacle Bill."
 		)
 
 	mission_label.text = "ANÁLISIS COMPLETADO · SOJOURNER"
-	instruction_label.text = "APXS · COMPOSICIÓN REGISTRADA"
-	distance_label.text = "LEGADO · UN CAMINO PARA LOS ROVERS DE MARTE"
-	status_label.text = "La última transmisión de Pathfinder llegó en septiembre de 1997. El hardware quedó en Marte, pero su legado continúa."
+	instruction_label.text = "YOGI · RESULTADO DEL APXS"
+	distance_label.text = "POCO CUARZO · PARECIDA A BASALTOS TERRESTRES"
+	status_label.text = "Los primeros resultados mostraron una roca más primitiva que Barnacle Bill y parecida a basaltos comunes de la Tierra. La misión terminó, pero el hardware quedó en Marte."
 	hint_label.text = "E / Esc · Continuar"
 	challenge_completed.emit()
 
@@ -205,7 +207,7 @@ func _update_drive_display() -> void:
 
 	if remaining == 0:
 		distance_label.text = "POSICIÓN · JUNTO A LA ROCA"
-		status_label.text = "APXS listo. Pulsa E para realizar el análisis."
+		status_label.text = "APXS listo junto a Yogi. Pulsa E para realizar el análisis."
 	else:
 		distance_label.text = "TRAMO RESTANTE · %d / %d" % [remaining, max_drive_steps]
 

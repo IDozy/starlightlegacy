@@ -2,7 +2,6 @@ extends StaticBody3D
 
 @export var display_name: String = "Personaje"
 @export var dialogue_id: String = "dialogue"
-@export var dialogue_lines: PackedStringArray = []
 
 
 func get_interaction_prompt() -> String:
@@ -10,12 +9,15 @@ func get_interaction_prompt() -> String:
 
 
 func interact(player: Node) -> void:
-	var controller := get_tree().get_first_node_in_group("dialogue_controller")
-	if controller == null or not controller.has_method("start_dialogue"):
+	if player == null:
 		return
 
-	var lines: Array[String] = []
-	for line in dialogue_lines:
-		lines.append(line)
+	var main_node := player.get_parent()
+	if main_node == null:
+		return
 
-	controller.call("start_dialogue", dialogue_id, display_name, lines, player)
+	var controller := main_node.get_node_or_null("DialogueController") as DialogueController
+	if controller == null:
+		return
+
+	controller.start_dialogue_by_id(dialogue_id, display_name, player)

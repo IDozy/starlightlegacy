@@ -37,7 +37,6 @@ height = 1.8
 script = ExtResource("1_npc")
 display_name = "Abuelo"
 dialogue_id = "grandfather_intro"
-dialogue_lines = PackedStringArray("Vaya... no veía uno de esos desde hace muchos años.", "Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.", "¿Quieren saber para qué servía realmente?", "Entonces tendré que contarles dónde empezó todo.")
 
 [node name="Visual" type="Node3D" parent="."]
 
