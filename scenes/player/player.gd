@@ -1,7 +1,5 @@
 extends CharacterBody3D
 
-const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
-
 signal interaction_prompt_changed(prompt: String)
 signal inspection_state_changed(is_inspecting: bool, title: String, description: String)
 
@@ -24,23 +22,17 @@ var _control_locked := false
 
 func _ready() -> void:
 	add_to_group("player_controller")
-	_ensure_interact_action()
 	interaction_ray.target_position = Vector3(0.0, 0.0, -interaction_distance)
 	_capture_mouse()
 
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if _control_locked:
 		return
 
 	if event is InputEventMouseButton and event.pressed:
 		if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 			_capture_mouse()
-			return
-
-		if event.button_index == MOUSE_BUTTON_LEFT and _current_interactable != null:
-			_current_interactable.call("interact", self)
-			get_viewport().set_input_as_handled()
 			return
 
 	if _is_inspecting:
@@ -53,7 +45,11 @@ func _input(event: InputEvent) -> void:
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
+		if event.keycode == KEY_E and _current_interactable != null:
+			_current_interactable.call("interact", self)
+			return
+
+		if event.keycode == KEY_ESCAPE:
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				_release_mouse()
 			else:
@@ -71,10 +67,6 @@ func _physics_process(delta: float) -> void:
 		return
 
 	_update_interaction_target()
-
-	if Input.is_action_just_pressed("interact") and _current_interactable != null:
-		_current_interactable.call("interact", self)
-		return
 
 	if Input.is_physical_key_pressed(KEY_SPACE) and is_on_floor():
 		velocity.y = jump_velocity
@@ -106,7 +98,6 @@ func _physics_process(delta: float) -> void:
 
 func set_control_locked(locked: bool) -> void:
 	_control_locked = locked
-
 	if locked:
 		_set_current_interactable(null)
 
@@ -181,11 +172,15 @@ func _handle_inspection_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
+		if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
 			stop_inspection()
 
 
 func _update_interaction_target() -> void:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		_set_current_interactable(null)
+		return
+
 	interaction_ray.force_raycast_update()
 	var collider := interaction_ray.get_collider()
 	var new_interactable: Node = null
@@ -229,23 +224,6 @@ func _register_discovery(interactable: Node) -> void:
 		str(discovery.get("category", "Conocimiento")),
 		str(discovery.get("summary", ""))
 	)
-
-
-func _ensure_interact_action() -> void:
-	if not InputMap.has_action("interact"):
-		InputMap.add_action("interact")
-
-	var physical_event := InputEventKey.new()
-	physical_event.physical_keycode = KEY_E
-
-	if not InputMap.action_has_event("interact", physical_event):
-		InputMap.action_add_event("interact", physical_event)
-
-	var logical_event := InputEventKey.new()
-	logical_event.keycode = KEY_E
-
-	if not InputMap.action_has_event("interact", logical_event):
-		InputMap.action_add_event("interact", logical_event)
 
 
 func _capture_mouse() -> void:
