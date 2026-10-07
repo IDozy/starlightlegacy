@@ -10,20 +10,28 @@ func get_interaction_prompt() -> String:
 
 
 func interact(player: Node) -> void:
-	var controller := _resolve_dialogue_controller()
+	var controller := _resolve_dialogue_controller(player)
 	if controller == null:
 		return
 
-	var lines: Array[String] = []
-	for line in dialogue_lines:
-		lines.append(line)
+	controller.call(
+		"start_dialogue",
+		dialogue_id,
+		display_name,
+		dialogue_lines,
+		player
+	)
 
-	controller.call("start_dialogue", dialogue_id, display_name, lines, player)
 
+func _resolve_dialogue_controller(player: Node) -> Node:
+	if player != null:
+		var player_parent := player.get_parent()
+		if player_parent != null:
+			var player_controller := player_parent.get_node_or_null("DialogueController")
+			if player_controller != null and player_controller.has_method("start_dialogue"):
+				return player_controller
 
-func _resolve_dialogue_controller() -> Node:
 	var current_scene := get_tree().current_scene
-
 	if current_scene != null:
 		var direct_controller := current_scene.get_node_or_null("DialogueController")
 		if direct_controller != null and direct_controller.has_method("start_dialogue"):
