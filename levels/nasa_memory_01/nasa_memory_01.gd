@@ -2,7 +2,10 @@ extends Node3D
 
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
 const ORIENTATION_CHALLENGE := preload("res://systems/gameplay/orientation_challenge.tscn")
+const SOJOURNER_CHALLENGE := preload("res://systems/gameplay/sojourner_scan_challenge.tscn")
+
 const ORIENTATION_DISCOVERY_ID := "gyroscopic_orientation"
+const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
 
 const FLOOR_COLOR := Color(0.14, 0.16, 0.18)
 const WALL_COLOR := Color(0.62, 0.64, 0.62)
@@ -17,6 +20,7 @@ const ACCENT_COLOR := Color(0.88, 0.55, 0.16)
 @onready var narration_label: Label = $HUD/Narration
 
 var _orientation_challenge: Node = null
+var _sojourner_challenge: Node = null
 var _return_portal: Node = null
 
 
@@ -28,11 +32,13 @@ func _ready() -> void:
 	interaction_prompt.visible = false
 	narration_label.visible = false
 
-	if _has_completed_orientation_discovery():
-		_orientation_challenge.call("set_completed_state", true)
-		_unlock_return_portal(false)
-	else:
-		objective_label.text = "OBJETIVO · Calibra el sistema central de orientación."
+	var orientation_done := _has_discovery(ORIENTATION_DISCOVERY_ID)
+	var sojourner_done := _has_discovery(SOJOURNER_DISCOVERY_ID)
+
+	_orientation_challenge.call("set_completed_state", orientation_done)
+	_sojourner_challenge.call("set_completed_state", sojourner_done)
+
+	_update_memory_progress(false)
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -48,28 +54,51 @@ func _on_challenge_active_changed(active: bool) -> void:
 
 
 func _on_orientation_challenge_completed() -> void:
-	_unlock_return_portal(true)
+	narration_label.text = "Abuelo: Muy bien. Ahora deja la simulación y mira aquella pequeña máquina. Esa sí quedó en Marte."
+	narration_label.visible = true
+	_update_memory_progress(false)
 
 
-func _unlock_return_portal(show_narration: bool) -> void:
+func _on_sojourner_challenge_completed() -> void:
+	narration_label.text = "Abuelo: Sojourner era pequeño, pero demostró que un rover podía recorrer otro planeta y acercar instrumentos directamente a sus rocas."
+	narration_label.visible = true
+	_update_memory_progress(true)
+
+
+func _update_memory_progress(show_completion_narration: bool) -> void:
+	var orientation_done := _has_discovery(ORIENTATION_DISCOVERY_ID)
+	var sojourner_done := _has_discovery(SOJOURNER_DISCOVERY_ID)
+
+	if not orientation_done:
+		objective_label.text = "OBJETIVO 1/2 · Calibra el sistema central de orientación."
+		return
+
+	if not sojourner_done:
+		objective_label.text = "OBJETIVO 2/2 · Opera Sojourner y analiza la roca con su APXS."
+		return
+
+	_unlock_return_portal()
+
+	if show_completion_narration:
+		narration_label.text = "Abuelo: La misión terminó hace décadas, pero Sojourner sigue en Ares Vallis. Lo que aprendimos con él abrió camino a los rovers que vinieron después."
+		narration_label.visible = true
+
+
+func _unlock_return_portal() -> void:
 	if _return_portal == null:
 		_return_portal = SCENE_PORTAL.instantiate()
 		_return_portal.position = Vector3(0.0, 0.65, 4.6)
 		add_child(_return_portal)
 
-	objective_label.text = "RECUERDO COMPLETADO · Regresa al taller."
-
-	if show_narration:
-		narration_label.text = "Abuelo: Un giroscopio no necesita saber dónde está la nave; necesita conservar una referencia para saber cómo está orientada."
-		narration_label.visible = true
+	objective_label.text = "RECUERDO COMPLETADO · 2 conocimientos registrados · Regresa al taller."
 
 
-func _has_completed_orientation_discovery() -> bool:
+func _has_discovery(discovery_id: String) -> bool:
 	var registry := get_node_or_null("/root/KnowledgeRegistry")
 	if registry == null or not registry.has_method("has_discovery"):
 		return false
 
-	return bool(registry.call("has_discovery", ORIENTATION_DISCOVERY_ID))
+	return bool(registry.call("has_discovery", discovery_id))
 
 
 func _build_environment() -> void:
@@ -122,6 +151,13 @@ func _build_lab() -> void:
 	_orientation_challenge.connect("challenge_active_changed", _on_challenge_active_changed)
 	_orientation_challenge.connect("challenge_completed", _on_orientation_challenge_completed)
 	add_child(_orientation_challenge)
+
+	_sojourner_challenge = SOJOURNER_CHALLENGE.instantiate()
+	_sojourner_challenge.position = Vector3(4.35, 0.14, -1.25)
+	_sojourner_challenge.rotation_degrees = Vector3(0.0, -18.0, 0.0)
+	_sojourner_challenge.connect("challenge_active_changed", _on_challenge_active_changed)
+	_sojourner_challenge.connect("challenge_completed", _on_sojourner_challenge_completed)
+	add_child(_sojourner_challenge)
 
 
 func _create_static_box(
