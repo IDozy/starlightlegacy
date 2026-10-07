@@ -12,6 +12,7 @@ const SAND_LIGHT := Color(0.62, 0.33, 0.19)
 const ROCK := Color(0.34, 0.20, 0.15)
 const ROCK_DARK := Color(0.23, 0.14, 0.12)
 const TRACK := Color(0.20, 0.12, 0.10)
+const AIRBAG := Color(0.73, 0.68, 0.57)
 
 @onready var player = $Player
 @onready var crosshair: Label = $HUD/Crosshair
@@ -165,6 +166,29 @@ func _build_ares_vallis() -> void:
 	_pathfinder.connect("story_active_changed", _on_story_active_changed)
 	_pathfinder.connect("story_completed", _on_pathfinder_story_completed)
 	add_child(_pathfinder)
+
+	# Deflated airbag remnants remained visible around Pathfinder after landing.
+	_create_visual_sphere(
+		"DeflatedAirbagLeft",
+		Vector3(-3.2, 0.08, 1.55),
+		0.62,
+		Vector3(1.45, 0.22, 1.05),
+		AIRBAG
+	)
+	_create_visual_sphere(
+		"DeflatedAirbagRight",
+		Vector3(-0.4, 0.07, 1.80),
+		0.58,
+		Vector3(1.25, 0.20, 1.10),
+		AIRBAG
+	)
+	_create_visual_sphere(
+		"DeflatedAirbagRear",
+		Vector3(-1.65, 0.06, 2.75),
+		0.52,
+		Vector3(1.55, 0.18, 0.92),
+		AIRBAG
+	)
 
 	# Stylized rover tracks lead the player from Pathfinder toward Sojourner.
 	for step in range(8):
