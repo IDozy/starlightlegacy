@@ -18,7 +18,7 @@ offset_right = 620.0
 offset_bottom = 82.0
 text = "RECUERDO 01 · LABORATORIO DE NAVEGACIÓN"
 theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.94, 0.76, 0.4, 1)
+theme_override_colors/font_color = Color(0.36, 0.86, 0.94, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 6
 
@@ -27,7 +27,7 @@ offset_left = 24.0
 offset_top = 54.0
 offset_right = 650.0
 offset_bottom = 94.0
-text = "Un primer vistazo al pasado del abuelo."
+text = "Una memoria técnica convertida en un lugar para explorar."
 theme_override_font_sizes/font_size = 16
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 5

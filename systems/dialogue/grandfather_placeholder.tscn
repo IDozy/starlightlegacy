@@ -1,37 +1,77 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://systems/dialogue/talkable_npc.gd" id="1_npc"]
 
-[sub_resource type="StandardMaterial3D" id="Material_body"]
-albedo_color = Color(0.18, 0.28, 0.36, 1)
-roughness = 0.9
+[sub_resource type="StandardMaterial3D" id="Material_coat"]
+albedo_color = Color(0.50, 0.28, 0.16, 1)
+roughness = 0.92
 
 [sub_resource type="CapsuleMesh" id="Mesh_body"]
-material = SubResource("Material_body")
-radius = 0.32
-height = 1.15
+material = SubResource("Material_coat")
+radius = 0.38
+height = 1.18
 
-[sub_resource type="StandardMaterial3D" id="Material_head"]
-albedo_color = Color(0.72, 0.55, 0.43, 1)
-roughness = 0.95
+[sub_resource type="StandardMaterial3D" id="Material_shirt"]
+albedo_color = Color(0.82, 0.72, 0.56, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="Mesh_shirt"]
+material = SubResource("Material_shirt")
+size = Vector3(0.34, 0.48, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="Material_skin"]
+albedo_color = Color(0.76, 0.58, 0.44, 1)
+roughness = 0.96
 
 [sub_resource type="SphereMesh" id="Mesh_head"]
-material = SubResource("Material_head")
-radius = 0.28
-height = 0.56
+material = SubResource("Material_skin")
+radius = 0.30
+height = 0.60
 
 [sub_resource type="StandardMaterial3D" id="Material_hair"]
-albedo_color = Color(0.78, 0.8, 0.82, 1)
-roughness = 0.95
+albedo_color = Color(0.82, 0.83, 0.80, 1)
+roughness = 0.98
 
 [sub_resource type="SphereMesh" id="Mesh_hair"]
 material = SubResource("Material_hair")
-radius = 0.3
-height = 0.36
+radius = 0.32
+height = 0.42
+
+[sub_resource type="SphereMesh" id="Mesh_beard"]
+material = SubResource("Material_hair")
+radius = 0.24
+height = 0.34
+
+[sub_resource type="StandardMaterial3D" id="Material_pants"]
+albedo_color = Color(0.16, 0.20, 0.23, 1)
+roughness = 0.94
+
+[sub_resource type="CylinderMesh" id="Mesh_leg"]
+material = SubResource("Material_pants")
+top_radius = 0.11
+bottom_radius = 0.12
+height = 0.66
+
+[sub_resource type="StandardMaterial3D" id="Material_shoe"]
+albedo_color = Color(0.10, 0.07, 0.055, 1)
+roughness = 0.88
+
+[sub_resource type="BoxMesh" id="Mesh_shoe"]
+material = SubResource("Material_shoe")
+size = Vector3(0.24, 0.14, 0.34)
+
+[sub_resource type="StandardMaterial3D" id="Material_glasses"]
+albedo_color = Color(0.08, 0.10, 0.11, 1)
+metallic = 0.45
+roughness = 0.34
+
+[sub_resource type="BoxMesh" id="Mesh_glasses"]
+material = SubResource("Material_glasses")
+size = Vector3(0.18, 0.12, 0.025)
 
 [sub_resource type="CapsuleShape3D" id="Shape_npc"]
-radius = 0.38
-height = 1.8
+radius = 0.42
+height = 1.95
 
 [node name="Grandfather" type="StaticBody3D"]
 script = ExtResource("1_npc")
@@ -42,18 +82,56 @@ dialogue_lines = PackedStringArray("Vaya... no veía uno de esos desde hace much
 [node name="Visual" type="Node3D" parent="."]
 
 [node name="Body" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 0.68, 0)
+position = Vector3(0, 0.82, 0)
 mesh = SubResource("Mesh_body")
 
+[node name="Shirt" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 0.98, 0.34)
+mesh = SubResource("Mesh_shirt")
+
 [node name="Head" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.48, 0)
+position = Vector3(0, 1.55, 0)
 mesh = SubResource("Mesh_head")
 
 [node name="Hair" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.68, -0.02)
-scale = Vector3(1.02, 0.48, 1.02)
+position = Vector3(0, 1.78, -0.035)
+scale = Vector3(1.03, 0.62, 1.03)
 mesh = SubResource("Mesh_hair")
 
+[node name="Beard" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.37, 0.18)
+scale = Vector3(0.92, 0.84, 0.72)
+mesh = SubResource("Mesh_beard")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.17, 0.33, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="RightLeg" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.17, 0.33, 0)
+mesh = SubResource("Mesh_leg")
+
+[node name="LeftShoe" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.17, 0.07, 0.08)
+mesh = SubResource("Mesh_shoe")
+
+[node name="RightShoe" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.17, 0.07, 0.08)
+mesh = SubResource("Mesh_shoe")
+
+[node name="LeftGlasses" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.105, 1.59, 0.275)
+mesh = SubResource("Mesh_glasses")
+
+[node name="RightGlasses" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.105, 1.59, 0.275)
+mesh = SubResource("Mesh_glasses")
+
+[node name="GlassesBridge" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.59, 0.276)
+scale = Vector3(0.42, 0.20, 1)
+mesh = SubResource("Mesh_glasses")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 0.9, 0)
+position = Vector3(0, 0.95, 0)
 shape = SubResource("Shape_npc")
