@@ -34,9 +34,9 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var advance_pressed := (
-		Input.is_physical_key_pressed(KEY_E)
-		or Input.is_physical_key_pressed(KEY_ENTER)
-		or Input.is_physical_key_pressed(KEY_SPACE)
+		INPUT_COMPAT.is_key_pressed(KEY_E)
+		or INPUT_COMPAT.is_key_pressed(KEY_ENTER)
+		or INPUT_COMPAT.is_key_pressed(KEY_SPACE)
 	)
 
 	if _active and advance_pressed and not _advance_key_was_pressed:
@@ -45,7 +45,7 @@ func _process(_delta: float) -> void:
 	_advance_key_was_pressed = advance_pressed
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not _active:
 		return
 
@@ -54,7 +54,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	var advance := false
 
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventKey and event.pressed and not event.echo:
+		advance = (
+			INPUT_COMPAT.key_matches(event, KEY_E)
+			or INPUT_COMPAT.key_matches(event, KEY_ENTER)
+			or INPUT_COMPAT.key_matches(event, KEY_SPACE)
+		)
+	elif event is InputEventMouseButton and event.pressed:
 		advance = event.button_index == MOUSE_BUTTON_LEFT
 
 	if advance:
@@ -81,9 +87,9 @@ func start_dialogue(
 	_active = true
 	_started_frame = Engine.get_process_frames()
 	_advance_key_was_pressed = (
-		Input.is_physical_key_pressed(KEY_E)
-		or Input.is_physical_key_pressed(KEY_ENTER)
-		or Input.is_physical_key_pressed(KEY_SPACE)
+		INPUT_COMPAT.is_key_pressed(KEY_E)
+		or INPUT_COMPAT.is_key_pressed(KEY_ENTER)
+		or INPUT_COMPAT.is_key_pressed(KEY_SPACE)
 	)
 
 	if player != null and player.has_method("set_control_locked"):
