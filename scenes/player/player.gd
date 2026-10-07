@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal interaction_prompt_changed(prompt: String)
 signal inspection_state_changed(is_inspecting: bool, title: String, description: String)
 
@@ -35,6 +37,11 @@ func _unhandled_input(event: InputEvent) -> void:
 			_capture_mouse()
 			return
 
+		if event.button_index == MOUSE_BUTTON_LEFT and _current_interactable != null:
+			_current_interactable.call("interact", self)
+			get_viewport().set_input_as_handled()
+			return
+
 	if _is_inspecting:
 		_handle_inspection_input(event)
 		return
@@ -45,11 +52,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_E and _current_interactable != null:
+		if INPUT_COMPAT.key_matches(event, KEY_E) and _current_interactable != null:
 			_current_interactable.call("interact", self)
 			return
 
-		if event.keycode == KEY_ESCAPE:
+		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				_release_mouse()
 			else:
@@ -172,15 +179,11 @@ func _handle_inspection_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			stop_inspection()
 
 
 func _update_interaction_target() -> void:
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		_set_current_interactable(null)
-		return
-
 	interaction_ray.force_raycast_update()
 	var collider := interaction_ray.get_collider()
 	var new_interactable: Node = null
