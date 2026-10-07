@@ -4,13 +4,6 @@ extends Node
 signal dialogue_active_changed(active: bool)
 signal dialogue_finished(dialogue_id: String)
 
-const GRANDFATHER_INTRO := PackedStringArray([
-	"Vaya... no veía uno de esos desde hace muchos años.",
-	"Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.",
-	"¿Quieren saber para qué servía realmente?",
-	"Entonces tendré que contarles dónde empezó todo."
-])
-
 @export var player_path: NodePath
 @export var dialogue_panel_path: NodePath
 @export var speaker_label_path: NodePath
@@ -119,7 +112,12 @@ func is_dialogue_active() -> bool:
 func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 	match dialogue_id:
 		"grandfather_intro":
-			return GRANDFATHER_INTRO.duplicate()
+			return PackedStringArray([
+				"Vaya... no veía uno de esos desde hace muchos años.",
+				"Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.",
+				"¿Quieren saber para qué servía realmente?",
+				"Entonces tendré que contarles dónde empezó todo."
+			])
 		_:
 			return PackedStringArray()
 
