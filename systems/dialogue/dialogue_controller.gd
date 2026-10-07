@@ -1,7 +1,5 @@
 extends Node
 
-const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
-
 signal dialogue_active_changed(active: bool)
 signal dialogue_finished(dialogue_id: String)
 
@@ -19,7 +17,7 @@ signal dialogue_finished(dialogue_id: String)
 
 var _dialogue_id := ""
 var _speaker := ""
-var _lines: PackedStringArray = PackedStringArray()
+var _lines: Array[String] = []
 var _line_index := 0
 var _active := false
 var _started_frame := -1
@@ -28,21 +26,9 @@ var _started_frame := -1
 func _ready() -> void:
 	add_to_group("dialogue_controller")
 	_dialogue_panel.visible = false
-	set_process(true)
 
 
-func _process(_delta: float) -> void:
-	if not _active:
-		return
-
-	if Engine.get_process_frames() == _started_frame:
-		return
-
-	if Input.is_action_just_pressed("interact"):
-		advance_dialogue()
-
-
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not _active:
 		return
 
@@ -51,7 +37,9 @@ func _input(event: InputEvent) -> void:
 
 	var advance := false
 
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventKey and event.pressed and not event.echo:
+		advance = event.keycode == KEY_E or event.keycode == KEY_ENTER or event.keycode == KEY_SPACE
+	elif event is InputEventMouseButton and event.pressed:
 		advance = event.button_index == MOUSE_BUTTON_LEFT
 
 	if advance:
@@ -62,7 +50,7 @@ func _input(event: InputEvent) -> void:
 func start_dialogue(
 	dialogue_id: String,
 	speaker: String,
-	lines: PackedStringArray,
+	lines: Array[String],
 	source_player: Node = null
 ) -> void:
 	if _active or lines.is_empty():
