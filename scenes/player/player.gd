@@ -29,7 +29,7 @@ func _ready() -> void:
 	_capture_mouse()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if _control_locked:
 		return
 
@@ -53,6 +53,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
 
 	if event is InputEventKey and event.pressed and not event.echo:
+		if INPUT_COMPAT.key_matches(event, KEY_E) and _current_interactable != null:
+			_current_interactable.call("interact", self)
+			_interact_key_was_pressed = true
+			get_viewport().set_input_as_handled()
+			return
+
 		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				_release_mouse()
@@ -104,7 +110,7 @@ func _physics_process(delta: float) -> void:
 
 func set_control_locked(locked: bool) -> void:
 	_control_locked = locked
-	_interact_key_was_pressed = Input.is_physical_key_pressed(KEY_E)
+	_interact_key_was_pressed = INPUT_COMPAT.is_key_pressed(KEY_E)
 
 	if locked:
 		_set_current_interactable(null)
@@ -231,7 +237,7 @@ func _register_discovery(interactable: Node) -> void:
 
 
 func _poll_interaction_key() -> void:
-	var interact_pressed := Input.is_physical_key_pressed(KEY_E)
+	var interact_pressed: bool = INPUT_COMPAT.is_key_pressed(KEY_E)
 
 	if (
 		interact_pressed
