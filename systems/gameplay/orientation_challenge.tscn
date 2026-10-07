@@ -1,0 +1,122 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://systems/gameplay/orientation_challenge.gd" id="1_challenge"]
+
+[sub_resource type="StandardMaterial3D" id="Material_body"]
+albedo_color = Color(0.16, 0.21, 0.24, 1)
+roughness = 0.72
+
+[sub_resource type="BoxMesh" id="Mesh_body"]
+material = SubResource("Material_body")
+size = Vector3(1.35, 0.9, 0.82)
+
+[sub_resource type="StandardMaterial3D" id="Material_screen"]
+albedo_color = Color(0.04, 0.16, 0.19, 1)
+emission_enabled = true
+emission = Color(0.12, 0.64, 0.72, 1)
+emission_energy_multiplier = 1.4
+roughness = 0.28
+
+[sub_resource type="BoxMesh" id="Mesh_screen"]
+material = SubResource("Material_screen")
+size = Vector3(0.92, 0.42, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="Material_accent"]
+albedo_color = Color(0.88, 0.55, 0.16, 1)
+emission_enabled = true
+emission = Color(0.88, 0.35, 0.08, 1)
+emission_energy_multiplier = 1.1
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="Mesh_accent"]
+material = SubResource("Material_accent")
+size = Vector3(0.62, 0.08, 0.06)
+
+[sub_resource type="BoxShape3D" id="Shape_body"]
+size = Vector3(1.35, 0.9, 0.82)
+
+[node name="OrientationChallenge" type="StaticBody3D"]
+script = ExtResource("1_challenge")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+mesh = SubResource("Mesh_body")
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.10, 0.435)
+mesh = SubResource("Mesh_screen")
+
+[node name="Accent" type="MeshInstance3D" parent="."]
+position = Vector3(0, -0.28, 0.47)
+mesh = SubResource("Mesh_accent")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("Shape_body")
+
+[node name="ChallengeHUD" type="CanvasLayer" parent="."]
+layer = 70
+
+[node name="Panel" type="ColorRect" parent="ChallengeHUD"]
+visible = false
+anchor_left = 0.18
+anchor_top = 0.18
+anchor_right = 0.82
+anchor_bottom = 0.82
+color = Color(0.025, 0.04, 0.055, 0.97)
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.06
+anchor_top = 0.07
+anchor_right = 0.94
+anchor_bottom = 0.18
+text = "CALIBRACIÓN DE ORIENTACIÓN"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.94, 0.76, 0.4, 1)
+
+[node name="Target" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.08
+anchor_top = 0.25
+anchor_right = 0.92
+anchor_bottom = 0.36
+text = "OBJETIVO   090°"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 25
+
+[node name="Current" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.08
+anchor_top = 0.39
+anchor_right = 0.92
+anchor_bottom = 0.50
+text = "ACTUAL     000°"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 31
+theme_override_colors/font_color = Color(0.36, 0.86, 0.94, 1)
+
+[node name="Progress" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.08
+anchor_top = 0.53
+anchor_right = 0.92
+anchor_bottom = 0.62
+text = "Referencia 1 de 3"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.72, 0.78, 0.84, 1)
+
+[node name="Status" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.10
+anchor_top = 0.65
+anchor_right = 0.90
+anchor_bottom = 0.78
+text = "Alinea la lectura actual con la referencia indicada."
+horizontal_alignment = 1
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="Hint" type="Label" parent="ChallengeHUD/Panel"]
+anchor_left = 0.06
+anchor_top = 0.84
+anchor_right = 0.94
+anchor_bottom = 0.94
+text = "A / D · Girar referencia    E · Confirmar    Esc · Salir"
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.70, 0.74, 0.78, 1)
