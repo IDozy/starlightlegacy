@@ -128,10 +128,10 @@ layer = 72
 
 [node name="Panel" type="ColorRect" parent="ChallengeHUD"]
 visible = false
-anchor_left = 0.16
-anchor_top = 0.14
-anchor_right = 0.84
-anchor_bottom = 0.86
+anchor_left = 0.24
+anchor_top = 0.19
+anchor_right = 0.76
+anchor_bottom = 0.81
 color = Color(0.035, 0.03, 0.028, 0.97)
 mouse_filter = 2
 
@@ -142,7 +142,7 @@ anchor_right = 0.94
 anchor_bottom = 0.14
 text = "HARDWARE EN MARTE"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 25
+theme_override_font_sizes/font_size = 21
 theme_override_colors/font_color = Color(0.95, 0.62, 0.28, 1)
 
 [node name="Mission" type="Label" parent="ChallengeHUD/Panel"]
@@ -162,7 +162,7 @@ anchor_bottom = 0.42
 text = "Acerca el rover a la roca."
 horizontal_alignment = 1
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 
 [node name="Distance" type="Label" parent="ChallengeHUD/Panel"]
 anchor_left = 0.10
@@ -171,7 +171,7 @@ anchor_right = 0.90
 anchor_bottom = 0.54
 text = "TRAMO RESTANTE · 4 / 4"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 19
 theme_override_colors/font_color = Color(0.35, 0.84, 0.88, 1)
 
 [node name="ScanProgress" type="ProgressBar" parent="ChallengeHUD/Panel"]
@@ -191,7 +191,7 @@ anchor_bottom = 0.78
 text = "Sojourner fue el primer vehículo con ruedas que recorrió otro planeta."
 horizontal_alignment = 1
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 15
 
 [node name="Hint" type="Label" parent="ChallengeHUD/Panel"]
 anchor_left = 0.06
