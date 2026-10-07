@@ -17,9 +17,14 @@ func interact(player: Node) -> void:
 	if main_node == null:
 		return
 
+	_debug(main_node, "2 · Abuelo.interact() ejecutado")
+
 	var controller := main_node.get_node_or_null("DialogueController") as DialogueController
 	if controller == null:
+		_debug(main_node, "ERROR · DialogueController no encontrado")
 		return
+
+	_debug(main_node, "3 · DialogueController encontrado")
 
 	controller.start_dialogue(
 		dialogue_id,
@@ -27,3 +32,10 @@ func interact(player: Node) -> void:
 		dialogue_lines,
 		player
 	)
+
+	_debug(main_node, "4 · start_dialogue() invocado")
+
+
+func _debug(main_node: Node, message: String) -> void:
+	if main_node != null and main_node.has_method("set_interaction_debug"):
+		main_node.call("set_interaction_debug", message)
