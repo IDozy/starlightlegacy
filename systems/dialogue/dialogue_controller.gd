@@ -54,9 +54,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	var advance := false
 
-	if event is InputEventKey and event.pressed and not event.echo:
-		advance = INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER) or INPUT_COMPAT.key_matches(event, KEY_SPACE)
-	elif event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and event.pressed:
 		advance = event.button_index == MOUSE_BUTTON_LEFT
 
 	if advance:
