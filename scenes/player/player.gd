@@ -46,13 +46,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_E and _current_interactable != null:
-			var main_node := get_parent()
-			if main_node != null and main_node.has_method("set_interaction_debug"):
-				main_node.call(
-					"set_interaction_debug",
-					"1 · E detectada → %s" % _current_interactable.name
-				)
-
 			_current_interactable.call("interact", self)
 			return
 
