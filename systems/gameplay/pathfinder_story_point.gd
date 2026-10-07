@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal story_active_changed(active: bool)
 signal story_completed
 
@@ -53,7 +55,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.pressed or event.echo:
 		return
 
-	if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
+	if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 		_close_panel()
 		get_viewport().set_input_as_handled()
 
