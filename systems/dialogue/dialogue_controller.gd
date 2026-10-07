@@ -1,3 +1,4 @@
+class_name DialogueController
 extends Node
 
 signal dialogue_active_changed(active: bool)
@@ -17,7 +18,7 @@ signal dialogue_finished(dialogue_id: String)
 
 var _dialogue_id := ""
 var _speaker := ""
-var _lines: Array[String] = []
+var _lines: PackedStringArray = PackedStringArray()
 var _line_index := 0
 var _active := false
 var _started_frame := -1
@@ -50,7 +51,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func start_dialogue(
 	dialogue_id: String,
 	speaker: String,
-	lines: Array[String],
+	lines: PackedStringArray,
 	source_player: Node = null
 ) -> void:
 	if _active or lines.is_empty():
