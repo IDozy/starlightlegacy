@@ -5,6 +5,7 @@ extends Node3D
 @onready var crosshair: Label = $HUD/Crosshair
 @onready var interaction_prompt: Label = $HUD/InteractionPrompt
 @onready var inspection_info: Label = $HUD/InspectionInfo
+@onready var interaction_debug: Label = $HUD/InteractionDebug
 
 
 func _ready() -> void:
@@ -15,6 +16,7 @@ func _ready() -> void:
 
 	interaction_prompt.visible = false
 	inspection_info.visible = false
+	interaction_debug.visible = false
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -52,3 +54,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 	var transition := get_node_or_null("/root/SceneTransition")
 	if transition != null and transition.has_method("fade_to_scene"):
 		transition.call("fade_to_scene", "res://levels/ares_vallis/ares_vallis.tscn")
+
+
+func set_interaction_debug(message: String) -> void:
+	interaction_debug.text = message
+	interaction_debug.visible = true
