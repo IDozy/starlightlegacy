@@ -145,7 +145,7 @@ func _open_review() -> void:
 	mission_label.text = "MARS PATHFINDER · SOJOURNER · MISIÓN COMPLETADA"
 	instruction_label.text = "APXS · Alpha Proton X-Ray Spectrometer"
 	distance_label.text = "ROCA Y SUELO · COMPOSICIÓN QUÍMICA"
-	status_label.text = "Sojourner exploró Marte durante 83 días y ayudó a estudiar la composición de sus rocas y suelo."
+	status_label.text = "Sojourner operó durante 83 días, aunque su misión principal se había planeado para solo siete."
 	hint_label.text = "E / Esc · Cerrar"
 	challenge_active_changed.emit(true)
 
@@ -175,13 +175,13 @@ func _finish_scan() -> void:
 			DISCOVERY_ID,
 			"Sojourner y su APXS",
 			"Hardware en Marte",
-			"Sojourner fue el primer rover que recorrió otro planeta. Su APXS analizó químicamente rocas y suelo en Ares Vallis; junto con otros datos de Mars Pathfinder, esas observaciones ayudaron a reconstruir un Marte antiguo más cálido y húmedo."
+			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS analizó químicamente rocas y suelo en Ares Vallis; junto con otros datos de Mars Pathfinder, esas observaciones aportaron evidencia de un Marte pasado más cálido y húmedo."
 		)
 
 	mission_label.text = "ANÁLISIS COMPLETADO · SOJOURNER"
 	instruction_label.text = "APXS · COMPOSICIÓN REGISTRADA"
 	distance_label.text = "LEGADO · UN CAMINO PARA LOS ROVERS DE MARTE"
-	status_label.text = "La pequeña misión tecnológica terminó en 1997, pero el hardware y su historia siguen en Marte."
+	status_label.text = "La última transmisión de Pathfinder llegó en septiembre de 1997. El hardware quedó en Marte, pero su legado continúa."
 	hint_label.text = "E / Esc · Continuar"
 	challenge_completed.emit()
 
