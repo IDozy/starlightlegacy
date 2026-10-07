@@ -1,5 +1,7 @@
 extends Node
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal dialogue_active_changed(active: bool)
 signal dialogue_finished(dialogue_id: String)
 
@@ -38,7 +40,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	var advance := false
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		advance = event.keycode == KEY_E or event.keycode == KEY_ENTER or event.keycode == KEY_SPACE
+		advance = INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER) or INPUT_COMPAT.key_matches(event, KEY_SPACE)
 	elif event is InputEventMouseButton and event.pressed:
 		advance = event.button_index == MOUSE_BUTTON_LEFT
 
