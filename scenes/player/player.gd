@@ -53,10 +53,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-85.0), deg_to_rad(85.0))
 
 	if event is InputEventKey and event.pressed and not event.echo:
-		if INPUT_COMPAT.key_matches(event, KEY_E) and _current_interactable != null:
-			_current_interactable.call("interact", self)
-			return
-
 		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 				_release_mouse()
