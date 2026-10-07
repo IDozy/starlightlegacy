@@ -28,7 +28,7 @@ offset_left = 20.0
 offset_top = 18.0
 offset_right = 520.0
 offset_bottom = 72.0
-text = "WASD · Mover    Mouse · Mirar    Espacio · Saltar    E · Interactuar    K · Conocimiento    Esc · Cursor"
+text = "WASD · Mover    Mouse · Mirar    Espacio · Saltar    E / clic · Interactuar    K · Conocimiento    Esc · Cursor"
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
 theme_override_constants/outline_size = 5
 
