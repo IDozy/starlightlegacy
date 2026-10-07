@@ -71,6 +71,11 @@ func start_dialogue(
 		player.call("set_control_locked", true)
 
 	_dialogue_panel.visible = true
+
+	var main_node := get_parent()
+	if main_node != null and main_node.has_method("set_interaction_debug"):
+		main_node.call("set_interaction_debug", "5 · Diálogo activo y panel visible")
+
 	hint_label.text = "E / Enter / clic · Continuar"
 	dialogue_active_changed.emit(true)
 	_show_current_line()
