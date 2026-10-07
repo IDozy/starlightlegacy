@@ -23,11 +23,26 @@ var _lines: Array[String] = []
 var _line_index := 0
 var _active := false
 var _started_frame := -1
+var _advance_key_was_pressed := false
 
 
 func _ready() -> void:
 	add_to_group("dialogue_controller")
 	_dialogue_panel.visible = false
+	set_process(true)
+
+
+func _process(_delta: float) -> void:
+	var advance_pressed := (
+		Input.is_physical_key_pressed(KEY_E)
+		or Input.is_physical_key_pressed(KEY_ENTER)
+		or Input.is_physical_key_pressed(KEY_SPACE)
+	)
+
+	if _active and advance_pressed and not _advance_key_was_pressed:
+		advance_dialogue()
+
+	_advance_key_was_pressed = advance_pressed
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -67,6 +82,11 @@ func start_dialogue(
 	_line_index = 0
 	_active = true
 	_started_frame = Engine.get_process_frames()
+	_advance_key_was_pressed = (
+		Input.is_physical_key_pressed(KEY_E)
+		or Input.is_physical_key_pressed(KEY_ENTER)
+		or Input.is_physical_key_pressed(KEY_SPACE)
+	)
 
 	if player != null and player.has_method("set_control_locked"):
 		player.call("set_control_locked", true)
