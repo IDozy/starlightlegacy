@@ -1,6 +1,8 @@
 extends Node3D
 
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
+const ORIENTATION_CHALLENGE := preload("res://systems/gameplay/orientation_challenge.tscn")
+const ORIENTATION_DISCOVERY_ID := "gyroscopic_orientation"
 
 const FLOOR_COLOR := Color(0.14, 0.16, 0.18)
 const WALL_COLOR := Color(0.62, 0.64, 0.62)
@@ -9,19 +11,65 @@ const PANEL_COLOR := Color(0.07, 0.10, 0.11)
 const ACCENT_COLOR := Color(0.88, 0.55, 0.16)
 
 @onready var player = $Player
+@onready var crosshair: Label = $HUD/Crosshair
 @onready var interaction_prompt: Label = $HUD/InteractionPrompt
+@onready var objective_label: Label = $HUD/Objective
+@onready var narration_label: Label = $HUD/Narration
+
+var _orientation_challenge: Node = null
+var _return_portal: Node = null
 
 
 func _ready() -> void:
 	_build_environment()
 	_build_lab()
+
 	player.connect("interaction_prompt_changed", _on_interaction_prompt_changed)
 	interaction_prompt.visible = false
+	narration_label.visible = false
+
+	if _has_completed_orientation_discovery():
+		_orientation_challenge.call("set_completed_state", true)
+		_unlock_return_portal(false)
+	else:
+		objective_label.text = "OBJETIVO · Calibra el sistema central de orientación."
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
 	interaction_prompt.text = prompt
 	interaction_prompt.visible = not prompt.is_empty()
+
+
+func _on_challenge_active_changed(active: bool) -> void:
+	crosshair.visible = not active
+
+	if active:
+		interaction_prompt.visible = false
+
+
+func _on_orientation_challenge_completed() -> void:
+	_unlock_return_portal(true)
+
+
+func _unlock_return_portal(show_narration: bool) -> void:
+	if _return_portal == null:
+		_return_portal = SCENE_PORTAL.instantiate()
+		_return_portal.position = Vector3(0.0, 0.65, 4.6)
+		add_child(_return_portal)
+
+	objective_label.text = "RECUERDO COMPLETADO · Regresa al taller."
+
+	if show_narration:
+		narration_label.text = "Abuelo: Un giroscopio no necesita saber dónde está la nave; necesita conservar una referencia para saber cómo está orientada."
+		narration_label.visible = true
+
+
+func _has_completed_orientation_discovery() -> bool:
+	var registry := get_node_or_null("/root/KnowledgeRegistry")
+	if registry == null or not registry.has_method("has_discovery"):
+		return false
+
+	return bool(registry.call("has_discovery", ORIENTATION_DISCOVERY_ID))
 
 
 func _build_environment() -> void:
@@ -56,7 +104,6 @@ func _build_lab() -> void:
 	_create_static_box("LeftWall", Vector3(-7, 2.2, 0), Vector3(0.2, 4.4, 12), WALL_COLOR)
 	_create_static_box("RightWall", Vector3(7, 2.2, 0), Vector3(0.2, 4.4, 12), WALL_COLOR)
 
-	# Consolas de navegación provisionales, inspiradas en laboratorios de mediados del siglo XX.
 	_create_static_box("ConsoleLeft", Vector3(-2.6, 0.7, -3.6), Vector3(3.2, 1.4, 1.1), CONSOLE_COLOR)
 	_create_static_box("ConsoleRight", Vector3(2.6, 0.7, -3.6), Vector3(3.2, 1.4, 1.1), CONSOLE_COLOR)
 	_create_static_box("PanelLeft", Vector3(-2.6, 1.55, -4.05), Vector3(2.6, 1.3, 0.18), PANEL_COLOR)
@@ -70,9 +117,11 @@ func _build_lab() -> void:
 			ACCENT_COLOR
 		)
 
-	var portal := SCENE_PORTAL.instantiate()
-	portal.position = Vector3(0.0, 0.65, 4.6)
-	add_child(portal)
+	_orientation_challenge = ORIENTATION_CHALLENGE.instantiate()
+	_orientation_challenge.position = Vector3(0.0, 0.72, -3.62)
+	_orientation_challenge.connect("challenge_active_changed", _on_challenge_active_changed)
+	_orientation_challenge.connect("challenge_completed", _on_orientation_challenge_completed)
+	add_child(_orientation_challenge)
 
 
 func _create_static_box(
