@@ -20,6 +20,7 @@ var _inspected_object: Node = null
 var _inspection_visual: Node3D = null
 var _is_inspecting := false
 var _control_locked := false
+var _interact_key_was_pressed := false
 
 
 func _ready() -> void:
@@ -64,6 +65,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_poll_interaction_key()
+
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -105,6 +108,8 @@ func _physics_process(delta: float) -> void:
 
 func set_control_locked(locked: bool) -> void:
 	_control_locked = locked
+	_interact_key_was_pressed = Input.is_physical_key_pressed(KEY_E)
+
 	if locked:
 		_set_current_interactable(null)
 
@@ -227,6 +232,21 @@ func _register_discovery(interactable: Node) -> void:
 		str(discovery.get("category", "Conocimiento")),
 		str(discovery.get("summary", ""))
 	)
+
+
+func _poll_interaction_key() -> void:
+	var interact_pressed := Input.is_physical_key_pressed(KEY_E)
+
+	if (
+		interact_pressed
+		and not _interact_key_was_pressed
+		and not _control_locked
+		and not _is_inspecting
+		and _current_interactable != null
+	):
+		_current_interactable.call("interact", self)
+
+	_interact_key_was_pressed = interact_pressed
 
 
 func _capture_mouse() -> void:
