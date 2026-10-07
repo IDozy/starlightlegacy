@@ -177,13 +177,13 @@ func _finish_scan() -> void:
 			DISCOVERY_ID,
 			"Sojourner y su APXS",
 			"Hardware en Marte",
-			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS analizó rocas y suelo en Ares Vallis, incluida la roca Yogi, ayudando a comparar la composición de materiales marcianos con rocas volcánicas de la Tierra."
+			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS estudió rocas y suelo en Ares Vallis. En Yogi encontró poco cuarzo y una composición más parecida a basaltos terrestres que la roca Barnacle Bill."
 		)
 
 	mission_label.text = "ANÁLISIS COMPLETADO · SOJOURNER"
-	instruction_label.text = "APXS · COMPOSICIÓN REGISTRADA"
-	distance_label.text = "LEGADO · UN CAMINO PARA LOS ROVERS DE MARTE"
-	status_label.text = "La última transmisión de Pathfinder llegó en septiembre de 1997. El hardware quedó en Marte, pero su legado continúa."
+	instruction_label.text = "YOGI · RESULTADO DEL APXS"
+	distance_label.text = "POCO CUARZO · PARECIDA A BASALTOS TERRESTRES"
+	status_label.text = "Los primeros resultados mostraron una roca más primitiva que Barnacle Bill y parecida a basaltos comunes de la Tierra. La misión terminó, pero el hardware quedó en Marte."
 	hint_label.text = "E / Esc · Continuar"
 	challenge_completed.emit()
 
