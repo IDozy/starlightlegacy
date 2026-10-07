@@ -77,14 +77,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.keycode == KEY_W or event.keycode == KEY_UP:
-		_drive_step = min(_drive_step + 1, max_drive_steps)
+		_drive_step = mini(_drive_step + 1, max_drive_steps)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
 		return
 
 	if event.keycode == KEY_S or event.keycode == KEY_DOWN:
-		_drive_step = max(_drive_step - 1, 0)
+		_drive_step = maxi(_drive_step - 1, 0)
 		_update_rover_position()
 		_update_drive_display()
 		get_viewport().set_input_as_handled()
@@ -107,7 +107,7 @@ func _process(delta: float) -> void:
 	if not _scanning:
 		return
 
-	_scan_elapsed = min(_scan_elapsed + delta, scan_duration)
+	_scan_elapsed = minf(_scan_elapsed + delta, scan_duration)
 	scan_progress.value = (_scan_elapsed / scan_duration) * 100.0
 
 	if _scan_elapsed >= scan_duration:
@@ -201,7 +201,7 @@ func _close_panel() -> void:
 
 
 func _update_drive_display() -> void:
-	var remaining := max(max_drive_steps - _drive_step, 0)
+	var remaining: int = maxi(max_drive_steps - _drive_step, 0)
 
 	if remaining == 0:
 		distance_label.text = "POSICIÓN · JUNTO A LA ROCA"
@@ -214,8 +214,8 @@ func _update_rover_position() -> void:
 	if rover_visual == null:
 		return
 
-	var ratio := 0.0
+	var ratio: float = 0.0
 	if max_drive_steps > 0:
 		ratio = float(_drive_step) / float(max_drive_steps)
 
-	rover_visual.position.z = lerp(0.48, -0.55, ratio)
+	rover_visual.position.z = lerpf(0.48, -0.55, ratio)
