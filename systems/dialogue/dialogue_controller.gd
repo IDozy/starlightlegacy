@@ -23,7 +23,6 @@ var _lines: Array[String] = []
 var _line_index := 0
 var _active := false
 var _started_frame := -1
-var _advance_key_was_pressed := false
 
 
 func _ready() -> void:
@@ -33,16 +32,14 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	var advance_pressed := (
-		INPUT_COMPAT.is_key_pressed(KEY_E)
-		or INPUT_COMPAT.is_key_pressed(KEY_ENTER)
-		or INPUT_COMPAT.is_key_pressed(KEY_SPACE)
-	)
+	if not _active:
+		return
 
-	if _active and advance_pressed and not _advance_key_was_pressed:
+	if Engine.get_process_frames() == _started_frame:
+		return
+
+	if Input.is_action_just_pressed("interact"):
 		advance_dialogue()
-
-	_advance_key_was_pressed = advance_pressed
 
 
 func _input(event: InputEvent) -> void:
@@ -54,13 +51,7 @@ func _input(event: InputEvent) -> void:
 
 	var advance := false
 
-	if event is InputEventKey and event.pressed and not event.echo:
-		advance = (
-			INPUT_COMPAT.key_matches(event, KEY_E)
-			or INPUT_COMPAT.key_matches(event, KEY_ENTER)
-			or INPUT_COMPAT.key_matches(event, KEY_SPACE)
-		)
-	elif event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton and event.pressed:
 		advance = event.button_index == MOUSE_BUTTON_LEFT
 
 	if advance:
@@ -86,11 +77,6 @@ func start_dialogue(
 	_line_index = 0
 	_active = true
 	_started_frame = Engine.get_process_frames()
-	_advance_key_was_pressed = (
-		INPUT_COMPAT.is_key_pressed(KEY_E)
-		or INPUT_COMPAT.is_key_pressed(KEY_ENTER)
-		or INPUT_COMPAT.is_key_pressed(KEY_SPACE)
-	)
 
 	if player != null and player.has_method("set_control_locked"):
 		player.call("set_control_locked", true)
