@@ -37,6 +37,10 @@ height = 1.8
 script = ExtResource("1_npc")
 display_name = "Abuelo"
 dialogue_id = "grandfather_intro"
+required_discovery_id = "rescue_rover_impact_problem"
+locked_prompt = "Prueba primero el Vehículo de Rescate"
+completed_discovery_id = "sojourner_apxs"
+completed_prompt = "Abuelo · Aplica lo aprendido al vehículo"
 
 [node name="Visual" type="Node3D" parent="."]
 
