@@ -7,6 +7,8 @@ const ROCK_1_SCENE := preload("res://assets/third_party/quaternius/ultimate_spac
 const ROCK_2_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_2.gltf")
 const ROCK_3_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_3.gltf")
 const ROCK_4_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_4.gltf")
+const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_pathfinder_preview.obj")
+const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -134,6 +136,7 @@ func _build_environment() -> void:
 
 func _build_ares_vallis() -> void:
 	_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
+	_add_nasa_pathfinder_terrain_preview()
 
 	# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
 	_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
@@ -234,6 +237,33 @@ func _build_ares_vallis() -> void:
 	var platform := _sojourner.get_node_or_null("Platform") as MeshInstance3D
 	if platform != null:
 		platform.visible = false
+
+
+
+func _add_nasa_pathfinder_terrain_preview() -> void:
+	# Stereo-derived terrain from Mars Pathfinder IMP data.
+	# The generated OBJ keeps NASA metric scale and original image UVs.
+	var body := StaticBody3D.new()
+	body.name = "NASAPathfinderTerrainPreview"
+	body.position = Vector3(0.5, 0.82, -5.0)
+
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = "Mesh"
+	mesh_instance.mesh = NASA_PATHFINDER_TERRAIN
+
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = NASA_PATHFINDER_TEXTURE
+	material.albedo_color = Color(1.0, 0.68, 0.52)
+	material.roughness = 1.0
+	mesh_instance.material_override = material
+	body.add_child(mesh_instance)
+
+	var collision := CollisionShape3D.new()
+	collision.name = "CollisionShape3D"
+	collision.shape = NASA_PATHFINDER_TERRAIN.create_trimesh_shape()
+	body.add_child(collision)
+
+	add_child(body)
 
 
 func _create_static_box(
