@@ -4,6 +4,12 @@ const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_objec
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
 const QUATERNIUS_SOLAR_PANEL := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/SolarPanel_Ground.gltf")
+const KENNEY_COMPUTER_WIDE := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/computer-wide.glb")
+const KENNEY_CONTAINER_WIDE := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/container-wide.glb")
+const KENNEY_DISPLAY_WALL := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/display-wall.glb")
+const KENNEY_WALL_DETAIL := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/wall-detail.glb")
+const KENNEY_CHAIR := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/chair.glb")
+const KENNEY_TABLE_DISPLAY_SMALL := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/table-display-small.glb")
 
 const FLOOR_COLOR := Color(0.115, 0.135, 0.17)
 const WALL_COLOR := Color(0.48, 0.44, 0.37)
@@ -88,12 +94,14 @@ func _build_room() -> void:
 func _build_workshop_props() -> void:
 	_build_workbench()
 	_build_test_area()
-	_build_storage()
+	_build_kenney_storage()
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
 	prototype_device.name = "PrototypeDevice"
-	prototype_device.position = Vector3(-0.65, 1.03, -3.62)
+	prototype_device.position = Vector3(-0.58, 1.03, -3.62)
 	add_child(prototype_device)
+
+	_add_kenney_workbench_props()
 
 	var rescue_rover := RESCUE_ROVER_PROJECT.instantiate()
 	rescue_rover.name = "RescueRoverProject"
@@ -119,16 +127,50 @@ func _build_workbench() -> void:
 	_create_static_box("WorkbenchLowerShelf", Vector3(0.0, 0.24, -3.70), Vector3(2.05, 0.06, 0.56), METAL_COLOR)
 	_create_static_box("WorkbenchBackboard", Vector3(0.0, 1.28, -4.04), Vector3(2.20, 0.68, 0.05), PANEL_COLOR)
 
-	# Simple tool silhouettes until the furniture/tool pack is integrated.
-	_create_visual_box("ToolRail", Vector3(0.28, 1.43, -4.005), Vector3(0.86, 0.045, 0.035), TEST_BORDER_COLOR)
-	_create_visual_box("ToolA", Vector3(0.02, 1.31, -3.995), Vector3(0.045, 0.20, 0.03), TOOL_COLOR)
-	_create_visual_box("ToolB", Vector3(0.26, 1.30, -3.995), Vector3(0.055, 0.23, 0.03), TOOL_COLOR)
-	_create_visual_box("ToolC", Vector3(0.50, 1.33, -3.995), Vector3(0.055, 0.16, 0.03), TOOL_COLOR)
 
-	# Compact task lamp on the bench.
-	_create_visual_box("LampBase", Vector3(0.82, 0.97, -3.70), Vector3(0.18, 0.035, 0.18), METAL_COLOR)
-	_create_visual_box("LampStem", Vector3(0.82, 1.24, -3.70), Vector3(0.035, 0.52, 0.035), METAL_COLOR)
-	_create_visual_box("LampHead", Vector3(0.74, 1.49, -3.70), Vector3(0.22, 0.08, 0.16), TEST_BORDER_COLOR)
+
+func _add_kenney_workbench_props() -> void:
+	var computer := _add_kenney_visual(
+		"WorkbenchComputer",
+		KENNEY_COMPUTER_WIDE,
+		Vector3(0.58, 0.94, -3.66),
+		Vector3(0.0, 180.0, 0.0),
+		Vector3.ONE * 0.62
+	)
+
+	_add_kenney_body(
+		"WorkbenchChair",
+		KENNEY_CHAIR,
+		Vector3(0.72, 0.0, -2.92),
+		Vector3(0.0, 180.0, 0.0),
+		Vector3.ONE * 1.18,
+		Vector3(0.38, 0.66, 0.44),
+		Vector3(0.0, 0.33, 0.0)
+	)
+
+	_add_kenney_visual(
+		"WorkbenchWallDisplay",
+		KENNEY_DISPLAY_WALL,
+		Vector3(0.45, 1.48, -4.76),
+		Vector3(0.0, 0.0, 0.0),
+		Vector3.ONE * 1.45
+	)
+
+	_add_kenney_visual(
+		"WorkshopWallDetailLeft",
+		KENNEY_WALL_DETAIL,
+		Vector3(-2.45, 1.18, -4.76),
+		Vector3(0.0, 0.0, 0.0),
+		Vector3.ONE * 1.20
+	)
+
+	_add_kenney_visual(
+		"WorkshopWallDetailRight",
+		KENNEY_WALL_DETAIL,
+		Vector3(2.85, 1.18, -4.76),
+		Vector3(0.0, 0.0, 0.0),
+		Vector3.ONE * 1.20
+	)
 
 
 func _build_test_area() -> void:
@@ -161,26 +203,47 @@ func _build_test_area() -> void:
 		)
 
 
-func _build_storage() -> void:
-	# Compact side shelving with open space around it.
-	_create_static_box("ShelfLeftPost", Vector3(-4.65, 1.35, -1.65), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
-	_create_static_box("ShelfRightPost", Vector3(-3.25, 1.35, -1.65), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
-	_create_static_box("ShelfRearLeft", Vector3(-4.65, 1.35, -2.25), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
-	_create_static_box("ShelfRearRight", Vector3(-3.25, 1.35, -2.25), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
 
-	for level in range(3):
-		var y_pos: float = 0.48 + float(level) * 0.82
-		_create_static_box(
-			"StorageShelf_%d" % level,
-			Vector3(-3.95, y_pos, -1.95),
-			Vector3(1.48, 0.07, 1.28),
-			WOOD_COLOR
-		)
+func _build_kenney_storage() -> void:
+	# Real Kenney props replace the previous block shelving.
+	_add_kenney_body(
+		"PartsContainerA",
+		KENNEY_CONTAINER_WIDE,
+		Vector3(-4.45, 0.0, -1.90),
+		Vector3(0.0, 18.0, 0.0),
+		Vector3.ONE * 0.88,
+		Vector3(0.54, 0.62, 0.54),
+		Vector3(0.0, 0.31, 0.0)
+	)
+	_add_kenney_body(
+		"PartsContainerB",
+		KENNEY_CONTAINER_WIDE,
+		Vector3(-3.75, 0.0, -1.92),
+		Vector3(0.0, -12.0, 0.0),
+		Vector3.ONE * 0.88,
+		Vector3(0.54, 0.62, 0.54),
+		Vector3(0.0, 0.31, 0.0)
+	)
+	_add_kenney_body(
+		"PartsContainerC",
+		KENNEY_CONTAINER_WIDE,
+		Vector3(-4.42, 0.64, -1.92),
+		Vector3(0.0, -8.0, 0.0),
+		Vector3.ONE * 0.80,
+		Vector3(0.49, 0.56, 0.49),
+		Vector3(0.0, 0.28, 0.0)
+	)
 
-	# A couple of simple storage bins; these are workshop furniture, not Quaternius crates.
-	_create_static_box("PartsBinA", Vector3(-4.30, 0.66, -1.95), Vector3(0.42, 0.26, 0.42), PANEL_COLOR)
-	_create_static_box("PartsBinB", Vector3(-3.70, 0.66, -1.95), Vector3(0.42, 0.26, 0.42), TEST_BORDER_COLOR)
-
+	# A small utility console anchors the energy corner next to the solar panel.
+	_add_kenney_body(
+		"EnergyConsole",
+		KENNEY_TABLE_DISPLAY_SMALL,
+		Vector3(4.10, 0.0, 1.20),
+		Vector3(0.0, -112.0, 0.0),
+		Vector3.ONE * 0.78,
+		Vector3(0.66, 0.33, 0.64),
+		Vector3(0.0, 0.17, 0.0)
+	)
 
 func _create_static_box(
 	box_name: String,
@@ -235,6 +298,52 @@ func _create_visual_box(
 	mesh_instance.mesh = box_mesh
 	add_child(mesh_instance)
 	return mesh_instance
+
+
+
+func _add_kenney_visual(
+	prop_name: String,
+	scene: PackedScene,
+	prop_position: Vector3,
+	prop_rotation: Vector3,
+	prop_scale: Vector3
+) -> Node3D:
+	var prop := scene.instantiate() as Node3D
+	prop.name = prop_name
+	prop.position = prop_position
+	prop.rotation_degrees = prop_rotation
+	prop.scale = prop_scale
+	add_child(prop)
+	return prop
+
+
+func _add_kenney_body(
+	prop_name: String,
+	scene: PackedScene,
+	prop_position: Vector3,
+	prop_rotation: Vector3,
+	prop_scale: Vector3,
+	collision_size: Vector3,
+	collision_position: Vector3
+) -> StaticBody3D:
+	var body := StaticBody3D.new()
+	body.name = prop_name
+	body.position = prop_position
+	body.rotation_degrees = prop_rotation
+
+	var prop := scene.instantiate() as Node3D
+	prop.scale = prop_scale
+	body.add_child(prop)
+
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = collision_size
+	collision.position = collision_position
+	collision.shape = shape
+	body.add_child(collision)
+
+	add_child(body)
+	return body
 
 
 func _add_quaternius_decor() -> void:
