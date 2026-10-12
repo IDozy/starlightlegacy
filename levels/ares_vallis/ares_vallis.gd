@@ -11,12 +11,13 @@ const ROCK_4_SCENE := preload("res://assets/third_party/quaternius/ultimate_spac
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
 
-const SAND := Color(0.48, 0.24, 0.14)
-const SAND_LIGHT := Color(0.62, 0.33, 0.19)
-const ROCK := Color(0.34, 0.20, 0.15)
-const ROCK_DARK := Color(0.23, 0.14, 0.12)
-const TRACK := Color(0.20, 0.12, 0.10)
+const SAND := Color(0.42, 0.21, 0.13)
+const SAND_LIGHT := Color(0.55, 0.29, 0.18)
+const ROCK := Color(0.30, 0.18, 0.14)
+const ROCK_DARK := Color(0.20, 0.12, 0.10)
+const TRACK := Color(0.16, 0.095, 0.075)
 const AIRBAG := Color(0.73, 0.68, 0.57)
+const LANDING_SCAR := Color(0.31, 0.15, 0.095)
 
 @onready var player = $Player
 @onready var crosshair: Label = $HUD/Crosshair
@@ -115,40 +116,63 @@ func _build_environment() -> void:
 
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.33, 0.15, 0.10)
+	environment.background_color = Color(0.46, 0.25, 0.18)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.72, 0.43, 0.30)
-	environment.ambient_light_energy = 0.58
+	environment.ambient_light_color = Color(0.66, 0.44, 0.34)
+	environment.ambient_light_energy = 0.50
 	world_environment.environment = environment
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "MarsSun"
-	sun.rotation_degrees = Vector3(-38.0, -28.0, 0.0)
-	sun.light_color = Color(1.0, 0.72, 0.54)
-	sun.light_energy = 1.05
+	sun.rotation_degrees = Vector3(-42.0, -34.0, 0.0)
+	sun.light_color = Color(1.0, 0.80, 0.66)
+	sun.light_energy = 1.12
 	sun.shadow_enabled = true
 	add_child(sun)
 
 
 func _build_ares_vallis() -> void:
-	_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(34, 0.24, 30), SAND)
+	_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
 
-	# Low-cost terrain shapes create a broad Martian flood-plain silhouette.
-	_create_static_box("RidgeLeft", Vector3(-11.0, 0.25, -4.0), Vector3(8.0, 0.55, 18.0), SAND_LIGHT)
-	_create_static_box("RidgeRight", Vector3(12.0, 0.18, -6.0), Vector3(7.0, 0.42, 17.0), ROCK)
+	# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
+	_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
+	_create_visual_sphere("WestMoundB", Vector3(-13.5, 0.06, -10.5), 3.8, Vector3(1.60, 0.15, 2.05), ROCK)
+	_create_visual_sphere("EastMoundA", Vector3(13.2, 0.06, -3.2), 3.5, Vector3(1.90, 0.17, 2.40), ROCK)
+	_create_visual_sphere("EastMoundB", Vector3(13.0, 0.05, -11.5), 3.7, Vector3(1.65, 0.14, 2.10), SAND_LIGHT)
 
-	# Twin Peaks: a recognizable horizon landmark from Pathfinder imagery.
-	_create_visual_sphere("TwinPeakLeft", Vector3(-4.8, 2.2, -15.0), 2.8, Vector3(1.25, 0.80, 0.75), ROCK_DARK)
-	_create_visual_sphere("TwinPeakRight", Vector3(-0.6, 2.0, -16.0), 2.5, Vector3(1.15, 0.72, 0.78), ROCK_DARK)
+	# Twin Peaks use actual low-poly rock silhouettes instead of sphere placeholders.
+	_create_asset_rock("TwinPeakLeft", ROCK_3_SCENE, Vector3(-5.2, 0.45, -15.7), 1.75, -12.0)
+	_create_asset_rock("TwinPeakRight", ROCK_1_SCENE, Vector3(-0.7, 0.42, -16.8), 1.55, 18.0)
+	_create_asset_rock("HorizonShoulder", ROCK_2_SCENE, Vector3(5.6, 0.0, -15.2), 0.78, -24.0)
 
-	# Quaternius rocks replace the earlier sphere placeholders.
+	# Scattered rock fields frame the route while leaving a readable corridor.
 	_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
 	_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
 	_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
 	_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
-	_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.0, 0.0, -8.2), 0.16, 65.0)
-	_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(3.8, 0.0, -10.0), 0.20, -8.0)
+	_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.2, 0.0, -8.6), 0.15, 65.0)
+	_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(4.6, 0.0, -10.2), 0.19, -8.0)
+	_create_asset_rock("Rock_6", ROCK_4_SCENE, Vector3(-9.4, 0.0, -11.0), 0.28, 28.0)
+	_create_asset_rock("Rock_7", ROCK_3_SCENE, Vector3(9.6, 0.0, -12.2), 0.31, -33.0)
+	_create_asset_rock("Rock_8", ROCK_2_SCENE, Vector3(10.4, 0.0, 0.4), 0.18, 54.0)
+	_create_asset_rock("Rock_9", ROCK_1_SCENE, Vector3(-10.2, 0.0, 4.0), 0.20, -20.0)
+
+	# Disturbed soil visually anchors the two historical hardware areas.
+	_create_visual_sphere(
+		"PathfinderLandingScar",
+		Vector3(-1.8, 0.005, 1.4),
+		1.55,
+		Vector3(1.55, 0.018, 1.08),
+		LANDING_SCAR
+	)
+	_create_visual_sphere(
+		"SojournerSoilPatch",
+		Vector3(3.4, 0.004, -6.0),
+		0.95,
+		Vector3(1.55, 0.015, 1.20),
+		SAND_LIGHT
+	)
 
 	_pathfinder = PATHFINDER_STORY.instantiate()
 	_pathfinder.position = Vector3(-1.8, 0.05, 1.4)
@@ -180,22 +204,24 @@ func _build_ares_vallis() -> void:
 		AIRBAG
 	)
 
-	# Stylized rover tracks lead the player from Pathfinder toward Sojourner.
-	for step in range(8):
-		var t: float = float(step) / 7.0
-		var z_pos: float = lerpf(0.2, -5.6, t)
-		var x_center: float = lerpf(-0.8, 3.1, t)
+	# Rover tracks form a readable diagonal trail from Pathfinder to Sojourner.
+	for step in range(11):
+		var t: float = float(step) / 10.0
+		var z_pos: float = lerpf(0.15, -5.55, t)
+		var x_center: float = lerpf(-0.75, 3.05, t)
 		_create_visual_box(
 			"TrackL_%d" % step,
-			Vector3(x_center - 0.28, 0.015, z_pos),
-			Vector3(0.10, 0.025, 0.46),
-			TRACK
+			Vector3(x_center - 0.20, 0.014, z_pos),
+			Vector3(0.075, 0.020, 0.34),
+			TRACK,
+			-34.0
 		)
 		_create_visual_box(
 			"TrackR_%d" % step,
-			Vector3(x_center + 0.28, 0.015, z_pos),
-			Vector3(0.10, 0.025, 0.46),
-			TRACK
+			Vector3(x_center + 0.20, 0.014, z_pos),
+			Vector3(0.075, 0.020, 0.34),
+			TRACK,
+			-34.0
 		)
 
 	_sojourner = SOJOURNER_CHALLENGE.instantiate()
@@ -241,11 +267,13 @@ func _create_visual_box(
 	box_name: String,
 	box_position: Vector3,
 	box_size: Vector3,
-	color: Color
+	color: Color,
+	yaw_degrees: float = 0.0
 ) -> MeshInstance3D:
 	var mesh_instance := MeshInstance3D.new()
 	mesh_instance.name = box_name
 	mesh_instance.position = box_position
+	mesh_instance.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
 
 	var mesh := BoxMesh.new()
 	mesh.size = box_size
@@ -292,10 +320,21 @@ func _create_asset_rock(
 	uniform_scale: float,
 	yaw_degrees: float
 ) -> Node3D:
+	var body := StaticBody3D.new()
+	body.name = rock_name
+	body.position = rock_position
+	body.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
+
 	var rock := rock_scene.instantiate() as Node3D
-	rock.name = rock_name
-	rock.position = rock_position
-	rock.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
 	rock.scale = Vector3.ONE * uniform_scale
-	add_child(rock)
-	return rock
+	body.add_child(rock)
+
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.7, 2.3, 2.4) * uniform_scale
+	collision.position = Vector3(0.0, 0.90 * uniform_scale, 0.0)
+	collision.shape = shape
+	body.add_child(collision)
+
+	add_child(body)
+	return body
