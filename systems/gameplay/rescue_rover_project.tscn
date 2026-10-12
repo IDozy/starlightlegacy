@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://systems/gameplay/rescue_rover_project.gd" id="1_project"]
 
@@ -57,22 +57,22 @@ mesh = SubResource("Mesh_top")
 
 [node name="WheelFL" type="MeshInstance3D" parent="."]
 position = Vector3(-0.58, 0.26, -0.36)
-rotation_degrees = Vector3(90, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
 mesh = SubResource("Mesh_wheel")
 
 [node name="WheelFR" type="MeshInstance3D" parent="."]
 position = Vector3(0.58, 0.26, -0.36)
-rotation_degrees = Vector3(90, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
 mesh = SubResource("Mesh_wheel")
 
 [node name="WheelRL" type="MeshInstance3D" parent="."]
 position = Vector3(-0.58, 0.26, 0.36)
-rotation_degrees = Vector3(90, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
 mesh = SubResource("Mesh_wheel")
 
 [node name="WheelRR" type="MeshInstance3D" parent="."]
 position = Vector3(0.58, 0.26, 0.36)
-rotation_degrees = Vector3(90, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
 mesh = SubResource("Mesh_wheel")
 
 [node name="UpgradeVisual" type="Node3D" parent="."]
