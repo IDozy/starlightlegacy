@@ -9,7 +9,7 @@ roughness = 0.72
 
 [sub_resource type="BoxMesh" id="Mesh_body"]
 material = SubResource("Mat_body")
-size = Vector3(1.35, 0.55, 1.15)
+size = Vector3(0.95, 0.45, 0.85)
 
 [sub_resource type="StandardMaterial3D" id="Mat_panel"]
 albedo_color = Color(0.08, 0.16, 0.24, 1)
@@ -18,7 +18,7 @@ roughness = 0.46
 
 [sub_resource type="BoxMesh" id="Mesh_panel"]
 material = SubResource("Mat_panel")
-size = Vector3(1.15, 0.08, 0.95)
+size = Vector3(0.88, 0.06, 0.78)
 
 [sub_resource type="StandardMaterial3D" id="Mat_petal"]
 albedo_color = Color(0.77, 0.69, 0.53, 1)
@@ -26,7 +26,7 @@ roughness = 0.78
 
 [sub_resource type="BoxMesh" id="Mesh_petal"]
 material = SubResource("Mat_petal")
-size = Vector3(1.25, 0.10, 1.05)
+size = Vector3(0.90, 0.08, 0.80)
 
 [sub_resource type="StandardMaterial3D" id="Mat_ramp"]
 albedo_color = Color(0.29, 0.31, 0.31, 1)
@@ -35,7 +35,7 @@ roughness = 0.62
 
 [sub_resource type="BoxMesh" id="Mesh_ramp"]
 material = SubResource("Mat_ramp")
-size = Vector3(0.55, 0.08, 1.15)
+size = Vector3(0.42, 0.06, 0.90)
 
 [sub_resource type="StandardMaterial3D" id="Mat_mast"]
 albedo_color = Color(0.34, 0.34, 0.32, 1)
@@ -46,7 +46,7 @@ roughness = 0.55
 material = SubResource("Mat_mast")
 top_radius = 0.06
 bottom_radius = 0.07
-height = 0.95
+height = 1.15
 
 [sub_resource type="SphereMesh" id="Mesh_camera"]
 material = SubResource("Mat_panel")
@@ -56,49 +56,49 @@ radial_segments = 10
 rings = 5
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
-size = Vector3(2.6, 1.6, 2.5)
+size = Vector3(2.8, 2.1, 2.7)
 
 [node name="PathfinderStoryPoint" type="StaticBody3D"]
 script = ExtResource("1_story")
 
 [node name="Body" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.38, 0)
+position = Vector3(0, 0.30, 0)
 mesh = SubResource("Mesh_body")
 
 [node name="SolarPanel" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.70, 0)
+position = Vector3(0, 0.56, 0)
 mesh = SubResource("Mesh_panel")
 
 [node name="PetalLeft" type="MeshInstance3D" parent="."]
-position = Vector3(-1.15, 0.10, 0)
+position = Vector3(-0.90, 0.08, 0)
 rotation_degrees = Vector3(0, 0, -8)
 mesh = SubResource("Mesh_petal")
 
 [node name="PetalRight" type="MeshInstance3D" parent="."]
-position = Vector3(1.15, 0.10, 0)
+position = Vector3(0.90, 0.08, 0)
 rotation_degrees = Vector3(0, 0, 8)
 mesh = SubResource("Mesh_petal")
 
 [node name="PetalRear" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.10, 1.0)
+position = Vector3(0, 0.08, 0.82)
 rotation_degrees = Vector3(8, 0, 0)
 mesh = SubResource("Mesh_petal")
 
 [node name="Ramp" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.03, -1.12)
+position = Vector3(0, 0.03, -0.98)
 rotation_degrees = Vector3(-10, 0, 0)
 mesh = SubResource("Mesh_ramp")
 
 [node name="Mast" type="MeshInstance3D" parent="."]
-position = Vector3(0.34, 1.00, 0.05)
+position = Vector3(0.28, 1.22, 0.04)
 mesh = SubResource("Mesh_mast")
 
 [node name="CameraHead" type="MeshInstance3D" parent="."]
-position = Vector3(0.34, 1.48, 0.05)
+position = Vector3(0.28, 1.80, 0.04)
 mesh = SubResource("Mesh_camera")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 0.55, 0)
+position = Vector3(0, 0.80, 0)
 shape = SubResource("Shape_body")
 
 [node name="StoryHUD" type="CanvasLayer" parent="."]
