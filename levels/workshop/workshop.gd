@@ -19,8 +19,6 @@ const METAL_COLOR := Color(0.26, 0.31, 0.35)
 const TEST_MAT_COLOR := Color(0.075, 0.095, 0.12)
 const TEST_BORDER_COLOR := Color(0.78, 0.43, 0.16)
 const MARKING_COLOR := Color(0.92, 0.68, 0.24)
-const PANEL_COLOR := Color(0.16, 0.19, 0.22)
-const TOOL_COLOR := Color(0.72, 0.76, 0.78)
 
 
 func _ready() -> void:
@@ -130,7 +128,7 @@ func _build_workbench() -> void:
 
 
 func _add_kenney_workbench_props() -> void:
-	var computer := _add_kenney_visual(
+	_add_kenney_visual(
 		"WorkbenchComputer",
 		KENNEY_COMPUTER_WIDE,
 		Vector3(0.58, 0.94, -3.66),
