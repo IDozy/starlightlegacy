@@ -38,7 +38,7 @@ func _ready() -> void:
 
 	_pathfinder.call("set_completed_state", pathfinder_done)
 	_sojourner.call("set_completed_state", sojourner_done)
-	_update_progress(false)
+	_update_progress()
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -69,10 +69,10 @@ func _on_pathfinder_story_completed() -> void:
 func _on_sojourner_completed() -> void:
 	narration_label.text = "Abuelo: No hemos traído la máquina de vuelta. Hemos recuperado lo que hizo, lo que aprendió y por qué todavía importa."
 	narration_label.visible = true
-	_update_progress(true)
+	_update_progress()
 
 
-func _update_progress(show_completion: bool) -> void:
+func _update_progress() -> void:
 	var pathfinder_done := _has_discovery(PATHFINDER_DISCOVERY_ID)
 	var sojourner_done := _has_discovery(SOJOURNER_DISCOVERY_ID)
 
@@ -85,9 +85,7 @@ func _update_progress(show_completion: bool) -> void:
 		return
 
 	_unlock_return_portal()
-
-	if show_completion:
-		objective_label.text = "HISTORIA RECUPERADA · Pathfinder + Sojourner · Regresa al taller."
+	objective_label.text = "HISTORIA RECUPERADA · Pathfinder + Sojourner · Regresa al taller."
 
 
 func _unlock_return_portal() -> void:
