@@ -3,6 +3,8 @@ extends Node3D
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
+const QUATERNIUS_CRATE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Items/GLTF/Pickup_Crate.gltf")
+const QUATERNIUS_SOLAR_PANEL := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/SolarPanel_Ground.gltf")
 
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
@@ -80,6 +82,8 @@ func _build_workshop_props() -> void:
 	rescue_rover.rotation_degrees = Vector3(0.0, 18.0, 0.0)
 	add_child(rescue_rover)
 
+	_add_quaternius_decor()
+
 	var grandfather := GRANDFATHER.instantiate()
 	grandfather.position = Vector3(2.7, 0.0, -2.6)
 	grandfather.rotation_degrees = Vector3(0.0, -28.0, 0.0)
@@ -116,3 +120,33 @@ func _create_static_box(
 
 	add_child(body)
 	return body
+
+
+func _add_quaternius_decor() -> void:
+	var crate_a := QUATERNIUS_CRATE.instantiate() as Node3D
+	crate_a.name = "QuaterniusCrateA"
+	crate_a.position = Vector3(-4.35, 0.88, -1.72)
+	crate_a.rotation_degrees = Vector3(0.0, 18.0, 0.0)
+	crate_a.scale = Vector3.ONE * 0.48
+	add_child(crate_a)
+
+	var crate_b := QUATERNIUS_CRATE.instantiate() as Node3D
+	crate_b.name = "QuaterniusCrateB"
+	crate_b.position = Vector3(-4.35, 1.78, -0.35)
+	crate_b.rotation_degrees = Vector3(0.0, -22.0, 0.0)
+	crate_b.scale = Vector3.ONE * 0.42
+	add_child(crate_b)
+
+	var crate_c := QUATERNIUS_CRATE.instantiate() as Node3D
+	crate_c.name = "QuaterniusCrateC"
+	crate_c.position = Vector3(4.75, 0.44, 2.65)
+	crate_c.rotation_degrees = Vector3(0.0, 34.0, 0.0)
+	crate_c.scale = Vector3.ONE * 0.72
+	add_child(crate_c)
+
+	var solar_panel := QUATERNIUS_SOLAR_PANEL.instantiate() as Node3D
+	solar_panel.name = "WorkshopSolarPanel"
+	solar_panel.position = Vector3(4.35, 0.02, -2.65)
+	solar_panel.rotation_degrees = Vector3(0.0, -38.0, 0.0)
+	solar_panel.scale = Vector3.ONE * 0.72
+	add_child(solar_panel)
