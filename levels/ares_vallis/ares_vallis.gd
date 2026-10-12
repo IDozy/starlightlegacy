@@ -320,10 +320,21 @@ func _create_asset_rock(
 	uniform_scale: float,
 	yaw_degrees: float
 ) -> Node3D:
+	var body := StaticBody3D.new()
+	body.name = rock_name
+	body.position = rock_position
+	body.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
+
 	var rock := rock_scene.instantiate() as Node3D
-	rock.name = rock_name
-	rock.position = rock_position
-	rock.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
 	rock.scale = Vector3.ONE * uniform_scale
-	add_child(rock)
-	return rock
+	body.add_child(rock)
+
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.7, 2.3, 2.4) * uniform_scale
+	collision.position = Vector3(0.0, 0.90 * uniform_scale, 0.0)
+	collision.shape = shape
+	body.add_child(collision)
+
+	add_child(body)
+	return body
