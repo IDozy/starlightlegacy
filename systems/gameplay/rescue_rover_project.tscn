@@ -43,7 +43,7 @@ radial_segments = 10
 rings = 5
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
-size = Vector3(1.7, 0.9, 1.3)
+size = Vector3(1.2, 0.78, 1.7)
 
 [node name="RescueRoverProject" type="StaticBody3D"]
 script = ExtResource("1_project")
@@ -109,7 +109,7 @@ scale = Vector3(1.20, 0.72, 0.48)
 mesh = SubResource("Mesh_airbag")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 0.45, 0)
+position = Vector3(0, 0.40, -0.18)
 shape = SubResource("Shape_body")
 
 [node name="ProjectHUD" type="CanvasLayer" parent="."]
