@@ -43,14 +43,14 @@ radial_segments = 10
 rings = 5
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
-size = Vector3(1.2, 0.78, 1.7)
+size = Vector3(0.50, 0.52, 0.72)
 
 [node name="RescueRoverProject" type="StaticBody3D"]
 script = ExtResource("1_project")
 
 [node name="QuaterniusRover" parent="." instance=ExtResource("2_rover")]
-position = Vector3(0, 0.08, 0)
-scale = Vector3(0.25, 0.25, 0.25)
+position = Vector3(0, 0.02, 0.07)
+scale = Vector3(0.10, 0.10, 0.10)
 
 [node name="Body" type="MeshInstance3D" parent="."]
 visible = false
@@ -87,6 +87,7 @@ rotation_degrees = Vector3(0, 0, 90)
 mesh = SubResource("Mesh_wheel")
 
 [node name="UpgradeVisual" type="Node3D" parent="."]
+scale = Vector3(0.45, 0.45, 0.45)
 
 [node name="AirbagLeft" type="MeshInstance3D" parent="UpgradeVisual"]
 position = Vector3(-0.80, 0.42, 0)
@@ -109,7 +110,7 @@ scale = Vector3(1.20, 0.72, 0.48)
 mesh = SubResource("Mesh_airbag")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-position = Vector3(0, 0.40, -0.18)
+position = Vector3(0, 0.25, 0.0)
 shape = SubResource("Shape_body")
 
 [node name="ProjectHUD" type="CanvasLayer" parent="."]
