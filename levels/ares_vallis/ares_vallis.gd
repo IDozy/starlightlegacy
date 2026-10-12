@@ -63,7 +63,7 @@ func _on_challenge_active_changed(active: bool) -> void:
 func _on_pathfinder_story_completed() -> void:
 	narration_label.text = "Abuelo: Ahí empezó la historia. Pathfinder abrió sus pétalos y dejó salir a Sojourner. Sigue sus huellas."
 	narration_label.visible = true
-	_update_progress(false)
+	_update_progress()
 
 
 func _on_sojourner_completed() -> void:
