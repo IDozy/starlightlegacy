@@ -4,7 +4,6 @@ const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_objec
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
 const QUATERNIUS_SOLAR_PANEL := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/SolarPanel_Ground.gltf")
-const QUATERNIUS_METAL_SUPPORT := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/MetalSupport.gltf")
 
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
@@ -60,9 +59,14 @@ func _build_room() -> void:
 
 
 func _build_workshop_props() -> void:
-	# Workbench at a human-scale 0.90 m working height.
-	_create_static_box("WorkbenchTop", Vector3(0.0, 0.90, -3.7), Vector3(3.6, 0.08, 0.95), WOOD_COLOR)
-	_add_workbench_frame()
+	# Human-scale workshop bench: 2.4 m wide, 0.75 m deep, 0.90 m high.
+	_create_static_box("WorkbenchTop", Vector3(0.0, 0.90, -3.7), Vector3(2.40, 0.08, 0.75), WOOD_COLOR)
+	_create_static_box("WorkbenchLegFL", Vector3(-1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegFR", Vector3(1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegRL", Vector3(-1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegRR", Vector3(1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLowerShelf", Vector3(0.0, 0.24, -3.70), Vector3(2.05, 0.06, 0.56), METAL_COLOR)
+	_create_static_box("WorkbenchBackboard", Vector3(0.0, 1.28, -4.04), Vector3(2.20, 0.68, 0.05), METAL_COLOR)
 
 	# Side shelving.
 	_create_static_box("ShelfFrame", Vector3(-4.9, 1.5, -1.0), Vector3(0.8, 3.0, 3.2), METAL_COLOR)
@@ -72,7 +76,7 @@ func _build_workshop_props() -> void:
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
 	prototype_device.name = "PrototypeDevice"
-	prototype_device.position = Vector3(-1.20, 1.00, -3.65)
+	prototype_device.position = Vector3(-0.65, 1.03, -3.62)
 	add_child(prototype_device)
 
 	var rescue_rover := RESCUE_ROVER_PROJECT.instantiate()
@@ -120,22 +124,6 @@ func _create_static_box(
 	add_child(body)
 	return body
 
-
-
-func _add_workbench_frame() -> void:
-	var front_support := QUATERNIUS_METAL_SUPPORT.instantiate() as Node3D
-	front_support.name = "WorkbenchFrameFront"
-	front_support.position = Vector3(0.0, 0.12, -3.32)
-	front_support.rotation_degrees = Vector3(0.0, 90.0, 0.0)
-	front_support.scale = Vector3(0.58, 0.64, 0.58)
-	add_child(front_support)
-
-	var rear_support := QUATERNIUS_METAL_SUPPORT.instantiate() as Node3D
-	rear_support.name = "WorkbenchFrameRear"
-	rear_support.position = Vector3(0.0, 0.12, -4.08)
-	rear_support.rotation_degrees = Vector3(0.0, 90.0, 0.0)
-	rear_support.scale = Vector3(0.58, 0.64, 0.58)
-	add_child(rear_support)
 
 
 func _add_quaternius_decor() -> void:
