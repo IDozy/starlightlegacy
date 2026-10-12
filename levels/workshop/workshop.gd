@@ -10,6 +10,7 @@ const KENNEY_DISPLAY_WALL := preload("res://assets/third_party/kenney/space_stat
 const KENNEY_WALL_DETAIL := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/wall-detail.glb")
 const KENNEY_CHAIR := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/chair.glb")
 const KENNEY_TABLE_DISPLAY_SMALL := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/table-display-small.glb")
+const KENNEY_WALL_SWITCH := preload("res://assets/third_party/kenney/space_station_kit/Models/GLB format/wall-switch.glb")
 
 const FLOOR_COLOR := Color(0.115, 0.135, 0.17)
 const WALL_COLOR := Color(0.48, 0.44, 0.37)
@@ -37,7 +38,7 @@ func _build_lighting() -> void:
 	environment.background_color = Color(0.035, 0.043, 0.058)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.48, 0.46, 0.42)
-	environment.ambient_light_energy = 0.38
+	environment.ambient_light_energy = 0.50
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -54,7 +55,7 @@ func _build_lighting() -> void:
 	bench_light.position = Vector3(-0.4, 2.55, -3.35)
 	bench_light.omni_range = 5.0
 	bench_light.light_color = Color(1.0, 0.68, 0.43)
-	bench_light.light_energy = 2.2
+	bench_light.light_energy = 1.65
 	bench_light.shadow_enabled = true
 	add_child(bench_light)
 
@@ -63,7 +64,7 @@ func _build_lighting() -> void:
 	test_light.position = Vector3(1.55, 2.75, -0.45)
 	test_light.omni_range = 4.6
 	test_light.light_color = Color(0.62, 0.78, 0.92)
-	test_light.light_energy = 1.35
+	test_light.light_energy = 1.15
 	test_light.shadow_enabled = true
 	add_child(test_light)
 
@@ -140,8 +141,8 @@ func _add_kenney_workbench_props() -> void:
 	_add_kenney_body(
 		"WorkbenchChair",
 		KENNEY_CHAIR,
-		Vector3(0.72, 0.0, -2.92),
-		Vector3(0.0, 180.0, 0.0),
+		Vector3(0.72, 0.0, -3.02),
+		Vector3(0.0, 165.0, 0.0),
 		Vector3.ONE * 1.18,
 		Vector3(0.38, 0.66, 0.44),
 		Vector3(0.0, 0.33, 0.0)
@@ -164,11 +165,11 @@ func _add_kenney_workbench_props() -> void:
 	)
 
 	_add_kenney_visual(
-		"WorkshopWallDetailRight",
-		KENNEY_WALL_DETAIL,
-		Vector3(2.85, 1.18, -4.76),
-		Vector3(0.0, 0.0, 0.0),
-		Vector3.ONE * 1.20
+		"EnergyWallSwitch",
+		KENNEY_WALL_SWITCH,
+		Vector3(5.76, 1.25, 1.35),
+		Vector3(0.0, -90.0, 0.0),
+		Vector3.ONE * 1.80
 	)
 
 
@@ -208,40 +209,40 @@ func _build_kenney_storage() -> void:
 	_add_kenney_body(
 		"PartsContainerA",
 		KENNEY_CONTAINER_WIDE,
-		Vector3(-4.45, 0.0, -1.90),
-		Vector3(0.0, 18.0, 0.0),
-		Vector3.ONE * 0.88,
-		Vector3(0.54, 0.62, 0.54),
-		Vector3(0.0, 0.31, 0.0)
+		Vector3(-5.18, 0.0, -1.45),
+		Vector3(0.0, 12.0, 0.0),
+		Vector3.ONE * 0.68,
+		Vector3(0.42, 0.48, 0.42),
+		Vector3(0.0, 0.24, 0.0)
 	)
 	_add_kenney_body(
 		"PartsContainerB",
 		KENNEY_CONTAINER_WIDE,
-		Vector3(-3.75, 0.0, -1.92),
-		Vector3(0.0, -12.0, 0.0),
-		Vector3.ONE * 0.88,
-		Vector3(0.54, 0.62, 0.54),
-		Vector3(0.0, 0.31, 0.0)
+		Vector3(-5.12, 0.0, -2.05),
+		Vector3(0.0, -8.0, 0.0),
+		Vector3.ONE * 0.68,
+		Vector3(0.42, 0.48, 0.42),
+		Vector3(0.0, 0.24, 0.0)
 	)
 	_add_kenney_body(
 		"PartsContainerC",
 		KENNEY_CONTAINER_WIDE,
-		Vector3(-4.42, 0.64, -1.92),
-		Vector3(0.0, -8.0, 0.0),
-		Vector3.ONE * 0.80,
-		Vector3(0.49, 0.56, 0.49),
-		Vector3(0.0, 0.28, 0.0)
+		Vector3(-4.72, 0.0, -2.58),
+		Vector3(0.0, 20.0, 0.0),
+		Vector3.ONE * 0.62,
+		Vector3(0.38, 0.44, 0.38),
+		Vector3(0.0, 0.22, 0.0)
 	)
 
 	# A small utility console anchors the energy corner next to the solar panel.
 	_add_kenney_body(
 		"EnergyConsole",
 		KENNEY_TABLE_DISPLAY_SMALL,
-		Vector3(4.10, 0.0, 1.20),
-		Vector3(0.0, -112.0, 0.0),
+		Vector3(4.02, 0.24, 1.42),
+		Vector3(0.0, -104.0, 0.0),
 		Vector3.ONE * 0.78,
-		Vector3(0.66, 0.33, 0.64),
-		Vector3(0.0, 0.17, 0.0)
+		Vector3(0.66, 0.32, 0.64),
+		Vector3(0.0, -0.07, 0.0)
 	)
 
 func _create_static_box(
@@ -349,8 +350,8 @@ func _add_quaternius_decor() -> void:
 	# Solar panel moved to a dedicated energy/storage corner.
 	var solar_body := StaticBody3D.new()
 	solar_body.name = "WorkshopSolarPanel"
-	solar_body.position = Vector3(4.65, 0.02, 1.90)
-	solar_body.rotation_degrees = Vector3(0.0, -112.0, 0.0)
+	solar_body.position = Vector3(4.82, 0.02, 1.28)
+	solar_body.rotation_degrees = Vector3(0.0, -104.0, 0.0)
 
 	var solar_panel := QUATERNIUS_SOLAR_PANEL.instantiate() as Node3D
 	solar_panel.scale = Vector3.ONE * 0.64
