@@ -1,5 +1,7 @@
 extends StaticBody3D
 
+const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
+
 signal challenge_active_changed(active: bool)
 signal challenge_completed
 
@@ -56,29 +58,29 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if _review_only:
-		if event.keycode == KEY_E or event.keycode == KEY_ESCAPE:
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 			_close_panel()
 			get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_A or event.keycode == KEY_LEFT:
+	if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT):
 		_current_heading = wrapi(_current_heading - step_degrees, 0, 360)
 		_update_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_D or event.keycode == KEY_RIGHT:
+	if INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
 		_current_heading = wrapi(_current_heading + step_degrees, 0, 360)
 		_update_display()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_E or event.keycode == KEY_ENTER:
+	if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER):
 		_confirm_heading()
 		get_viewport().set_input_as_handled()
 		return
 
-	if event.keycode == KEY_ESCAPE:
+	if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 		_close_panel()
 		get_viewport().set_input_as_handled()
 

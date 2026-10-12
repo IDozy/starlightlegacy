@@ -51,4 +51,5 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 	var transition := get_node_or_null("/root/SceneTransition")
 	if transition != null and transition.has_method("fade_to_scene"):
-		transition.call("fade_to_scene", "res://levels/nasa_memory_01/nasa_memory_01.tscn")
+		transition.call("fade_to_scene", "res://levels/ares_vallis/ares_vallis.tscn")
+

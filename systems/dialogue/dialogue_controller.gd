@@ -1,3 +1,4 @@
+class_name DialogueController
 extends Node
 
 signal dialogue_active_changed(active: bool)
@@ -17,7 +18,7 @@ signal dialogue_finished(dialogue_id: String)
 
 var _dialogue_id := ""
 var _speaker := ""
-var _lines: Array[String] = []
+var _lines: PackedStringArray = PackedStringArray()
 var _line_index := 0
 var _active := false
 var _started_frame := -1
@@ -47,14 +48,26 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func start_dialogue(
+func start_dialogue_by_id(
 	dialogue_id: String,
 	speaker: String,
-	lines: Array[String],
 	source_player: Node = null
-) -> void:
-	if _active or lines.is_empty():
-		return
+) -> bool:
+	var lines := _get_dialogue_lines(dialogue_id)
+	if lines.is_empty():
+		return false
+
+	return _start_dialogue(dialogue_id, speaker, lines, source_player)
+
+
+func _start_dialogue(
+	dialogue_id: String,
+	speaker: String,
+	lines: PackedStringArray,
+	source_player: Node = null
+) -> bool:
+	if _active:
+		return false
 
 	if source_player != null:
 		player = source_player
@@ -73,6 +86,7 @@ func start_dialogue(
 	hint_label.text = "E / Enter / clic · Continuar"
 	dialogue_active_changed.emit(true)
 	_show_current_line()
+	return true
 
 
 func advance_dialogue() -> void:
@@ -90,6 +104,19 @@ func advance_dialogue() -> void:
 
 func is_dialogue_active() -> bool:
 	return _active
+
+
+func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
+	match dialogue_id:
+		"grandfather_intro":
+			return PackedStringArray([
+				"Vaya... no veía uno de esos desde hace muchos años.",
+				"Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.",
+				"¿Quieren saber para qué servía realmente?",
+				"Entonces tendré que contarles dónde empezó todo."
+			])
+		_:
+			return PackedStringArray()
 
 
 func _show_current_line() -> void:
@@ -111,3 +138,4 @@ func _finish_dialogue() -> void:
 
 	dialogue_active_changed.emit(false)
 	dialogue_finished.emit(finished_id)
+

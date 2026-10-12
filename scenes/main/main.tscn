@@ -134,3 +134,4 @@ offset_bottom = -10.0
 text = "E / Enter / clic · Continuar"
 horizontal_alignment = 2
 theme_override_colors/font_color = Color(0.72, 0.76, 0.82, 1)
+
