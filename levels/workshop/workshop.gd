@@ -72,7 +72,7 @@ func _build_workshop_props() -> void:
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
 	prototype_device.name = "PrototypeDevice"
-	prototype_device.position = Vector3(-1.25, 1.35, -3.65)
+	prototype_device.position = Vector3(-1.20, 1.00, -3.65)
 	add_child(prototype_device)
 
 	var rescue_rover := RESCUE_ROVER_PROJECT.instantiate()
