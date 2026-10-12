@@ -19,6 +19,7 @@ const METAL_COLOR := Color(0.26, 0.31, 0.35)
 const TEST_MAT_COLOR := Color(0.075, 0.095, 0.12)
 const TEST_BORDER_COLOR := Color(0.78, 0.43, 0.16)
 const MARKING_COLOR := Color(0.92, 0.68, 0.24)
+const PANEL_COLOR := Color(0.16, 0.19, 0.22)
 
 
 func _ready() -> void:
