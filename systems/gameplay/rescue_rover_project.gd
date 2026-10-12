@@ -28,6 +28,7 @@ const OPTION_COUNT := 3
 @onready var feedback_label: Label = $ProjectHUD/Panel/Feedback
 @onready var hint_label: Label = $ProjectHUD/Panel/Hint
 @onready var upgrade_visual: Node3D = $UpgradeVisual
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
 var _active := false
@@ -232,7 +233,19 @@ func _register_upgrade() -> void:
 
 
 func _refresh_visual_state() -> void:
-	upgrade_visual.visible = _has_discovery(UPGRADE_ID)
+	var upgraded := _has_discovery(UPGRADE_ID)
+	upgrade_visual.visible = upgraded
+
+	var box_shape := collision_shape.shape as BoxShape3D
+	if box_shape == null:
+		return
+
+	if upgraded:
+		box_shape.size = Vector3(0.96, 0.58, 0.80)
+		collision_shape.position = Vector3(0.0, 0.29, 0.0)
+	else:
+		box_shape.size = Vector3(0.50, 0.52, 0.72)
+		collision_shape.position = Vector3(0.0, 0.25, 0.0)
 
 
 func _memories_complete() -> bool:
