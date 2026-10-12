@@ -5,6 +5,7 @@ extends StaticBody3D
 @export var discovery_id: String = ""
 @export var discovery_category: String = "Hardware"
 @export_multiline var discovery_summary: String = ""
+@export var inspection_scale: float = 0.55
 
 @onready var visual: Node3D = $Visual
 
@@ -19,7 +20,13 @@ func interact(player: Node) -> void:
 
 
 func create_inspection_visual() -> Node3D:
-	return visual.duplicate()
+	var inspection_visual := visual.duplicate() as Node3D
+	if inspection_visual == null:
+		return null
+
+	inspection_visual.scale = Vector3.ONE * inspection_scale
+	inspection_visual.rotation_degrees = Vector3(-10.0, 24.0, 0.0)
+	return inspection_visual
 
 
 func set_world_visible(is_visible: bool) -> void:

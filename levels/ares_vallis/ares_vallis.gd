@@ -3,6 +3,10 @@ extends Node3D
 const PATHFINDER_STORY := preload("res://systems/gameplay/pathfinder_story_point.tscn")
 const SOJOURNER_CHALLENGE := preload("res://systems/gameplay/sojourner_scan_challenge.tscn")
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
+const ROCK_1_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_1.gltf")
+const ROCK_2_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_2.gltf")
+const ROCK_3_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_3.gltf")
+const ROCK_4_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_4.gltf")
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -138,25 +142,13 @@ func _build_ares_vallis() -> void:
 	_create_visual_sphere("TwinPeakLeft", Vector3(-4.8, 2.2, -15.0), 2.8, Vector3(1.25, 0.80, 0.75), ROCK_DARK)
 	_create_visual_sphere("TwinPeakRight", Vector3(-0.6, 2.0, -16.0), 2.5, Vector3(1.15, 0.72, 0.78), ROCK_DARK)
 
-	# Scattered rocks keep the path readable while suggesting Ares Vallis.
-	var rock_positions: Array[Vector3] = [
-		Vector3(-6.0, 0.22, 1.0),
-		Vector3(6.8, 0.20, 2.4),
-		Vector3(-7.2, 0.18, -5.0),
-		Vector3(7.4, 0.20, -7.0),
-		Vector3(-2.0, 0.16, -8.2),
-		Vector3(3.8, 0.17, -10.0)
-	]
-
-	for index in range(rock_positions.size()):
-		var scale_factor: float = 0.55 + (float(index % 3) * 0.18)
-		_create_visual_sphere(
-			"Rock_%d" % index,
-			rock_positions[index],
-			0.55,
-			Vector3(1.25, 0.72, 0.95) * scale_factor,
-			ROCK
-		)
+	# Quaternius rocks replace the earlier sphere placeholders.
+	_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
+	_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
+	_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
+	_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
+	_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.0, 0.0, -8.2), 0.16, 65.0)
+	_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(3.8, 0.0, -10.0), 0.20, -8.0)
 
 	_pathfinder = PATHFINDER_STORY.instantiate()
 	_pathfinder.position = Vector3(-1.8, 0.05, 1.4)
@@ -291,3 +283,19 @@ func _make_material(color: Color) -> StandardMaterial3D:
 	material.albedo_color = color
 	material.roughness = 0.94
 	return material
+
+
+func _create_asset_rock(
+	rock_name: String,
+	rock_scene: PackedScene,
+	rock_position: Vector3,
+	uniform_scale: float,
+	yaw_degrees: float
+) -> Node3D:
+	var rock := rock_scene.instantiate() as Node3D
+	rock.name = rock_name
+	rock.position = rock_position
+	rock.rotation_degrees = Vector3(0.0, yaw_degrees, 0.0)
+	rock.scale = Vector3.ONE * uniform_scale
+	add_child(rock)
+	return rock
