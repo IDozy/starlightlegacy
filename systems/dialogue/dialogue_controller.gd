@@ -110,10 +110,10 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 	match dialogue_id:
 		"grandfather_intro":
 			return PackedStringArray([
-				"Vaya... no veía uno de esos desde hace muchos años.",
-				"Cuando era joven, piezas como esa podían decidir si una misión encontraba su camino... o se perdía allá arriba.",
-				"¿Quieren saber para qué servía realmente?",
-				"Entonces tendré que contarles dónde empezó todo."
+				"Veo lo que pasó en la prueba. El vehículo llegó al suelo, pero el golpe soltó todo por dentro.",
+				"En 1997 tuvimos un problema parecido con Mars Pathfinder. Frenar la caída no bastaba: también había que sobrevivir al contacto con Marte.",
+				"Usamos paracaídas y retrocohetes para reducir la velocidad, y unos enormes airbags para absorber el impacto final.",
+				"Ven. Quiero mostrarte dónde terminó aquella máquina y qué aprendimos de ella."
 			])
 		_:
 			return PackedStringArray()
