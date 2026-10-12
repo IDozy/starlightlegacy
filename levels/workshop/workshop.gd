@@ -2,6 +2,7 @@ extends Node3D
 
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
+const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
 
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
@@ -70,8 +71,14 @@ func _build_workshop_props() -> void:
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
 	prototype_device.name = "PrototypeDevice"
-	prototype_device.position = Vector3(0.0, 1.35, -3.65)
+	prototype_device.position = Vector3(-1.25, 1.35, -3.65)
 	add_child(prototype_device)
+
+	var rescue_rover := RESCUE_ROVER_PROJECT.instantiate()
+	rescue_rover.name = "RescueRoverProject"
+	rescue_rover.position = Vector3(0.0, 0.0, -0.9)
+	rescue_rover.rotation_degrees = Vector3(0.0, 18.0, 0.0)
+	add_child(rescue_rover)
 
 	var grandfather := GRANDFATHER.instantiate()
 	grandfather.position = Vector3(2.7, 0.0, -2.6)
