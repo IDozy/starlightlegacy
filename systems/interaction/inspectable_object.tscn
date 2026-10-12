@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://systems/interaction/inspectable_object.gd" id="1_inspectable"]
 [ext_resource type="PackedScene" path="res://assets/third_party/quaternius/ultimate_space_kit/Items/GLTF/Pickup_Sphere.gltf" id="2_sensor"]
