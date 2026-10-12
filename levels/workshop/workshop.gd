@@ -3,8 +3,8 @@ extends Node3D
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
-const QUATERNIUS_CRATE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Items/GLTF/Pickup_Crate.gltf")
 const QUATERNIUS_SOLAR_PANEL := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/SolarPanel_Ground.gltf")
+const QUATERNIUS_METAL_SUPPORT := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/MetalSupport.gltf")
 
 const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
 const WALL_COLOR := Color(0.73, 0.70, 0.63)
@@ -60,10 +60,9 @@ func _build_room() -> void:
 
 
 func _build_workshop_props() -> void:
-	# Main workbench.
-	_create_static_box("WorkbenchTop", Vector3(0.0, 1.0, -3.7), Vector3(4.0, 0.18, 1.1), WOOD_COLOR)
-	_create_static_box("WorkbenchLegLeft", Vector3(-1.65, 0.5, -3.7), Vector3(0.22, 1.0, 0.8), METAL_COLOR)
-	_create_static_box("WorkbenchLegRight", Vector3(1.65, 0.5, -3.7), Vector3(0.22, 1.0, 0.8), METAL_COLOR)
+	# Workbench at a human-scale 0.90 m working height.
+	_create_static_box("WorkbenchTop", Vector3(0.0, 0.90, -3.7), Vector3(3.6, 0.08, 0.95), WOOD_COLOR)
+	_add_workbench_frame()
 
 	# Side shelving.
 	_create_static_box("ShelfFrame", Vector3(-4.9, 1.5, -1.0), Vector3(0.8, 3.0, 3.2), METAL_COLOR)
@@ -122,28 +121,24 @@ func _create_static_box(
 	return body
 
 
+
+func _add_workbench_frame() -> void:
+	var front_support := QUATERNIUS_METAL_SUPPORT.instantiate() as Node3D
+	front_support.name = "WorkbenchFrameFront"
+	front_support.position = Vector3(0.0, 0.12, -3.32)
+	front_support.rotation_degrees = Vector3(0.0, 90.0, 0.0)
+	front_support.scale = Vector3(0.58, 0.64, 0.58)
+	add_child(front_support)
+
+	var rear_support := QUATERNIUS_METAL_SUPPORT.instantiate() as Node3D
+	rear_support.name = "WorkbenchFrameRear"
+	rear_support.position = Vector3(0.0, 0.12, -4.08)
+	rear_support.rotation_degrees = Vector3(0.0, 90.0, 0.0)
+	rear_support.scale = Vector3(0.58, 0.64, 0.58)
+	add_child(rear_support)
+
+
 func _add_quaternius_decor() -> void:
-	var crate_a := QUATERNIUS_CRATE.instantiate() as Node3D
-	crate_a.name = "QuaterniusCrateA"
-	crate_a.position = Vector3(-4.35, 0.88, -1.72)
-	crate_a.rotation_degrees = Vector3(0.0, 18.0, 0.0)
-	crate_a.scale = Vector3.ONE * 0.48
-	add_child(crate_a)
-
-	var crate_b := QUATERNIUS_CRATE.instantiate() as Node3D
-	crate_b.name = "QuaterniusCrateB"
-	crate_b.position = Vector3(-4.35, 1.78, -0.35)
-	crate_b.rotation_degrees = Vector3(0.0, -22.0, 0.0)
-	crate_b.scale = Vector3.ONE * 0.42
-	add_child(crate_b)
-
-	var crate_c := QUATERNIUS_CRATE.instantiate() as Node3D
-	crate_c.name = "QuaterniusCrateC"
-	crate_c.position = Vector3(4.75, 0.44, 2.65)
-	crate_c.rotation_degrees = Vector3(0.0, 34.0, 0.0)
-	crate_c.scale = Vector3.ONE * 0.72
-	add_child(crate_c)
-
 	var solar_panel := QUATERNIUS_SOLAR_PANEL.instantiate() as Node3D
 	solar_panel.name = "WorkshopSolarPanel"
 	solar_panel.position = Vector3(4.35, 0.02, -2.65)
