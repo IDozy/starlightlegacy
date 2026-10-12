@@ -139,9 +139,20 @@ func _add_workbench_frame() -> void:
 
 
 func _add_quaternius_decor() -> void:
+	var solar_body := StaticBody3D.new()
+	solar_body.name = "WorkshopSolarPanel"
+	solar_body.position = Vector3(4.35, 0.02, -2.65)
+	solar_body.rotation_degrees = Vector3(0.0, -38.0, 0.0)
+
 	var solar_panel := QUATERNIUS_SOLAR_PANEL.instantiate() as Node3D
-	solar_panel.name = "WorkshopSolarPanel"
-	solar_panel.position = Vector3(4.35, 0.02, -2.65)
-	solar_panel.rotation_degrees = Vector3(0.0, -38.0, 0.0)
 	solar_panel.scale = Vector3.ONE * 0.72
-	add_child(solar_panel)
+	solar_body.add_child(solar_panel)
+
+	var solar_collision := CollisionShape3D.new()
+	var solar_shape := BoxShape3D.new()
+	solar_shape.size = Vector3(1.05, 0.85, 1.20)
+	solar_collision.position = Vector3(0.0, 0.40, 0.05)
+	solar_collision.shape = solar_shape
+	solar_body.add_child(solar_collision)
+
+	add_child(solar_body)
