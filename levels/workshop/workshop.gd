@@ -5,10 +5,16 @@ const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tsc
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
 const QUATERNIUS_SOLAR_PANEL := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/SolarPanel_Ground.gltf")
 
-const FLOOR_COLOR := Color(0.19, 0.20, 0.22)
-const WALL_COLOR := Color(0.73, 0.70, 0.63)
-const WOOD_COLOR := Color(0.34, 0.22, 0.14)
-const METAL_COLOR := Color(0.28, 0.31, 0.34)
+const FLOOR_COLOR := Color(0.115, 0.135, 0.17)
+const WALL_COLOR := Color(0.48, 0.44, 0.37)
+const WALL_LOWER_COLOR := Color(0.20, 0.23, 0.27)
+const WOOD_COLOR := Color(0.34, 0.19, 0.10)
+const METAL_COLOR := Color(0.26, 0.31, 0.35)
+const TEST_MAT_COLOR := Color(0.075, 0.095, 0.12)
+const TEST_BORDER_COLOR := Color(0.78, 0.43, 0.16)
+const MARKING_COLOR := Color(0.92, 0.68, 0.24)
+const PANEL_COLOR := Color(0.16, 0.19, 0.22)
+const TOOL_COLOR := Color(0.72, 0.76, 0.78)
 
 
 func _ready() -> void:
@@ -23,27 +29,38 @@ func _build_lighting() -> void:
 
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.055, 0.065, 0.085)
+	environment.background_color = Color(0.035, 0.043, 0.058)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.55, 0.60, 0.70)
-	environment.ambient_light_energy = 0.7
+	environment.ambient_light_color = Color(0.48, 0.46, 0.42)
+	environment.ambient_light_energy = 0.38
 	world_environment.environment = environment
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "DirectionalLight3D"
 	sun.rotation_degrees = Vector3(-48.0, -32.0, 0.0)
-	sun.light_energy = 1.0
+	sun.light_color = Color(1.0, 0.86, 0.70)
+	sun.light_energy = 0.48
 	sun.shadow_enabled = true
 	add_child(sun)
 
-	var workshop_light := OmniLight3D.new()
-	workshop_light.name = "WorkshopLight"
-	workshop_light.position = Vector3(0.0, 3.2, 0.0)
-	workshop_light.omni_range = 9.0
-	workshop_light.light_energy = 4.0
-	workshop_light.shadow_enabled = true
-	add_child(workshop_light)
+	var bench_light := OmniLight3D.new()
+	bench_light.name = "BenchLight"
+	bench_light.position = Vector3(-0.4, 2.55, -3.35)
+	bench_light.omni_range = 5.0
+	bench_light.light_color = Color(1.0, 0.68, 0.43)
+	bench_light.light_energy = 2.2
+	bench_light.shadow_enabled = true
+	add_child(bench_light)
+
+	var test_light := OmniLight3D.new()
+	test_light.name = "TestAreaLight"
+	test_light.position = Vector3(1.55, 2.75, -0.45)
+	test_light.omni_range = 4.6
+	test_light.light_color = Color(0.62, 0.78, 0.92)
+	test_light.light_energy = 1.35
+	test_light.shadow_enabled = true
+	add_child(test_light)
 
 
 func _build_room() -> void:
@@ -57,22 +74,21 @@ func _build_room() -> void:
 	_create_static_box("FrontWallRight", Vector3(4.0, 2.0, 5.0), Vector3(4.0, 4.0, 0.2), WALL_COLOR)
 	_create_static_box("FrontWallTop", Vector3(0.0, 3.5, 5.0), Vector3(4.0, 1.0, 0.2), WALL_COLOR)
 
+	# Dark lower wall band keeps the workshop from reading as a white test room.
+	_create_visual_box("BackWallLower", Vector3(0.0, 0.55, -4.88), Vector3(11.7, 1.05, 0.04), WALL_LOWER_COLOR)
+	_create_visual_box("LeftWallLower", Vector3(-5.88, 0.55, 0.0), Vector3(0.04, 1.05, 9.7), WALL_LOWER_COLOR)
+	_create_visual_box("RightWallLower", Vector3(5.88, 0.55, 0.0), Vector3(0.04, 1.05, 9.7), WALL_LOWER_COLOR)
+
+	# Thin orange workshop stripe.
+	_create_visual_box("BackAccentStripe", Vector3(0.0, 1.12, -4.84), Vector3(11.6, 0.055, 0.035), TEST_BORDER_COLOR)
+	_create_visual_box("LeftAccentStripe", Vector3(-5.84, 1.12, 0.0), Vector3(0.035, 0.055, 9.6), TEST_BORDER_COLOR)
+	_create_visual_box("RightAccentStripe", Vector3(5.84, 1.12, 0.0), Vector3(0.035, 0.055, 9.6), TEST_BORDER_COLOR)
+
 
 func _build_workshop_props() -> void:
-	# Human-scale workshop bench: 2.4 m wide, 0.75 m deep, 0.90 m high.
-	_create_static_box("WorkbenchTop", Vector3(0.0, 0.90, -3.7), Vector3(2.40, 0.08, 0.75), WOOD_COLOR)
-	_create_static_box("WorkbenchLegFL", Vector3(-1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
-	_create_static_box("WorkbenchLegFR", Vector3(1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
-	_create_static_box("WorkbenchLegRL", Vector3(-1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
-	_create_static_box("WorkbenchLegRR", Vector3(1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
-	_create_static_box("WorkbenchLowerShelf", Vector3(0.0, 0.24, -3.70), Vector3(2.05, 0.06, 0.56), METAL_COLOR)
-	_create_static_box("WorkbenchBackboard", Vector3(0.0, 1.28, -4.04), Vector3(2.20, 0.68, 0.05), METAL_COLOR)
-
-	# Side shelving.
-	_create_static_box("ShelfFrame", Vector3(-4.9, 1.5, -1.0), Vector3(0.8, 3.0, 3.2), METAL_COLOR)
-	_create_static_box("ShelfOne", Vector3(-4.45, 0.6, -1.0), Vector3(0.9, 0.12, 3.0), WOOD_COLOR)
-	_create_static_box("ShelfTwo", Vector3(-4.45, 1.5, -1.0), Vector3(0.9, 0.12, 3.0), WOOD_COLOR)
-	_create_static_box("ShelfThree", Vector3(-4.45, 2.4, -1.0), Vector3(0.9, 0.12, 3.0), WOOD_COLOR)
+	_build_workbench()
+	_build_test_area()
+	_build_storage()
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
 	prototype_device.name = "PrototypeDevice"
@@ -81,16 +97,89 @@ func _build_workshop_props() -> void:
 
 	var rescue_rover := RESCUE_ROVER_PROJECT.instantiate()
 	rescue_rover.name = "RescueRoverProject"
-	rescue_rover.position = Vector3(0.0, 0.0, -0.9)
-	rescue_rover.rotation_degrees = Vector3(0.0, 18.0, 0.0)
+	rescue_rover.position = Vector3(1.55, 0.02, -0.35)
+	rescue_rover.rotation_degrees = Vector3(0.0, -12.0, 0.0)
 	add_child(rescue_rover)
 
 	_add_quaternius_decor()
 
 	var grandfather := GRANDFATHER.instantiate()
-	grandfather.position = Vector3(2.7, 0.0, -2.6)
-	grandfather.rotation_degrees = Vector3(0.0, -28.0, 0.0)
+	grandfather.position = Vector3(3.55, 0.0, -2.95)
+	grandfather.rotation_degrees = Vector3(0.0, -42.0, 0.0)
 	add_child(grandfather)
+
+
+func _build_workbench() -> void:
+	# Human-scale workshop bench: 2.4 m wide, 0.75 m deep, 0.90 m high.
+	_create_static_box("WorkbenchTop", Vector3(0.0, 0.90, -3.7), Vector3(2.40, 0.08, 0.75), WOOD_COLOR)
+	_create_static_box("WorkbenchLegFL", Vector3(-1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegFR", Vector3(1.05, 0.44, -3.40), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegRL", Vector3(-1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLegRR", Vector3(1.05, 0.44, -4.00), Vector3(0.08, 0.88, 0.08), METAL_COLOR)
+	_create_static_box("WorkbenchLowerShelf", Vector3(0.0, 0.24, -3.70), Vector3(2.05, 0.06, 0.56), METAL_COLOR)
+	_create_static_box("WorkbenchBackboard", Vector3(0.0, 1.28, -4.04), Vector3(2.20, 0.68, 0.05), PANEL_COLOR)
+
+	# Simple tool silhouettes until the furniture/tool pack is integrated.
+	_create_visual_box("ToolRail", Vector3(0.28, 1.43, -4.005), Vector3(0.86, 0.045, 0.035), TEST_BORDER_COLOR)
+	_create_visual_box("ToolA", Vector3(0.02, 1.31, -3.995), Vector3(0.045, 0.20, 0.03), TOOL_COLOR)
+	_create_visual_box("ToolB", Vector3(0.26, 1.30, -3.995), Vector3(0.055, 0.23, 0.03), TOOL_COLOR)
+	_create_visual_box("ToolC", Vector3(0.50, 1.33, -3.995), Vector3(0.055, 0.16, 0.03), TOOL_COLOR)
+
+	# Compact task lamp on the bench.
+	_create_visual_box("LampBase", Vector3(0.82, 0.97, -3.70), Vector3(0.18, 0.035, 0.18), METAL_COLOR)
+	_create_visual_box("LampStem", Vector3(0.82, 1.24, -3.70), Vector3(0.035, 0.52, 0.035), METAL_COLOR)
+	_create_visual_box("LampHead", Vector3(0.74, 1.49, -3.70), Vector3(0.22, 0.08, 0.16), TEST_BORDER_COLOR)
+
+
+func _build_test_area() -> void:
+	# Rubberized 2.4 x 1.8 m test mat.
+	_create_visual_box("TestMat", Vector3(1.55, 0.012, -0.35), Vector3(2.40, 0.024, 1.80), TEST_MAT_COLOR)
+
+	# Perimeter markings.
+	_create_visual_box("TestBorderFront", Vector3(1.55, 0.028, 0.54), Vector3(2.40, 0.018, 0.045), TEST_BORDER_COLOR)
+	_create_visual_box("TestBorderRear", Vector3(1.55, 0.028, -1.24), Vector3(2.40, 0.018, 0.045), TEST_BORDER_COLOR)
+	_create_visual_box("TestBorderLeft", Vector3(0.37, 0.028, -0.35), Vector3(0.045, 0.018, 1.80), TEST_BORDER_COLOR)
+	_create_visual_box("TestBorderRight", Vector3(2.73, 0.028, -0.35), Vector3(0.045, 0.018, 1.80), TEST_BORDER_COLOR)
+
+	# Center line and impact target.
+	_create_visual_box("TestCenterLine", Vector3(1.55, 0.031, -0.35), Vector3(0.035, 0.018, 1.18), MARKING_COLOR)
+	_create_visual_box("ImpactTargetH", Vector3(1.55, 0.034, -0.95), Vector3(0.72, 0.018, 0.035), MARKING_COLOR)
+	_create_visual_box("ImpactTargetV", Vector3(1.55, 0.034, -0.95), Vector3(0.035, 0.018, 0.50), MARKING_COLOR)
+
+	# Low test platform: visual context for the controlled drop test.
+	_create_static_box("DropPlatformBase", Vector3(0.65, 0.11, -1.02), Vector3(0.64, 0.22, 0.54), METAL_COLOR)
+	_create_static_box("DropPlatformTop", Vector3(0.65, 0.24, -1.02), Vector3(0.74, 0.05, 0.62), TEST_BORDER_COLOR)
+
+	# Small hazard stripes on the platform edge.
+	for index in range(5):
+		var stripe_x: float = 0.39 + float(index) * 0.13
+		_create_visual_box(
+			"DropStripe_%d" % index,
+			Vector3(stripe_x, 0.272, -0.72),
+			Vector3(0.065, 0.012, 0.035),
+			MARKING_COLOR
+		)
+
+
+func _build_storage() -> void:
+	# Compact side shelving with open space around it.
+	_create_static_box("ShelfLeftPost", Vector3(-4.65, 1.35, -1.65), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
+	_create_static_box("ShelfRightPost", Vector3(-3.25, 1.35, -1.65), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
+	_create_static_box("ShelfRearLeft", Vector3(-4.65, 1.35, -2.25), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
+	_create_static_box("ShelfRearRight", Vector3(-3.25, 1.35, -2.25), Vector3(0.08, 2.70, 0.08), METAL_COLOR)
+
+	for level in range(3):
+		var y_pos: float = 0.48 + float(level) * 0.82
+		_create_static_box(
+			"StorageShelf_%d" % level,
+			Vector3(-3.95, y_pos, -1.95),
+			Vector3(1.48, 0.07, 1.28),
+			WOOD_COLOR
+		)
+
+	# A couple of simple storage bins; these are workshop furniture, not Quaternius crates.
+	_create_static_box("PartsBinA", Vector3(-4.30, 0.66, -1.95), Vector3(0.42, 0.26, 0.42), PANEL_COLOR)
+	_create_static_box("PartsBinB", Vector3(-3.70, 0.66, -1.95), Vector3(0.42, 0.26, 0.42), TEST_BORDER_COLOR)
 
 
 func _create_static_box(
@@ -125,21 +214,44 @@ func _create_static_box(
 	return body
 
 
+func _create_visual_box(
+	box_name: String,
+	box_position: Vector3,
+	box_size: Vector3,
+	color: Color
+) -> MeshInstance3D:
+	var mesh_instance := MeshInstance3D.new()
+	mesh_instance.name = box_name
+	mesh_instance.position = box_position
+
+	var box_mesh := BoxMesh.new()
+	box_mesh.size = box_size
+
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 0.78
+	box_mesh.material = material
+
+	mesh_instance.mesh = box_mesh
+	add_child(mesh_instance)
+	return mesh_instance
+
 
 func _add_quaternius_decor() -> void:
+	# Solar panel moved to a dedicated energy/storage corner.
 	var solar_body := StaticBody3D.new()
 	solar_body.name = "WorkshopSolarPanel"
-	solar_body.position = Vector3(4.35, 0.02, -2.65)
-	solar_body.rotation_degrees = Vector3(0.0, -38.0, 0.0)
+	solar_body.position = Vector3(4.65, 0.02, 1.90)
+	solar_body.rotation_degrees = Vector3(0.0, -112.0, 0.0)
 
 	var solar_panel := QUATERNIUS_SOLAR_PANEL.instantiate() as Node3D
-	solar_panel.scale = Vector3.ONE * 0.72
+	solar_panel.scale = Vector3.ONE * 0.64
 	solar_body.add_child(solar_panel)
 
 	var solar_collision := CollisionShape3D.new()
 	var solar_shape := BoxShape3D.new()
-	solar_shape.size = Vector3(1.05, 0.85, 1.20)
-	solar_collision.position = Vector3(0.0, 0.40, 0.05)
+	solar_shape.size = Vector3(0.95, 0.78, 1.08)
+	solar_collision.position = Vector3(0.0, 0.36, 0.04)
 	solar_collision.shape = solar_shape
 	solar_body.add_child(solar_collision)
 
