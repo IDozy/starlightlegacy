@@ -214,10 +214,13 @@ func get_discovery_count() -> int:
 
 func get_timeline_entries() -> Array:
 	var result: Array = []
+	var catalog_ids: Dictionary = {}
 
 	for source_entry in TIMELINE_CATALOG:
 		var entry := source_entry.duplicate(true)
 		var discovery_id := str(entry.get("id", ""))
+		catalog_ids[discovery_id] = true
+		entry["archive_kind"] = "nasa"
 		entry["discovered"] = has_discovery(discovery_id)
 
 		if entry["discovered"]:
@@ -226,6 +229,31 @@ func get_timeline_entries() -> Array:
 				entry[key] = registered[key]
 
 		result.append(entry)
+
+	# Project discoveries are not historical NASA artifacts, but they must remain
+	# visible in the archive because the previous knowledge journal exposed them.
+	# They are appended after the chronological NASA timeline as PROJECT cards.
+	for discovery_id in _discovery_order:
+		if catalog_ids.has(discovery_id):
+			continue
+
+		var registered := get_discovery(discovery_id)
+		if registered.is_empty():
+			continue
+
+		var summary := str(registered.get("summary", ""))
+		result.append({
+			"id": discovery_id,
+			"year": 0,
+			"title": str(registered.get("title", "Registro del proyecto")),
+			"category": str(registered.get("category", "Proyecto")),
+			"optional": false,
+			"archive_kind": "project",
+			"discovered": true,
+			"history": "Registro del proceso de construcción del Vehículo Explorador de Rescate.",
+			"engineering": summary,
+			"project": summary
+		})
 
 	return result
 
