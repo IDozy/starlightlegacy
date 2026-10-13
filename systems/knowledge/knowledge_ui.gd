@@ -324,15 +324,20 @@ func _rebuild_timeline_buttons() -> void:
 		var discovered := bool(entry.get("discovered", false))
 		var year := int(entry.get("year", 0))
 		var title := str(entry.get("title", "???"))
+		var archive_kind := str(entry.get("archive_kind", "nasa"))
 
 		var button := Button.new()
 		button.toggle_mode = true
 		button.custom_minimum_size = Vector2(138.0, 100.0)
-		button.text = "%d\n%s\n%s" % [
-			year,
-			"◆" if discovered else "◼",
-			title if discovered else "???"
-		]
+
+		if archive_kind == "project":
+			button.text = "PROYECTO\n◆\n%s" % title
+		else:
+			button.text = "%d\n%s\n%s" % [
+				year,
+				"◆" if discovered else "◼",
+				title if discovered else "???"
+			]
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.pressed.connect(Callable(self, "_select_entry").bind(index))
 
@@ -411,13 +416,17 @@ func _refresh_detail() -> void:
 	var title := str(entry.get("title", "Descubrimiento"))
 	var category := str(entry.get("category", "Conocimiento"))
 	var optional := bool(entry.get("optional", false))
+	var archive_kind := str(entry.get("archive_kind", "nasa"))
 
 	_detail_title.text = title
-	_detail_meta.text = "%d · %s%s" % [
-		year,
-		category,
-		" · DESCUBRIMIENTO OPCIONAL" if optional else ""
-	]
+	if archive_kind == "project":
+		_detail_meta.text = "PROYECTO DEL NIÑO · %s" % category
+	else:
+		_detail_meta.text = "%d · %s%s" % [
+			year,
+			category,
+			" · DESCUBRIMIENTO OPCIONAL" if optional else ""
+		]
 
 	match _section_index:
 		SECTION_HISTORY:
