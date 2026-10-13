@@ -192,13 +192,13 @@ show_percentage = true
 
 [node name="Status" type="Label" parent="ChallengeHUD/Panel"]
 anchor_left = 0.10
-anchor_top = 0.66
+anchor_top = 0.63
 anchor_right = 0.90
-anchor_bottom = 0.78
+anchor_bottom = 0.80
 text = "Sojourner fue el primer vehículo con ruedas que recorrió otro planeta."
 horizontal_alignment = 1
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 
 [node name="Hint" type="Label" parent="ChallengeHUD/Panel"]
 anchor_left = 0.06
