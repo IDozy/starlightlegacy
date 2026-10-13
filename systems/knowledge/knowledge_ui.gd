@@ -55,6 +55,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 
+		return
+
 	if event.keycode == KEY_K or event.keycode == KEY_ESCAPE:
 		_close_archive()
 		get_viewport().set_input_as_handled()
@@ -324,6 +326,7 @@ func _rebuild_timeline_buttons() -> void:
 		var title := str(entry.get("title", "???"))
 
 		var button := Button.new()
+		button.toggle_mode = true
 		button.custom_minimum_size = Vector2(138.0, 100.0)
 		button.text = "%d\n%s\n%s" % [
 			year,
