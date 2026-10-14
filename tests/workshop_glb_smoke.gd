@@ -87,7 +87,7 @@ func _run_smoke_test() -> void:
 				"La mesa debe quedar al nivel del piso inferior, no en la plataforma.")
 			_check(is_equal_approx(bench.position.x, -4.10),
 				"La mesa debe alejarse de la puerta lateral sin invadir la rampa.")
-			_check(is_equal_approx(bench.position.z, -1.25),
+			_check(is_equal_approx(bench.position.z, -2.00),
 				"La mesa debe estar más cerca del portón principal (-Z).")
 
 		for rail_name in ["ImportedRailRampEdgeLeft", "ImportedRailRampEdgeRight",
