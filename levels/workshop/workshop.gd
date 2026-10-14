@@ -1,5 +1,20 @@
 extends Node3D
 
+# La geometría arquitectónica se importa desde Blender; la lógica del taller
+# y sus elementos interactivos continúan siendo nodos propios de Godot.
+const WORKSHOP_MODEL := preload("res://assets/models/taller/Taller_NASA_v02.glb")
+@export var use_imported_workshop: bool = true
+
+# Blender: 14 x 20 m, Z alto=1 m, plataforma alta=6.4 m,
+# rampa de 4.2 x 3.8 m. Godot invierte el signo del eje Y de Blender en Z.
+const MODEL_WIDTH: float = 14.0
+const MODEL_DEPTH: float = 20.0
+const UPPER_DEPTH: float = 6.4
+const UPPER_HEIGHT: float = 1.0
+const RAMP_WIDTH: float = 4.2
+const RAMP_LENGTH: float = 3.8
+const PROPS_OFFSET_Z: float = 5.0
+
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
@@ -25,8 +40,124 @@ const PANEL_COLOR := Color(0.16, 0.19, 0.22)
 
 func _ready() -> void:
 	_build_lighting()
-	_build_room()
+	if use_imported_workshop:
+		_build_imported_room()
+	else:
+		_build_room()
+
+	# Mantener los hijos directamente bajo Workshop: main.gd espera
+	# $Workshop/RescueRoverProject y no se debe alterar esa ruta.
+	var previous_children := get_children()
 	_build_workshop_props()
+	if use_imported_workshop:
+		_reposition_legacy_props(previous_children)
+
+
+func _build_imported_room() -> void:
+	var model := WORKSHOP_MODEL.instantiate() as Node3D
+	if model == null:
+		push_error("No se pudo instanciar el modelo 3D del taller.")
+		return
+	model.name = "Taller_NASA_v02_Visual"
+	add_child(model)
+
+	# Colisiones sencillas, independientes de la geometría decorativa del GLB.
+	# La superficie de la losa inferior coincide con Y=0.
+	_create_collision_box(
+		"ImportedLowerFloor", Vector3(0.0, -0.125, 0.0),
+		Vector3(MODEL_WIDTH - 0.25, 0.25, MODEL_DEPTH - 0.25)
+	)
+
+	var upper_front_z := -(MODEL_DEPTH * 0.5 - UPPER_DEPTH)
+	var upper_back_z := -MODEL_DEPTH * 0.5
+	_create_collision_box(
+		"ImportedUpperPlatform",
+		Vector3(0.0, UPPER_HEIGHT * 0.5, (upper_front_z + upper_back_z) * 0.5),
+		Vector3(MODEL_WIDTH - 0.25, UPPER_HEIGHT, UPPER_DEPTH)
+	)
+
+	# La rampa del GLB fue ajustada manualmente en Blender para acabar
+	# exactamente a Y=0 y Y=1; esta cuña de colisión sigue esa pendiente.
+	_create_ramp_collision(upper_front_z)
+
+	# La puerta central queda libre; las colisiones de pared son laterales.
+	for side in [-1.0, 1.0]:
+		var suffix := "Left" if side < 0.0 else "Right"
+		_create_collision_box(
+			"ImportedWall" + suffix,
+			Vector3(side * (MODEL_WIDTH * 0.5 - 0.12), 2.9, 0.0),
+			Vector3(0.24, 5.8, MODEL_DEPTH - 0.15)
+		)
+
+	# Tramos de baranda frontales y traseros, siempre divididos en dos
+	# para permitir subir la rampa y atravesar el portón por el centro.
+	var gap_half := RAMP_WIDTH * 0.5 + 0.42
+	var end_x := MODEL_WIDTH * 0.5 - 0.50
+	var rail_length := end_x - gap_half
+	var rail_center := (end_x + gap_half) * 0.5
+	for side in [-1.0, 1.0]:
+		var suffix := "Left" if side < 0.0 else "Right"
+		for z in [upper_front_z - 0.18, upper_back_z + 0.45]:
+			var end_name := "RampEdge" if z > upper_back_z + 1.0 else "GarageEdge"
+			_create_collision_box(
+				"ImportedRail" + end_name + suffix,
+				Vector3(side * rail_center, UPPER_HEIGHT + 0.42, z),
+				Vector3(rail_length, 0.84, 0.10)
+			)
+
+
+func _create_collision_box(
+	body_name: String, center: Vector3, dimensions: Vector3
+) -> void:
+	var body := StaticBody3D.new()
+	body.name = body_name
+	body.position = center
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = dimensions
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+
+func _create_ramp_collision(upper_front_z: float) -> void:
+	var bottom_z := upper_front_z + RAMP_LENGTH
+	var half_width := RAMP_WIDTH * 0.5
+	# ConvexPolygonShape3D proporciona una cuña maciza para evitar que el
+	# jugador atraviese la rampa. La pendiente es de ~14.7 grados.
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = PackedVector3Array([
+		Vector3(-half_width, -0.20, bottom_z),
+		Vector3( half_width, -0.20, bottom_z),
+		Vector3(-half_width, -0.20, upper_front_z),
+		Vector3( half_width, -0.20, upper_front_z),
+		Vector3(-half_width, 0.0, bottom_z),
+		Vector3( half_width, 0.0, bottom_z),
+		Vector3(-half_width, UPPER_HEIGHT, upper_front_z),
+		Vector3( half_width, UPPER_HEIGHT, upper_front_z)
+	])
+	var body := StaticBody3D.new()
+	body.name = "ImportedRampCollision"
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+
+func _reposition_legacy_props(previous_children: Array[Node]) -> void:
+	# El taller nuevo ocupa 20 m de fondo y su rampa termina en Z~0.2.
+	# Desplazar los props 5 m hacia el nivel inferior, evitando enterrarlos
+	# en la plataforma alta, sin cambiar sus nombres ni scripts.
+	for child in get_children():
+		if child is Node3D and not previous_children.has(child):
+			(child as Node3D).position.z += PROPS_OFFSET_Z
+
+	# Las tres piezas decorativas estaban pegadas a paredes antiguas
+	# (12x10 m). Se ocultan hasta ubicarlas en las nuevas paredes.
+	for path in ["WorkbenchWallDisplay", "WorkshopWallDetailLeft", "EnergyWallSwitch"]:
+		var decoration := get_node_or_null(path) as Node3D
+		if decoration != null:
+			decoration.visible = false
 
 
 func _build_lighting() -> void:
@@ -35,10 +166,13 @@ func _build_lighting() -> void:
 
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.035, 0.043, 0.058)
+	environment.background_color = (
+		Color(0.63, 0.76, 0.88) if use_imported_workshop
+		else Color(0.035, 0.043, 0.058)
+	)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.48, 0.46, 0.42)
-	environment.ambient_light_energy = 0.50
+	environment.ambient_light_energy = 0.78 if use_imported_workshop else 0.50
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -46,7 +180,7 @@ func _build_lighting() -> void:
 	sun.name = "DirectionalLight3D"
 	sun.rotation_degrees = Vector3(-48.0, -32.0, 0.0)
 	sun.light_color = Color(1.0, 0.86, 0.70)
-	sun.light_energy = 0.48
+	sun.light_energy = 0.95 if use_imported_workshop else 0.48
 	sun.shadow_enabled = true
 	add_child(sun)
 
