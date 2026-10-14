@@ -15,9 +15,10 @@ const RAMP_WIDTH: float = 4.2
 const RAMP_LENGTH: float = 3.8
 const PROPS_OFFSET_Z: float = 5.0
 const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
-# Desplazamiento conjunto de la mesa y sus componentes al primer nivel.
-# Queda a la izquierda de la rampa, sobre Y=0 y sin invadir su recorrido.
-const WORKBENCH_LOWER_OFFSET := Vector3(-4.35, 0.0, 5.25)
+# Desplazamiento conjunto de mesa y equipo hacia la puerta lateral izquierda.
+# La puerta de Blender está aproximadamente en X=-6.8, Z=+2.0; el tablero
+# queda a X=-4.85, Z=+1.90, dejando espacio entre mesa y pared.
+const WORKBENCH_LOWER_OFFSET := Vector3(-4.85, 0.0, 5.60)
 const GRANDFATHER_UPPER_POSITION := Vector3(4.45, 1.0, -4.90)
 # Protección invisible por encima del pasamanos visible; no cruza la rampa.
 const UPPER_SAFETY_HEIGHT: float = 2.60
@@ -246,7 +247,7 @@ func _build_lighting() -> void:
 	var bench_light := OmniLight3D.new()
 	bench_light.name = "BenchLight"
 	bench_light.position = (
-		Vector3(-4.25, 2.55, 1.55) if use_imported_workshop
+		Vector3(-4.75, 2.55, 1.90) if use_imported_workshop
 		else Vector3(-0.4, 2.55, -3.35)
 	)
 	bench_light.omni_range = 5.0
