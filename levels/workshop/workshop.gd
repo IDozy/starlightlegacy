@@ -15,8 +15,9 @@ const RAMP_WIDTH: float = 4.2
 const RAMP_LENGTH: float = 3.8
 const PROPS_OFFSET_Z: float = 5.0
 const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
-# Desplazamiento conjunto de mesa y equipo al nivel superior izquierdo.
-const WORKBENCH_UPPER_OFFSET := Vector3(-4.35, 1.0, -1.85)
+# Desplazamiento conjunto de la mesa y sus componentes al primer nivel.
+# Queda a la izquierda de la rampa, sobre Y=0 y sin invadir su recorrido.
+const WORKBENCH_LOWER_OFFSET := Vector3(-4.35, 0.0, 5.25)
 const GRANDFATHER_UPPER_POSITION := Vector3(4.45, 1.0, -4.90)
 # Protección invisible por encima del pasamanos visible; no cruza la rampa.
 const UPPER_SAFETY_HEIGHT: float = 2.60
@@ -96,19 +97,20 @@ func _build_imported_room() -> void:
 			Vector3(0.24, 5.8, MODEL_DEPTH - 0.15)
 		)
 
-	# Cerramiento trasero en la zona del portón (sin modificar el GLB).
-	# Cubierta color marfil y zócalo azul, en consonancia con sus paredes.
-	var back_z := -MODEL_DEPTH * 0.5 + 0.20
+	# Cerramiento del extremo del PRIMER NIVEL, contrario al portón de arriba.
+	# La apertura del nivel superior queda libre para el futuro exterior.
+	# Cubierta color marfil y zócalo azul a juego con el GLB.
+	var back_z := MODEL_DEPTH * 0.5 - 0.20
 	_create_static_box(
 		"ImportedBackWall", Vector3(0.0, 2.9, back_z),
 		Vector3(MODEL_WIDTH - 0.30, 5.8, 0.20), Color(0.86, 0.83, 0.77)
 	)
 	_create_visual_box(
-		"ImportedBackWallLower", Vector3(0.0, 0.55, back_z + 0.115),
+		"ImportedBackWallLower", Vector3(0.0, 0.55, back_z - 0.115),
 		Vector3(MODEL_WIDTH - 0.34, 1.10, 0.035), Color(0.31, 0.43, 0.53)
 	)
 	_create_visual_box(
-		"ImportedBackWallStripe", Vector3(0.0, 2.34, back_z + 0.136),
+		"ImportedBackWallStripe", Vector3(0.0, 2.34, back_z - 0.136),
 		Vector3(MODEL_WIDTH - 0.40, 0.085, 0.040), TEST_BORDER_COLOR
 	)
 
@@ -194,9 +196,10 @@ func _reposition_legacy_props(previous_children: Array[Node]) -> void:
 			prop.position = GRANDFATHER_UPPER_POSITION
 			prop.rotation_degrees = Vector3(0.0, -115.0, 0.0)
 		elif prop_name.begins_with("Workbench") or prop_name == "PrototypeDevice":
-			# Mesa, patas, silla, ordenador y objeto inspeccionable conservan
-			# sus posiciones relativas en el lado izquierdo de la rampa.
-			prop.position += WORKBENCH_UPPER_OFFSET
+			# Mesa completa en el primer nivel (sin elevar piezas).
+			# Todas las partes y el objeto interactivo mantienen sus
+			# desplazamientos relativos a la mesa original.
+			prop.position += WORKBENCH_LOWER_OFFSET
 		else:
 			var extra_z := 0.0
 			if prop_name == "RescueRoverProject":
@@ -243,7 +246,7 @@ func _build_lighting() -> void:
 	var bench_light := OmniLight3D.new()
 	bench_light.name = "BenchLight"
 	bench_light.position = (
-		Vector3(-0.4, 2.55, 1.65) if use_imported_workshop
+		Vector3(-4.25, 2.55, 1.55) if use_imported_workshop
 		else Vector3(-0.4, 2.55, -3.35)
 	)
 	bench_light.omni_range = 5.0
