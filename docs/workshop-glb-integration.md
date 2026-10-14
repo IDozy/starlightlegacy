@@ -24,13 +24,13 @@ Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geome
 ## Ajustes de distribución y seguridad (octubre de 2026)
 
 - Al utilizar el taller importado, ya **no se instancia** `_build_test_area()`. Esto retira el rectángulo negro, el bloque de caída y las señales duplicadas. El modo antiguo mantiene su zona de pruebas.
-- La mesa completa (tablero, patas, ordenador, silla y dispositivo inspeccionable) conserva su composición, pero pasa al **nivel superior izquierdo** junto a la rampa; no se borran interacciones.
+- La mesa completa (tablero, patas, ordenador, silla y dispositivo inspeccionable) conserva su composición y queda en el **primer nivel, a la izquierda de la rampa**, sin invadirla; no se borran interacciones.
 - El abuelo pasa al **nivel superior derecho** junto a la baranda. Continúa siendo un nodo directo `Grandfather` de Workshop.
 - Se oculta el panel negro del prototipo antiguo situado tras la mesa (`WorkbenchBackboard`), incluyendo su colisión.
-- Se añade un **muro trasero color marfil** con zócalo azul y franja naranja en `Z≈-9.8`. Se genera en Godot, sin modificar el archivo fuente GLB de Blender.
+- Se añade un **muro de cierre color marfil** con zócalo azul y franja naranja en `Z≈+9.8`, al fondo del primer nivel. El **portón superior (`Z≈-10`) queda completamente despejado**. Se genera en Godot, sin modificar el archivo fuente GLB de Blender.
 - Barandas con colisión invisible de **2,6 m de altura** en ambos extremos del nivel alto y los laterales. El hueco central hacia la rampa continúa despejado. Las colisiones de pared permanecen activas.
 
-**Validación visual pendiente en el ordenador:** en particular, comprobar que el muro no tape elementos aprobados de la abertura, que la mesa quede accesible, que la interacción con el abuelo funcione desde el nivel superior y que la caída lateral se impida incluso saltando. El smoke test comprueba presencia y transformaciones, no simula movimiento real.
+**Validación visual pendiente en el ordenador:** en particular, comprobar que el muro cierre el extremo inferior sin obstruir el portón superior, que la mesa sea accesible al lado izquierdo de la rampa, que la interacción con el abuelo funcione desde el nivel superior y que la caída lateral se impida incluso saltando. El smoke test comprueba presencia y transformaciones, no simula movimiento real.
 
 ## Validación
 
