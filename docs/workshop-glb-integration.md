@@ -1,0 +1,41 @@
+# Integración del taller Blender v02 en Godot
+
+La rama `feat/005a-discovery-archive` utiliza `assets/models/taller/Taller_NASA_v02.glb` como geometría visible del taller. La escena principal sigue siendo `scenes/main/main.tscn` y `levels/workshop/workshop.gd` sigue creando los elementos interactivos.
+
+## Qué cambia
+
+- `Workshop` instancia el modelo como hijo `Taller_NASA_v02_Visual`.
+- Se retira **solo en tiempo de ejecución** la sala rectangular generada anteriormente, sin borrar su función `_build_room()`: el flag `use_imported_workshop` permite usar el diseño anterior como fallback.
+- Colisiones de Godot, separadas del mesh visual: piso inferior, plataforma superior, rampa convexa, paredes laterales y barandas divididas para dejar libre el centro.
+- El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; algunos accesorios visuales de las paredes antiguas se ocultan.
+- La iluminación de la versión GLB tiene un fondo más claro y luz ambiental cálida.
+
+## Referencia de coordenadas
+
+La geometría se creó en Blender a 14 × 20 m, con altura 5,8 m, plataforma superior a 1 m y rampa de 4,2 × 3,8 m. En Godot, el modelo se deja en transform identidad: el conversor glTF se ocupa de los ejes. Se esperan estos valores del mundo Godot:
+
+- Suelo inferior en `Y = 0`.
+- Plataforma superior en `Y = 1`, aproximadamente `Z = -10` a `Z = -3.6`.
+- Rampa de `Z = +0.2` (abajo) a `Z = -3.6` (arriba).
+- Zona de pruebas del rover en torno a `Z = +4.65`.
+
+Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geometría final debe verificarse contra el GLB exportado tras las correcciones manuales de Blender. Si la rampa visual no coincide exactamente, ajustar la cuña de colisión, no el importado.
+
+## Validación
+
+Desde la carpeta que contiene `project.godot`:
+
+```powershell
+godot --headless --editor --path . --quit
+godot --headless --path . --script res://tests/workshop_glb_smoke.gd
+```
+
+Después ejecutar el juego en Godot y confirmar que:
+
+1. No aparece la sala rectangular antigua por encima del modelo nuevo.
+2. El personaje aparece en el piso inferior, camina y sube la rampa sin saltar ni atravesarla.
+3. La parte alta es transitable y las barandas no bloquean la embocadura.
+4. Funcionan el rover, inspección, abuelo, diálogos, transición a Ares Vallis y Archivo NASA.
+5. No hay materiales ausentes, iluminación excesiva, colisiones flotantes ni props enterrados.
+
+**Pendiente:** validación manual de colisiones/posiciones y rendimiento Web, ya que esta integración no se ha ejecutado dentro del editor Godot en el entorno de edición remoto. Si se vuelve a exportar el GLB desde Blender, revisar estas referencias geométricas.
