@@ -150,7 +150,8 @@ func _reposition_legacy_props(previous_children: Array[Node]) -> void:
 	# en la plataforma alta, sin cambiar sus nombres ni scripts.
 	for child in get_children():
 		if child is Node3D and not previous_children.has(child):
-			(child as Node3D).position.z += PROPS_OFFSET_Z
+			var prop := child as Node3D
+			prop.position += Vector3(0.0, 0.0, PROPS_OFFSET_Z)
 
 	# Las tres piezas decorativas estaban pegadas a paredes antiguas
 	# (12x10 m). Se ocultan hasta ubicarlas en las nuevas paredes.
