@@ -32,6 +32,38 @@ func _run_smoke_test() -> void:
 	if workshop != null:
 		_check(workshop.get_node_or_null("Taller_NASA_v02_Visual") != null,
 			"No se instanció el GLB del taller.")
+
+		# La iluminación debe cubrir ambos niveles sin sombras extra
+		# por cada uno de los 8 paneles del techo.
+		var count := 0
+		var min_z := INF
+		var max_z := -INF
+		for child in workshop.get_children():
+			if str(child.name).begins_with("CeilingPanelLight_"):
+				_check(child is SpotLight3D,
+					"Los paneles deben usar SpotLight3D.")
+				if child is SpotLight3D:
+					var light := child as SpotLight3D
+					count += 1
+					min_z = minf(min_z, light.position.z)
+					max_z = maxf(max_z, light.position.z)
+					_check(light.light_energy > 0.0,
+						"Un panel del techo está apagado.")
+					_check(not light.shadow_enabled,
+						"Un panel del techo activa sombras costosas.")
+					_check(is_equal_approx(light.rotation_degrees.x, -90.0),
+						"Una luz del techo no apunta hacia abajo.")
+		_check(count == 8,
+			"Se esperan ocho luminarias, no %d." % count)
+		_check(min_z < -7.0 and max_z > 7.0,
+			"Las luces deben abarcar ambos extremos del taller.")
+
+		var world_env := workshop.get_node_or_null("WorldEnvironment") as WorldEnvironment
+		_check(world_env != null and world_env.environment != null,
+			"Falta la iluminación ambiental del hangar.")
+		if world_env != null and world_env.environment != null:
+			_check(world_env.environment.ambient_light_energy >= 0.9,
+				"La luz ambiental del hangar sigue siendo insuficiente.")
 		_check(workshop.get_node_or_null("ImportedLowerFloor") != null,
 			"Falta la colisión del nivel inferior.")
 		_check(workshop.get_node_or_null("ImportedUpperPlatform") != null,
