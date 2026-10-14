@@ -8,7 +8,7 @@ La rama `feat/005a-discovery-archive` utiliza `assets/models/taller/Taller_NASA_
 - Se retira **solo en tiempo de ejecución** la sala rectangular generada anteriormente, sin borrar su función `_build_room()`: el flag `use_imported_workshop` permite usar el diseño anterior como fallback.
 - Colisiones de Godot, separadas del mesh visual: piso inferior, plataforma superior, rampa convexa, paredes laterales y barandas divididas para dejar libre el centro.
 - El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; el rover suma `+1.5 m` adicionales para coincidir con el espacio de pruebas; las marcas antiguas y la plataforma de caída ya no se generan. Algunos accesorios visuales de las paredes antiguas se ocultan.
-- La iluminación de la versión GLB tiene un fondo más claro y luz ambiental cálida.
+- La iluminación de la versión GLB tiene un fondo más claro y luz ambiental cálida. Ahora también incorpora **8 focos de techo** orientados hacia abajo (dos filas × cuatro tramos), sin sombras individuales costosas, para iluminar ambos niveles.
 
 ## Referencia de coordenadas
 
@@ -31,6 +31,17 @@ Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geome
 - Barandas con colisión invisible de **2,6 m de altura** en ambos extremos del nivel alto y los laterales. El hueco central hacia la rampa continúa despejado. Las colisiones de pared permanecen activas.
 
 **Validación visual pendiente en el ordenador:** en particular, comprobar que el muro cierre el extremo inferior sin obstruir el portón superior, que la mesa sea accesible al lado izquierdo de la rampa, que la interacción con el abuelo funcione desde el nivel superior y que la caída lateral se impida incluso saltando. El smoke test comprueba presencia y transformaciones, no simula movimiento real.
+
+## Iluminación del hangar (octubre de 2026)
+
+El `.glb` incluye luminarias dibujadas, pero no luces puntuales importadas desde Blender. Ahora `_build_ceiling_panel_lights()` instancia ocho `SpotLight3D` funcionales en `X=±3.35`, `Y=5.10` y `Z=-7.5, -2.5, 2.5, 7.5`. Iluminan hacia abajo y no proyectan sombras dinámicas para evitar ocho pasadas adicionales de sombras en el renderizador de compatibilidad.
+
+- Luz ambiental del hangar: `workshop_ambient_energy=1.10` con relleno ligeramente frío; se mantiene el acento cálido de las lámparas y el sol.
+- Luz de cada panel: `ceiling_light_energy=1.85`, con alcance de 8 m y apertura de 52°. Los valores son ajustables desde el **Inspector** del nodo `Workshop` sin rehacer Blender ni editar el código.
+- Se reduce la intensidad de los focos aislados de mesa y área de pruebas para equilibrar el contraste del suelo.
+- El modo de taller antiguo (`use_imported_workshop=false`) conserva su iluminación previa y no crea estos focos.
+
+**Pendiente de comprobación visual y de rendimiento:** revisar que el nivel inferior y el superior se vean más luminosos en Godot, sin quemar los materiales claros, y probar el rendimiento en navegador. Si queda demasiado claro u oscuro, ajustar primero los dos parámetros exportados (manteniendo el color de los materiales).
 
 ## Validación
 
