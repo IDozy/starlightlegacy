@@ -7,7 +7,7 @@ La rama `feat/005a-discovery-archive` utiliza `assets/models/taller/Taller_NASA_
 - `Workshop` instancia el modelo como hijo `Taller_NASA_v02_Visual`.
 - Se retira **solo en tiempo de ejecución** la sala rectangular generada anteriormente, sin borrar su función `_build_room()`: el flag `use_imported_workshop` permite usar el diseño anterior como fallback.
 - Colisiones de Godot, separadas del mesh visual: piso inferior, plataforma superior, rampa convexa, paredes laterales y barandas divididas para dejar libre el centro.
-- El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; la zona de pruebas, el rover y sus marcas suman `+1.5 m` adicionales para coincidir con el rectángulo naranja del nuevo piso. Algunos accesorios visuales de las paredes antiguas se ocultan.
+- El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; el rover suma `+1.5 m` adicionales para coincidir con el espacio de pruebas; las marcas antiguas y la plataforma de caída ya no se generan. Algunos accesorios visuales de las paredes antiguas se ocultan.
 - La iluminación de la versión GLB tiene un fondo más claro y luz ambiental cálida.
 
 ## Referencia de coordenadas
