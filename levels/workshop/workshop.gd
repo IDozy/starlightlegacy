@@ -4,6 +4,9 @@ extends Node3D
 # y sus elementos interactivos continúan siendo nodos propios de Godot.
 const WORKSHOP_MODEL := preload("res://assets/models/taller/Taller_NASA_v02.glb")
 @export var use_imported_workshop: bool = true
+# Ajustes rápidos desde el Inspector para la iluminación interior del GLB.
+@export_range(0.0, 4.0, 0.05) var ceiling_light_energy: float = 1.85
+@export_range(0.0, 2.0, 0.05) var workshop_ambient_energy: float = 1.10
 
 # Blender: 14 x 20 m, Z alto=1 m, plataforma alta=6.4 m,
 # rampa de 4.2 x 3.8 m. Godot invierte el signo del eje Y de Blender en Z.
@@ -231,8 +234,13 @@ func _build_lighting() -> void:
 		else Color(0.035, 0.043, 0.058)
 	)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.48, 0.46, 0.42)
-	environment.ambient_light_energy = 0.78 if use_imported_workshop else 0.50
+	environment.ambient_light_color = (
+		Color(0.79, 0.81, 0.84) if use_imported_workshop
+		else Color(0.48, 0.46, 0.42)
+	)
+	environment.ambient_light_energy = (
+		workshop_ambient_energy if use_imported_workshop else 0.50
+	)
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -252,7 +260,7 @@ func _build_lighting() -> void:
 	)
 	bench_light.omni_range = 5.0
 	bench_light.light_color = Color(1.0, 0.68, 0.43)
-	bench_light.light_energy = 1.65
+	bench_light.light_energy = 0.95 if use_imported_workshop else 1.65
 	bench_light.shadow_enabled = true
 	add_child(bench_light)
 
@@ -264,9 +272,36 @@ func _build_lighting() -> void:
 	)
 	test_light.omni_range = 4.6
 	test_light.light_color = Color(0.62, 0.78, 0.92)
-	test_light.light_energy = 1.15
-	test_light.shadow_enabled = true
+	test_light.light_energy = 0.80 if use_imported_workshop else 1.15
+	test_light.shadow_enabled = not use_imported_workshop
 	add_child(test_light)
+
+	if use_imported_workshop:
+		_build_ceiling_panel_lights()
+
+
+func _build_ceiling_panel_lights() -> void:
+	# Los rectángulos blancos exportados de Blender son mallas, no luces.
+	# Ocho focos apuntan hacia abajo desde las luminarias del techo,
+	# repartidos por ambos niveles (14 x 20 m) para evitar rincones oscuros.
+	# Sin sombras adicionales: mejor rendimiento con GL Compatibility/Web.
+	var longitudinal_positions := [-7.5, -2.5, 2.5, 7.5]
+	for row in range(longitudinal_positions.size()):
+		for side in [-1, 1]:
+			var fixture := SpotLight3D.new()
+			fixture.name = "CeilingPanelLight_%s_%02d" % [
+				"L" if side < 0 else "R", row + 1
+			]
+			fixture.position = Vector3(float(side) * 3.35, 5.10, longitudinal_positions[row])
+			# SpotLight3D emite por su -Z local; -90º en X orienta el cono al suelo.
+			fixture.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+			fixture.light_color = Color(1.0, 0.95, 0.87)
+			fixture.light_energy = ceiling_light_energy
+			fixture.spot_range = 8.0
+			fixture.spot_angle = 52.0
+			fixture.spot_attenuation = 0.9
+			fixture.shadow_enabled = false
+			add_child(fixture)
 
 
 func _build_room() -> void:
