@@ -21,6 +21,17 @@ La geometría se creó en Blender a 14 × 20 m, con altura 5,8 m, plataforma sup
 
 Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geometría final debe verificarse contra el GLB exportado tras las correcciones manuales de Blender. Si la rampa visual no coincide exactamente, ajustar la cuña de colisión, no el importado.
 
+## Ajustes de distribución y seguridad (octubre de 2026)
+
+- Al utilizar el taller importado, ya **no se instancia** `_build_test_area()`. Esto retira el rectángulo negro, el bloque de caída y las señales duplicadas. El modo antiguo mantiene su zona de pruebas.
+- La mesa completa (tablero, patas, ordenador, silla y dispositivo inspeccionable) conserva su composición, pero pasa al **nivel superior izquierdo** junto a la rampa; no se borran interacciones.
+- El abuelo pasa al **nivel superior derecho** junto a la baranda. Continúa siendo un nodo directo `Grandfather` de Workshop.
+- Se oculta el panel negro del prototipo antiguo situado tras la mesa (`WorkbenchBackboard`), incluyendo su colisión.
+- Se añade un **muro trasero color marfil** con zócalo azul y franja naranja en `Z≈-9.8`. Se genera en Godot, sin modificar el archivo fuente GLB de Blender.
+- Barandas con colisión invisible de **2,6 m de altura** en ambos extremos del nivel alto y los laterales. El hueco central hacia la rampa continúa despejado. Las colisiones de pared permanecen activas.
+
+**Validación visual pendiente en el ordenador:** en particular, comprobar que el muro no tape elementos aprobados de la abertura, que la mesa quede accesible, que la interacción con el abuelo funcione desde el nivel superior y que la caída lateral se impida incluso saltando. El smoke test comprueba presencia y transformaciones, no simula movimiento real.
+
 ## Validación
 
 Desde la carpeta que contiene `project.godot`:
