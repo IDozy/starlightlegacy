@@ -15,6 +15,12 @@ const RAMP_WIDTH: float = 4.2
 const RAMP_LENGTH: float = 3.8
 const PROPS_OFFSET_Z: float = 5.0
 const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
+# Desplazamiento conjunto de mesa y equipo al nivel superior izquierdo.
+const WORKBENCH_UPPER_OFFSET := Vector3(-4.35, 1.0, -1.85)
+const GRANDFATHER_UPPER_POSITION := Vector3(4.45, 1.0, -4.90)
+# Protección invisible por encima del pasamanos visible; no cruza la rampa.
+const UPPER_SAFETY_HEIGHT: float = 2.60
+const UPPER_SAFETY_CENTER_Y: float = UPPER_HEIGHT + UPPER_SAFETY_HEIGHT * 0.5
 
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
@@ -90,8 +96,25 @@ func _build_imported_room() -> void:
 			Vector3(0.24, 5.8, MODEL_DEPTH - 0.15)
 		)
 
-	# Tramos de baranda frontales y traseros, siempre divididos en dos
-	# para permitir subir la rampa y atravesar el portón por el centro.
+	# Cerramiento trasero en la zona del portón (sin modificar el GLB).
+	# Cubierta color marfil y zócalo azul, en consonancia con sus paredes.
+	var back_z := -MODEL_DEPTH * 0.5 + 0.20
+	_create_static_box(
+		"ImportedBackWall", Vector3(0.0, 2.9, back_z),
+		Vector3(MODEL_WIDTH - 0.30, 5.8, 0.20), Color(0.86, 0.83, 0.77)
+	)
+	_create_visual_box(
+		"ImportedBackWallLower", Vector3(0.0, 0.55, back_z + 0.115),
+		Vector3(MODEL_WIDTH - 0.34, 1.10, 0.035), Color(0.31, 0.43, 0.53)
+	)
+	_create_visual_box(
+		"ImportedBackWallStripe", Vector3(0.0, 2.34, back_z + 0.136),
+		Vector3(MODEL_WIDTH - 0.40, 0.085, 0.040), TEST_BORDER_COLOR
+	)
+
+	# La barrera física es más alta que el salto del personaje. No se
+	# dibuja: mantiene la estética de las barandas bajas de Blender.
+	# Los dos tramos frontales dejan abierto el centro para la rampa.
 	var gap_half := RAMP_WIDTH * 0.5 + 0.42
 	var end_x := MODEL_WIDTH * 0.5 - 0.50
 	var rail_length := end_x - gap_half
@@ -102,9 +125,21 @@ func _build_imported_room() -> void:
 			var end_name := "RampEdge" if z > upper_back_z + 1.0 else "GarageEdge"
 			_create_collision_box(
 				"ImportedRail" + end_name + suffix,
-				Vector3(side * rail_center, UPPER_HEIGHT + 0.42, z),
-				Vector3(rail_length, 0.84, 0.10)
+				Vector3(side * rail_center, UPPER_SAFETY_CENTER_Y, z),
+				Vector3(rail_length, UPPER_SAFETY_HEIGHT, 0.10)
 			)
+
+		# Mismo límite invisible junto a cada baranda lateral alta.
+		var side_rail_back_z := upper_back_z + 0.45
+		var side_rail_front_z := upper_front_z - 0.90
+		_create_collision_box(
+			"ImportedSideSafety" + suffix,
+			Vector3(
+				side * end_x, UPPER_SAFETY_CENTER_Y,
+				(side_rail_back_z + side_rail_front_z) * 0.5
+			),
+			Vector3(0.10, UPPER_SAFETY_HEIGHT, side_rail_front_z - side_rail_back_z)
+		)
 
 
 func _create_collision_box(
@@ -146,31 +181,40 @@ func _create_ramp_collision(upper_front_z: float) -> void:
 
 
 func _reposition_legacy_props(previous_children: Array[Node]) -> void:
-	# El taller nuevo ocupa 20 m de fondo y su rampa termina en Z~0.2.
-	# Desplazar los props 5 m hacia el nivel inferior, evitando enterrarlos
-	# en la plataforma alta, sin cambiar sus nombres ni scripts.
+	# Todos los props se crearon directamente bajo Workshop para conservar
+	# sus rutas, diálogos, colisiones y señales.
 	for child in get_children():
-		if child is Node3D and not previous_children.has(child):
-			var prop := child as Node3D
-			var extra_z := 0.0
-			# El área de pruebas debe coincidir con el rectángulo naranja del GLB.
-			var prop_name := str(prop.name)
-			if (
-				prop_name == "RescueRoverProject"
-				or prop_name.begins_with("Test")
-				or prop_name.begins_with("Drop")
-				or prop_name.begins_with("Impact")
-			):
-				extra_z = TEST_AREA_EXTRA_OFFSET_Z
-			prop.position += Vector3(0.0, 0.0, PROPS_OFFSET_Z + extra_z)
+		if not (child is Node3D) or previous_children.has(child):
+			continue
+		var prop := child as Node3D
+		var prop_name := str(prop.name)
 
-	# Las tres piezas decorativas estaban pegadas a paredes antiguas
-	# (12x10 m). Se ocultan hasta ubicarlas en las nuevas paredes.
+		if prop_name == "Grandfather":
+			# Segundo nivel, junto a la baranda derecha.
+			prop.position = GRANDFATHER_UPPER_POSITION
+			prop.rotation_degrees = Vector3(0.0, -115.0, 0.0)
+		elif prop_name.begins_with("Workbench") or prop_name == "PrototypeDevice":
+			# Mesa, patas, silla, ordenador y objeto inspeccionable conservan
+			# sus posiciones relativas en el lado izquierdo de la rampa.
+			prop.position += WORKBENCH_UPPER_OFFSET
+		else:
+			var extra_z := 0.0
+			if prop_name == "RescueRoverProject":
+				extra_z = TEST_AREA_EXTRA_OFFSET_Z
+			prop.position.z += PROPS_OFFSET_Z + extra_z
+
+	# El gran panel negro detrás de la mesa procede del prototipo antiguo.
+	# No pertenece al mobiliario aprobado: se retira (incluida su colisión).
+	var old_backboard := get_node_or_null("WorkbenchBackboard")
+	if old_backboard != null:
+		old_backboard.queue_free()
+
+	# Decoraciones antiguas asociadas a coordenadas de paredes de 12x10 m:
+	# esconderlas hasta ubicarlas en la nueva arquitectura 14x20 m.
 	for path in ["WorkbenchWallDisplay", "WorkshopWallDetailLeft", "EnergyWallSwitch"]:
 		var decoration := get_node_or_null(path) as Node3D
 		if decoration != null:
 			decoration.visible = false
-
 
 func _build_lighting() -> void:
 	var world_environment := WorldEnvironment.new()
@@ -245,7 +289,10 @@ func _build_room() -> void:
 
 func _build_workshop_props() -> void:
 	_build_workbench()
-	_build_test_area()
+	# El nuevo GLB ya contiene las marcas del suelo: no duplicar
+	# la alfombra negra ni los bloques de la prueba antigua.
+	if not use_imported_workshop:
+		_build_test_area()
 	_build_kenney_storage()
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()
