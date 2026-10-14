@@ -24,7 +24,7 @@ Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geome
 ## Ajustes de distribución y seguridad (octubre de 2026)
 
 - Al utilizar el taller importado, ya **no se instancia** `_build_test_area()`. Esto retira el rectángulo negro, el bloque de caída y las señales duplicadas. El modo antiguo mantiene su zona de pruebas.
-- La mesa completa (tablero, patas, ordenador, silla y dispositivo inspeccionable) conserva su composición en el **primer nivel, a la izquierda de la rampa**. Se movió **0,75 m hacia el centro (alejándose de la puerta lateral)** y **3,15 m hacia el portón principal**. Nuevo tablero en `X≈-4.10`, `Z≈-1.25`, dejando paso junto a la rampa; no se borran interacciones.
+- La mesa completa (tablero, patas, ordenador, silla y dispositivo inspeccionable) conserva su composición en el **primer nivel, a la izquierda de la rampa**. Se movió **0,75 m hacia el centro (alejándose de la puerta lateral)** y **3,90 m hacia el portón principal** (0,75 m adicionales). Nuevo tablero en `X≈-4.10`, `Z≈-2.00`, dejando paso junto a la rampa; no se borran interacciones.
 - El abuelo pasa al **nivel superior derecho** junto a la baranda. Continúa siendo un nodo directo `Grandfather` de Workshop.
 - Se oculta el panel negro del prototipo antiguo situado tras la mesa (`WorkbenchBackboard`), incluyendo su colisión.
 - Se añade un **muro de cierre color marfil** con zócalo azul y franja naranja en `Z≈+9.8`, al fondo del primer nivel. El **portón superior (`Z≈-10`) queda completamente despejado**. Se genera en Godot, sin modificar el archivo fuente GLB de Blender.
