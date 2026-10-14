@@ -49,6 +49,41 @@ func _run_smoke_test() -> void:
 			"Falta el abuelo en el taller.")
 		_check(workshop.get_node_or_null("Floor") == null,
 			"El suelo antiguo no debería generarse junto al GLB.")
+		_check(workshop.get_node_or_null("TestMat") == null,
+			"La alfombra negra antigua todavía existe.")
+		_check(workshop.get_node_or_null("DropPlatformBase") == null,
+			"El bloque antiguo de la prueba todavía existe.")
+		_check(workshop.get_node_or_null("WorkbenchBackboard") == null,
+			"El panel negro anterior a la mesa todavía existe.")
+		_check(workshop.get_node_or_null("ImportedBackWall") is StaticBody3D,
+			"Falta el muro trasero visible con colisión.")
+
+		var grandfather := workshop.get_node_or_null("Grandfather") as Node3D
+		if grandfather != null:
+			_check(is_equal_approx(grandfather.position.y, 1.0),
+				"El abuelo debería estar en el nivel superior.")
+			_check(grandfather.position.x > 3.5,
+				"El abuelo debería estar junto a la baranda derecha.")
+
+		var bench := workshop.get_node_or_null("WorkbenchTop") as Node3D
+		if bench != null:
+			_check(bench.position.x < -3.0,
+				"La mesa debe quedar a la izquierda de la rampa.")
+			_check(bench.position.y > 1.8,
+				"La mesa debe quedar sobre la plataforma superior.")
+
+		for rail_name in ["ImportedRailRampEdgeLeft", "ImportedRailRampEdgeRight",
+			"ImportedSideSafetyLeft", "ImportedSideSafetyRight"]:
+			var rail := workshop.get_node_or_null(rail_name) as StaticBody3D
+			_check(rail != null, "Falta protección anti-caída: " + rail_name)
+			if rail != null:
+				var guard := rail.get_node_or_null("CollisionShape3D") as CollisionShape3D
+				_check(guard != null and guard.shape is BoxShape3D,
+					"La barrera debe tener una colisión de caja: " + rail_name)
+				if guard != null and guard.shape is BoxShape3D:
+					var guard_box := guard.shape as BoxShape3D
+					_check(guard_box.size.y >= 2.4,
+						"La protección debe superar la altura de salto: " + rail_name)
 
 	_check(main.get_node_or_null("Player") != null, "Falta el jugador.")
 	_check(main.get_node_or_null("DialogueController") != null,
