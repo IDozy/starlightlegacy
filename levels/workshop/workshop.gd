@@ -154,8 +154,13 @@ func _reposition_legacy_props(previous_children: Array[Node]) -> void:
 			var prop := child as Node3D
 			var extra_z := 0.0
 			# El área de pruebas debe coincidir con el rectángulo naranja del GLB.
-			if prop.name == "RescueRoverProject" or prop.name.begins_with("Test") \
-					or prop.name.begins_with("Drop") or prop.name.begins_with("Impact"):
+			var prop_name := str(prop.name)
+			if (
+				prop_name == "RescueRoverProject"
+				or prop_name.begins_with("Test")
+				or prop_name.begins_with("Drop")
+				or prop_name.begins_with("Impact")
+			):
 				extra_z = TEST_AREA_EXTRA_OFFSET_Z
 			prop.position += Vector3(0.0, 0.0, PROPS_OFFSET_Z + extra_z)
 
