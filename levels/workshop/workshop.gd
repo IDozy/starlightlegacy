@@ -17,8 +17,8 @@ const PROPS_OFFSET_Z: float = 5.0
 const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
 # Mesa en primer nivel: lejos de puerta lateral (-X) y más cerca del
 # portón principal (-Z). Se deja a la izquierda de la rampa sin invadirla.
-# Tablero resultante: X=-4.10, Y=0.90, Z=-1.25.
-const WORKBENCH_LOWER_OFFSET := Vector3(-4.10, 0.0, 2.45)
+# Tablero resultante: X=-4.10, Y=0.90, Z=-2.00.
+const WORKBENCH_LOWER_OFFSET := Vector3(-4.10, 0.0, 1.70)
 const GRANDFATHER_UPPER_POSITION := Vector3(4.45, 1.0, -4.90)
 # Protección invisible por encima del pasamanos visible; no cruza la rampa.
 const UPPER_SAFETY_HEIGHT: float = 2.60
@@ -247,7 +247,7 @@ func _build_lighting() -> void:
 	var bench_light := OmniLight3D.new()
 	bench_light.name = "BenchLight"
 	bench_light.position = (
-		Vector3(-4.00, 2.55, -1.25) if use_imported_workshop
+		Vector3(-4.00, 2.55, -2.00) if use_imported_workshop
 		else Vector3(-0.4, 2.55, -3.35)
 	)
 	bench_light.omni_range = 5.0
