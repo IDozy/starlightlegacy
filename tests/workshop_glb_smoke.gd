@@ -55,8 +55,18 @@ func _run_smoke_test() -> void:
 			"El bloque antiguo de la prueba todavía existe.")
 		_check(workshop.get_node_or_null("WorkbenchBackboard") == null,
 			"El panel negro anterior a la mesa todavía existe.")
-		_check(workshop.get_node_or_null("ImportedBackWall") is StaticBody3D,
-			"Falta el muro trasero visible con colisión.")
+		var back_wall := workshop.get_node_or_null("ImportedBackWall") as StaticBody3D
+		_check(back_wall != null, "Falta el muro trasero visible con colisión.")
+		if back_wall != null:
+			_check(back_wall.position.z > 9.5,
+				"La pared debe cerrar el primer nivel (+Z), no el portón superior (-Z).")
+			var wall_collision := back_wall.get_node_or_null("CollisionShape3D") as CollisionShape3D
+			_check(wall_collision != null and wall_collision.shape is BoxShape3D,
+				"La pared inferior debe mantener su colisión.")
+		var lower_wall_finish := workshop.get_node_or_null("ImportedBackWallLower") as Node3D
+		if lower_wall_finish != null and back_wall != null:
+			_check(lower_wall_finish.position.z < back_wall.position.z,
+				"El zócalo debe mirar hacia el interior del taller.")
 
 		var grandfather := workshop.get_node_or_null("Grandfather") as Node3D
 		if grandfather != null:
@@ -66,11 +76,17 @@ func _run_smoke_test() -> void:
 				"El abuelo debería estar junto a la baranda derecha.")
 
 		var bench := workshop.get_node_or_null("WorkbenchTop") as Node3D
+		var device := workshop.get_node_or_null("PrototypeDevice") as Node3D
+		if device != null:
+			_check(device.position.y > 0.8 and device.position.y < 1.3,
+				"El objeto inspeccionable debe seguir sobre la mesa del primer nivel.")
 		if bench != null:
 			_check(bench.position.x < -3.0,
 				"La mesa debe quedar a la izquierda de la rampa.")
-			_check(bench.position.y > 1.8,
-				"La mesa debe quedar sobre la plataforma superior.")
+			_check(is_equal_approx(bench.position.y, 0.90),
+				"La mesa debe quedar al nivel del piso inferior, no en la plataforma.")
+			_check(bench.position.z > 0.20,
+				"La mesa debe quedar en la zona inferior de la rampa.")
 
 		for rail_name in ["ImportedRailRampEdgeLeft", "ImportedRailRampEdgeRight",
 			"ImportedSideSafetyLeft", "ImportedSideSafetyRight"]:
