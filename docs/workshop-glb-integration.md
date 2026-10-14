@@ -7,7 +7,7 @@ La rama `feat/005a-discovery-archive` utiliza `assets/models/taller/Taller_NASA_
 - `Workshop` instancia el modelo como hijo `Taller_NASA_v02_Visual`.
 - Se retira **solo en tiempo de ejecución** la sala rectangular generada anteriormente, sin borrar su función `_build_room()`: el flag `use_imported_workshop` permite usar el diseño anterior como fallback.
 - Colisiones de Godot, separadas del mesh visual: piso inferior, plataforma superior, rampa convexa, paredes laterales y barandas divididas para dejar libre el centro.
-- El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; algunos accesorios visuales de las paredes antiguas se ocultan.
+- El rover de rescate, abuelo, objetos inspeccionables y props conservan sus nodos directamente bajo `Workshop`. La mayoría se desplaza `+5 m` en Z hacia el piso inferior; la zona de pruebas, el rover y sus marcas suman `+1.5 m` adicionales para coincidir con el rectángulo naranja del nuevo piso. Algunos accesorios visuales de las paredes antiguas se ocultan.
 - La iluminación de la versión GLB tiene un fondo más claro y luz ambiental cálida.
 
 ## Referencia de coordenadas
@@ -17,7 +17,7 @@ La geometría se creó en Blender a 14 × 20 m, con altura 5,8 m, plataforma sup
 - Suelo inferior en `Y = 0`.
 - Plataforma superior en `Y = 1`, aproximadamente `Z = -10` a `Z = -3.6`.
 - Rampa de `Z = +0.2` (abajo) a `Z = -3.6` (arriba).
-- Zona de pruebas del rover en torno a `Z = +4.65`.
+- Zona de pruebas del rover en torno a `Z = +6.15`.
 
 Se usan colisiones simplificadas, no una colisión por tornillo o viga. La geometría final debe verificarse contra el GLB exportado tras las correcciones manuales de Blender. Si la rampa visual no coincide exactamente, ajustar la cuña de colisión, no el importado.
 
