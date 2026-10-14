@@ -14,6 +14,7 @@ const UPPER_HEIGHT: float = 1.0
 const RAMP_WIDTH: float = 4.2
 const RAMP_LENGTH: float = 3.8
 const PROPS_OFFSET_Z: float = 5.0
+const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
 
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
@@ -151,7 +152,12 @@ func _reposition_legacy_props(previous_children: Array[Node]) -> void:
 	for child in get_children():
 		if child is Node3D and not previous_children.has(child):
 			var prop := child as Node3D
-			prop.position += Vector3(0.0, 0.0, PROPS_OFFSET_Z)
+			var extra_z := 0.0
+			# El área de pruebas debe coincidir con el rectángulo naranja del GLB.
+			if prop.name == "RescueRoverProject" or prop.name.begins_with("Test") \
+					or prop.name.begins_with("Drop") or prop.name.begins_with("Impact"):
+				extra_z = TEST_AREA_EXTRA_OFFSET_Z
+			prop.position += Vector3(0.0, 0.0, PROPS_OFFSET_Z + extra_z)
 
 	# Las tres piezas decorativas estaban pegadas a paredes antiguas
 	# (12x10 m). Se ocultan hasta ubicarlas en las nuevas paredes.
@@ -200,7 +206,7 @@ func _build_lighting() -> void:
 	var test_light := OmniLight3D.new()
 	test_light.name = "TestAreaLight"
 	test_light.position = (
-		Vector3(1.55, 2.75, 4.55) if use_imported_workshop
+		Vector3(1.55, 2.75, 6.05) if use_imported_workshop
 		else Vector3(1.55, 2.75, -0.45)
 	)
 	test_light.omni_range = 4.6
