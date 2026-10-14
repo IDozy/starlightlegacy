@@ -186,7 +186,10 @@ func _build_lighting() -> void:
 
 	var bench_light := OmniLight3D.new()
 	bench_light.name = "BenchLight"
-	bench_light.position = Vector3(-0.4, 2.55, -3.35)
+	bench_light.position = (
+		Vector3(-0.4, 2.55, 1.65) if use_imported_workshop
+		else Vector3(-0.4, 2.55, -3.35)
+	)
 	bench_light.omni_range = 5.0
 	bench_light.light_color = Color(1.0, 0.68, 0.43)
 	bench_light.light_energy = 1.65
@@ -195,7 +198,10 @@ func _build_lighting() -> void:
 
 	var test_light := OmniLight3D.new()
 	test_light.name = "TestAreaLight"
-	test_light.position = Vector3(1.55, 2.75, -0.45)
+	test_light.position = (
+		Vector3(1.55, 2.75, 4.55) if use_imported_workshop
+		else Vector3(1.55, 2.75, -0.45)
+	)
 	test_light.omni_range = 4.6
 	test_light.light_color = Color(0.62, 0.78, 0.92)
 	test_light.light_energy = 1.15
