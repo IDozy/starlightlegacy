@@ -204,7 +204,7 @@ func snap_to_terrain() -> bool:
 		# AABB rotada incluye volumen vacio: usar los vertices de la
 		# rueda que realmente se renderizan, en coordenadas mundiales.
 		var bottom_y := _wheel_lowest_vertex_y(wheel)
-		if not is_finite(bottom_y):
+		if bottom_y == INF:
 			continue
 		var wheel_box := wheel.get_aabb()
 		var center_world := wheel.global_transform * (
