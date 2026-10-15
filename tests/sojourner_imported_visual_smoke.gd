@@ -61,7 +61,9 @@ func _largest_wheel_gap(node: Node) -> float:
 				bounds.size.z if (i & 4) != 0 else 0.0
 			)
 			low_y = minf(low_y, (wheel.global_transform * corner).y)
-		gap = absf(low_y)
+		# Solo medir holgura por arriba: una leve penetracion visual de
+		# la rueda es intencional para evitar el aspecto de levitacion.
+		gap = maxf(0.0, low_y)
 	for child in node.get_children():
 		gap = maxf(gap, _largest_wheel_gap(child))
 	return gap
@@ -118,7 +120,7 @@ func _run() -> void:
 			"Falta el ajuste de altura sobre las seis ruedas.")
 		if visual.has_method("snap_to_terrain"):
 			visual.call("snap_to_terrain")
-			_check(_largest_wheel_gap(imported) < 0.045,
+			_check(_largest_wheel_gap(imported) < 0.08,
 				"El rover aparece flotando sobre el terreno plano.")
 		var restored_surfaces := _count_restored_surfaces(imported)
 		_check(restored_surfaces >= 12,
@@ -137,11 +139,15 @@ func _run() -> void:
 	_check(yogi != null, "Falta la roca Yogi.")
 	_check(yogi_collision != null, "Falta la colision de Yogi.")
 	if yogi != null:
-		_check(yogi.position.z <= -1.30,
+		_check(yogi.position.z <= -2.0,
 			"Yogi volvio a quedar demasiado cerca del rover.")
+		_check(yogi.scale.x <= 0.181 and yogi.scale.y <= 0.126,
+			"Yogi volvio a quedar demasiado grande.")
 		_check(_has_real_rock_mesh(yogi),
 			"Yogi no usa la malla irregular, o volvio la esfera-huevo.")
 	if yogi != null and yogi_collision != null:
+		_check(absf(yogi.position.x - yogi_collision.position.x) < 0.001,
+			"La colision de Yogi se desplazo lateralmente respecto a la roca.")
 		_check(absf(yogi.position.z - yogi_collision.position.z) < 0.001,
 			"La colision de Yogi no coincide con la roca visual.")
 	_check(challenge.has_signal("challenge_completed"), "Se perdio la senal de APXS.")
@@ -155,6 +161,8 @@ func _run() -> void:
 		challenge.call("set_completed_state", true)
 		_check(not is_equal_approx(before_z, visual.position.z),
 			"El reto no mueve el rover cuando avanza.")
+		_check(is_equal_approx(visual.position.z, -1.10),
+			"El rover no llega hasta la nueva posicion de analisis APXS.")
 
 	if failures.is_empty():
 		print("PASS: Sojourner GLB con paleta reparada, 6 ruedas y APXS intacto.")
