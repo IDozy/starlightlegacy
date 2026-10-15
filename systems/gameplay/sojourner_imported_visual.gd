@@ -189,7 +189,7 @@ func snap_to_terrain() -> void:
 	_collect_meshes(rover, meshes)
 	var corrections: Array[float] = []
 	for wheel in meshes:
-		if not wheel.name.begins_with("RoverFrontWheel."):
+		if not str(wheel.name).begins_with("RoverFrontWheel."):
 			continue
 		var local_box := wheel.get_aabb()
 		# El minimo vertical de la llanta se calcula con las ocho esquinas
