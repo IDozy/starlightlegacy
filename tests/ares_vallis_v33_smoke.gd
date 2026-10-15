@@ -49,6 +49,8 @@ func _run_smoke_test() -> void:
 		"El terreno de vista previa NASA se duplica con el GLB.")
 	_check(level.get_node_or_null("WestMoundA") == null,
 		"Los monticulos provisionales siguen visibles.")
+	_check(level.get_node_or_null("SojournerSoilPatch") == null,
+		"Se ha vuelto a dibujar la plataforma circular de Sojourner encima del GLB.")
 	_check(level.get_node_or_null("MarsSun") != null,
 		"Falta la iluminacion marciana del nivel.")
 	var mars_environment := level.get_node_or_null("MarsEnvironment") as WorldEnvironment
