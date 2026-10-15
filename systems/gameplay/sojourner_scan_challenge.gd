@@ -279,3 +279,6 @@ func _update_rover_position() -> void:
 		ratio = float(_drive_step) / float(max_drive_steps)
 
 	rover_visual.position.z = lerpf(0.48, -0.55, ratio)
+	# La altura debe seguir el suelo real bajo las seis ruedas al avanzar.
+	if rover_visual.has_method("snap_to_terrain"):
+		rover_visual.call("snap_to_terrain")
