@@ -71,10 +71,69 @@ func _load_imported_rover() -> void:
 		(WHEEL_CONTACT_Y - bounds.position.y * factor),
 		-center.z * factor
 	)
+	_apply_missing_material_palette(rover)
 	_show_legacy(false)
 	print("[Sojourner] Modelo GLB integrado. Piezas de suelo/rocas excluidas. Tamano: ",
 		rover.scale, " / base Y: ", WHEEL_CONTACT_Y)
 
+
+
+# El GLB v01 contiene nombres de 9 materiales, pero en glTF omite los
+# factores PBR y no incluye imagenes. Godot interpreta las superficies
+# sin color como blancas: se restauran tonos coherentes sin editar mallas.
+# Si una version futura ya incorpora texturas, se respeta su material.
+func _apply_missing_material_palette(rover: Node3D) -> void:
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(rover, meshes)
+	var replacements: Dictionary = {}
+	var replaced_count := 0
+	for instance in meshes:
+		for surface_index in range(instance.mesh.get_surface_count()):
+			var source_material := instance.mesh.surface_get_material(surface_index)
+			if source_material == null:
+				continue
+			if source_material is BaseMaterial3D:
+				var base := source_material as BaseMaterial3D
+				if base is StandardMaterial3D and (base as StandardMaterial3D).albedo_texture != null:
+					continue
+			var palette_key := source_material.resource_name.to_lower()
+			if palette_key.is_empty():
+				continue
+			var settings := _palette_for_material(palette_key)
+			if settings.is_empty():
+				continue
+			if not replacements.has(palette_key):
+				var restored := StandardMaterial3D.new()
+				restored.resource_name = "SL_" + palette_key
+				restored.albedo_color = settings["color"]
+				restored.metallic = settings["metallic"]
+				restored.roughness = settings["roughness"]
+				restored.vertex_color_use_as_albedo = false
+				replacements[palette_key] = restored
+			instance.set_surface_override_material(surface_index, replacements[palette_key])
+			replaced_count += 1
+	print("[Sojourner] Materiales reparados: ", replaced_count, " superficies. ",
+		"No se cambio ninguna malla.")
+
+
+func _palette_for_material(source_name: String) -> Dictionary:
+	# Los nombres proceden directamente de los materiales del GLB v01.
+	match source_name:
+		"rover_metal":
+			return {"color": Color(0.38, 0.36, 0.32), "metallic": 0.42, "roughness": 0.65}
+		"rover_metal_wheels":
+			return {"color": Color(0.24, 0.23, 0.22), "metallic": 0.28, "roughness": 0.82}
+		"black_plastic":
+			return {"color": Color(0.11, 0.12, 0.13), "metallic": 0.06, "roughness": 0.84}
+		"rover_gold_flat":
+			return {"color": Color(0.68, 0.49, 0.24), "metallic": 0.20, "roughness": 0.76}
+		"white_plastic":
+			return {"color": Color(0.77, 0.73, 0.64), "metallic": 0.0, "roughness": 0.79}
+		"solarpanels":
+			return {"color": Color(0.045, 0.095, 0.19), "metallic": 0.08, "roughness": 0.45}
+		"rover_gold_foil":
+			return {"color": Color(0.78, 0.58, 0.27), "metallic": 0.34, "roughness": 0.62}
+	return {}
 
 func _show_legacy(should_show: bool) -> void:
 	for part_name in LEGACY_PARTS:
