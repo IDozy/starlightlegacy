@@ -297,6 +297,12 @@ func _align_imported_gameplay() -> void:
 		var ground_y := float(_mars_landscape.call("ground_height_at", obj.global_position.x, obj.global_position.z))
 		obj.position.y += ground_y
 		obj.set_meta("ares_v33_ground_aligned", true)
+		# El centro del reto y las ruedas reales no siempre estan sobre el
+		# mismo punto del relieve: apoyar la malla despues del ajuste del padre.
+		if obj == _sojourner:
+			var rover_visual := _sojourner.get_node_or_null("RoverVisual") as Node3D
+			if rover_visual != null and rover_visual.has_method("snap_to_terrain"):
+				rover_visual.call("snap_to_terrain")
 
 
 
