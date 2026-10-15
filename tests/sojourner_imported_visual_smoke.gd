@@ -70,7 +70,7 @@ func _largest_wheel_gap(node: Node) -> float:
 func _has_real_rock_mesh(node: Node) -> bool:
 	if node is MeshInstance3D:
 		var instance := node as MeshInstance3D
-		if instance.mesh != null and not instance.mesh is SphereMesh:
+		if instance.mesh != null and not (instance.mesh is SphereMesh):
 			return true
 	for child in node.get_children():
 		if _has_real_rock_mesh(child):
