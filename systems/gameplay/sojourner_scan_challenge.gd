@@ -278,7 +278,9 @@ func _update_rover_position() -> void:
 	if max_drive_steps > 0:
 		ratio = float(_drive_step) / float(max_drive_steps)
 
-	rover_visual.position.z = lerpf(0.48, -0.55, ratio)
+		# Yogi ahora esta mas lejos: mantener separacion al inicio y permitir
+	# que el brazo delantero alcance la roca al completar los cuatro pasos.
+	rover_visual.position.z = lerpf(0.48, -1.10, ratio)
 	# La altura debe seguir el suelo real bajo las seis ruedas al avanzar.
 	if rover_visual.has_method("snap_to_terrain"):
 		rover_visual.call("snap_to_terrain")
