@@ -90,16 +90,20 @@ func _apply_missing_material_palette(rover: Node3D) -> void:
 	for instance in meshes:
 		for surface_index in range(instance.mesh.get_surface_count()):
 			var source_material := instance.mesh.surface_get_material(surface_index)
-			if source_material == null:
-				continue
+			# Una nueva exportacion que si tenga textura no debe recolorearse.
 			if source_material is BaseMaterial3D:
 				var base := source_material as BaseMaterial3D
-				if base is StandardMaterial3D and (base as StandardMaterial3D).albedo_texture != null:
+				if base.albedo_texture != null:
 					continue
-			var palette_key := source_material.resource_name.to_lower()
-			if palette_key.is_empty():
-				continue
+			var palette_key := ""
+			if source_material != null:
+				palette_key = source_material.resource_name.to_lower()
 			var settings := _palette_for_material(palette_key)
+			if settings.is_empty():
+				# Algunos importadores pierden el nombre del material; el GLB v01
+				# mantiene nombres de piezas y orden de superficies estables.
+				palette_key = _fallback_palette_key(instance.name, surface_index)
+				settings = _palette_for_material(palette_key)
 			if settings.is_empty():
 				continue
 			if not replacements.has(palette_key):
@@ -114,6 +118,28 @@ func _apply_missing_material_palette(rover: Node3D) -> void:
 			replaced_count += 1
 	print("[Sojourner] Materiales reparados: ", replaced_count, " superficies. ",
 		"No se cambio ninguna malla.")
+
+
+func _fallback_palette_key(mesh_name: String, surface_index: int) -> String:
+	if mesh_name == IMPORTED_NODE_NAME or mesh_name == "SojournerRover":
+		match surface_index:
+			0:
+				return "rover_metal"
+			1:
+				return "rover_gold_flat"
+			2:
+				return "white_plastic"
+			3:
+				return "solarpanels"
+			4:
+				return "rover_gold_foil"
+	if mesh_name.begins_with("RoverFrontWheel."):
+		return "rover_metal_wheels" if surface_index == 1 else "rover_metal"
+	if mesh_name.begins_with("RoverWheelsConnector."):
+		return "black_plastic" if surface_index == 1 else "rover_metal"
+	if mesh_name.begins_with("Rover"):
+		return "rover_metal"
+	return ""
 
 
 func _palette_for_material(source_name: String) -> Dictionary:
