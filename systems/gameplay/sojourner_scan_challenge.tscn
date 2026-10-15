@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://systems/gameplay/sojourner_scan_challenge.gd" id="1_sojourner"]
+[ext_resource type="Script" path="res://systems/gameplay/sojourner_imported_visual.gd" id="2_rover_visual"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_platform"]
 albedo_color = Color(0.11, 0.13, 0.15, 1)
@@ -74,6 +75,7 @@ position = Vector3(0, -0.10, 0)
 mesh = SubResource("Mesh_platform")
 
 [node name="RoverVisual" type="Node3D" parent="."]
+script = ExtResource("2_rover_visual")
 
 [node name="Body" type="MeshInstance3D" parent="RoverVisual"]
 position = Vector3(0, 0.18, 0)
