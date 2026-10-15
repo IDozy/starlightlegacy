@@ -67,6 +67,17 @@ func _largest_wheel_gap(node: Node) -> float:
 	return gap
 
 
+func _has_real_rock_mesh(node: Node) -> bool:
+	if node is MeshInstance3D:
+		var instance := node as MeshInstance3D
+		if instance.mesh != null and not instance.mesh is SphereMesh:
+			return true
+	for child in node.get_children():
+		if _has_real_rock_mesh(child):
+			return true
+	return false
+
+
 func _run() -> void:
 	var packed := load("res://systems/gameplay/sojourner_scan_challenge.tscn") as PackedScene
 	if packed == null:
@@ -119,6 +130,20 @@ func _run() -> void:
 		if old != null and imported != null:
 			_check(not old.visible, "Una pieza provisional sigue superpuesta: " + legacy_name)
 
+	# Yogi ya no debe verse como una esfera ovalada ni tocar el rover
+	# desde el comienzo. Su colision acompana al modelo importado.
+	var yogi := challenge.get_node_or_null("Rock") as Node3D
+	var yogi_collision := challenge.get_node_or_null("YogiCollision") as CollisionShape3D
+	_check(yogi != null, "Falta la roca Yogi.")
+	_check(yogi_collision != null, "Falta la colision de Yogi.")
+	if yogi != null:
+		_check(yogi.position.z <= -1.30,
+			"Yogi volvio a quedar demasiado cerca del rover.")
+		_check(_has_real_rock_mesh(yogi),
+			"Yogi no usa la malla irregular, o volvio la esfera-huevo.")
+	if yogi != null and yogi_collision != null:
+		_check(absf(yogi.position.z - yogi_collision.position.z) < 0.001,
+			"La colision de Yogi no coincide con la roca visual.")
 	_check(challenge.has_signal("challenge_completed"), "Se perdio la senal de APXS.")
 	_check(challenge.get_node_or_null("ChallengeHUD/Panel/ScanProgress") != null,
 		"Se perdio la interfaz del APXS.")
