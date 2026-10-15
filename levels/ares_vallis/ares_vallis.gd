@@ -7,8 +7,11 @@ const ROCK_1_SCENE := preload("res://assets/third_party/quaternius/ultimate_spac
 const ROCK_2_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_2.gltf")
 const ROCK_3_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_3.gltf")
 const ROCK_4_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_4.gltf")
+const MARS_LANDSCAPE_SCRIPT := preload("res://levels/ares_vallis/ares_vallis_landscape.gd")
 const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_pathfinder_preview.obj")
 const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
+
+@export var use_imported_ares_vallis: bool = true
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -30,6 +33,7 @@ const LANDING_SCAR := Color(0.31, 0.15, 0.095)
 var _pathfinder: Node = null
 var _sojourner: Node = null
 var _return_portal: Node = null
+var _mars_landscape: Node3D = null
 
 
 func _ready() -> void:
@@ -46,6 +50,8 @@ func _ready() -> void:
 	_pathfinder.call("set_completed_state", pathfinder_done)
 	_sojourner.call("set_completed_state", sojourner_done)
 	_update_progress()
+	if use_imported_ares_vallis:
+		call_deferred("_align_imported_gameplay")
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -135,31 +141,34 @@ func _build_environment() -> void:
 
 
 func _build_ares_vallis() -> void:
-	_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
-	_add_nasa_pathfinder_terrain_preview()
+	if use_imported_ares_vallis:
+		_build_imported_landscape()
+	else:
+		_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
+		_add_nasa_pathfinder_terrain_preview()
 
-	# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
-	_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
-	_create_visual_sphere("WestMoundB", Vector3(-13.5, 0.06, -10.5), 3.8, Vector3(1.60, 0.15, 2.05), ROCK)
-	_create_visual_sphere("EastMoundA", Vector3(13.2, 0.06, -3.2), 3.5, Vector3(1.90, 0.17, 2.40), ROCK)
-	_create_visual_sphere("EastMoundB", Vector3(13.0, 0.05, -11.5), 3.7, Vector3(1.65, 0.14, 2.10), SAND_LIGHT)
+		# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
+		_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
+		_create_visual_sphere("WestMoundB", Vector3(-13.5, 0.06, -10.5), 3.8, Vector3(1.60, 0.15, 2.05), ROCK)
+		_create_visual_sphere("EastMoundA", Vector3(13.2, 0.06, -3.2), 3.5, Vector3(1.90, 0.17, 2.40), ROCK)
+		_create_visual_sphere("EastMoundB", Vector3(13.0, 0.05, -11.5), 3.7, Vector3(1.65, 0.14, 2.10), SAND_LIGHT)
 
-	# Twin Peaks use actual low-poly rock silhouettes instead of sphere placeholders.
-	_create_asset_rock("TwinPeakLeft", ROCK_3_SCENE, Vector3(-5.2, 0.45, -15.7), 1.75, -12.0)
-	_create_asset_rock("TwinPeakRight", ROCK_1_SCENE, Vector3(-0.7, 0.42, -16.8), 1.55, 18.0)
-	_create_asset_rock("HorizonShoulder", ROCK_2_SCENE, Vector3(5.6, 0.0, -15.2), 0.78, -24.0)
+		# Twin Peaks use actual low-poly rock silhouettes instead of sphere placeholders.
+		_create_asset_rock("TwinPeakLeft", ROCK_3_SCENE, Vector3(-5.2, 0.45, -15.7), 1.75, -12.0)
+		_create_asset_rock("TwinPeakRight", ROCK_1_SCENE, Vector3(-0.7, 0.42, -16.8), 1.55, 18.0)
+		_create_asset_rock("HorizonShoulder", ROCK_2_SCENE, Vector3(5.6, 0.0, -15.2), 0.78, -24.0)
 
-	# Scattered rock fields frame the route while leaving a readable corridor.
-	_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
-	_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
-	_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
-	_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
-	_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.2, 0.0, -8.6), 0.15, 65.0)
-	_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(4.6, 0.0, -10.2), 0.19, -8.0)
-	_create_asset_rock("Rock_6", ROCK_4_SCENE, Vector3(-9.4, 0.0, -11.0), 0.28, 28.0)
-	_create_asset_rock("Rock_7", ROCK_3_SCENE, Vector3(9.6, 0.0, -12.2), 0.31, -33.0)
-	_create_asset_rock("Rock_8", ROCK_2_SCENE, Vector3(10.4, 0.0, 0.4), 0.18, 54.0)
-	_create_asset_rock("Rock_9", ROCK_1_SCENE, Vector3(-10.2, 0.0, 4.0), 0.20, -20.0)
+		# Scattered rock fields frame the route while leaving a readable corridor.
+		_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
+		_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
+		_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
+		_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
+		_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.2, 0.0, -8.6), 0.15, 65.0)
+		_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(4.6, 0.0, -10.2), 0.19, -8.0)
+		_create_asset_rock("Rock_6", ROCK_4_SCENE, Vector3(-9.4, 0.0, -11.0), 0.28, 28.0)
+		_create_asset_rock("Rock_7", ROCK_3_SCENE, Vector3(9.6, 0.0, -12.2), 0.31, -33.0)
+		_create_asset_rock("Rock_8", ROCK_2_SCENE, Vector3(10.4, 0.0, 0.4), 0.18, 54.0)
+		_create_asset_rock("Rock_9", ROCK_1_SCENE, Vector3(-10.2, 0.0, 4.0), 0.20, -20.0)
 
 	# Disturbed soil visually anchors the two historical hardware areas.
 	_create_visual_sphere(
@@ -237,6 +246,37 @@ func _build_ares_vallis() -> void:
 	var platform := _sojourner.get_node_or_null("Platform") as MeshInstance3D
 	if platform != null:
 		platform.visible = false
+
+
+
+func _build_imported_landscape() -> void:
+	_mars_landscape = MARS_LANDSCAPE_SCRIPT.new() as Node3D
+	_mars_landscape.name = "AresVallisLandscape_v33"
+	add_child(_mars_landscape)
+
+
+func _align_imported_gameplay() -> void:
+	# El GLB viene a escala de Blender. No aplanar el terreno para el gameplay:
+	# apoyar cada elemento en la altura real del suelo, tras crear su colision.
+	await get_tree().physics_frame
+	if not is_instance_valid(_mars_landscape):
+		return
+	for child in get_children():
+		if not child is Node3D:
+			continue
+		var obj := child as Node3D
+		if obj == _mars_landscape or obj.has_meta("ares_v33_ground_aligned"):
+			continue
+		var n := str(obj.name)
+		var is_stage_prop := (obj == player or obj == _pathfinder or obj == _sojourner or obj == _return_portal
+			or n.begins_with("TrackL_") or n.begins_with("TrackR_")
+			or n.begins_with("DeflatedAirbag") or n == "PathfinderLandingScar"
+			or n == "SojournerSoilPatch")
+		if not is_stage_prop:
+			continue
+		var ground_y := float(_mars_landscape.call("ground_height_at", obj.global_position.x, obj.global_position.z))
+		obj.position.y += ground_y
+		obj.set_meta("ares_v33_ground_aligned", true)
 
 
 
