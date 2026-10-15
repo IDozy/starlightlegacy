@@ -11,7 +11,7 @@ const TARGET_HORIZONTAL_SIZE: float = 0.82
 const WHEEL_CONTACT_Y: float = 0.0
 # Hundimiento visual leve de las ruedas: evita el efecto 'levitando' en Marte.
 # Se aplica dentro del ajuste de terreno, no como traslacion acumulativa.
-const WHEEL_GROUND_INSET: float = 0.055
+const WHEEL_GROUND_INSET: float = 0.014
 # En el GLB original el extremo del brazo perforador apunta al eje +X.
 # El recorrido hacia Yogi se hace hacia -Z local de RoverVisual.
 const MODEL_YAW_DEGREES: float = 90.0
@@ -176,53 +176,77 @@ func _palette_for_material(source_name: String) -> Dictionary:
 ## las seis ruedas, NO la altura del centro del StaticBody (que puede caer
 ## sobre una pendiente distinta). No modifica hitboxes ni mecanica APXS.
 ## Se llama tras alinear el reto y en cada paso W/S del jugador.
-func snap_to_terrain() -> void:
+func snap_to_terrain() -> bool:
+	# Godot puede convertir RoverFrontWheel.L.001 en
+	# RoverFrontWheel_L_001 al importar. No depender del punto.
 	if not is_inside_tree():
-		return
-	var stage := get_parent().get_parent()
+		return false
+	var challenge := get_parent()
+	if challenge == null:
+		return false
+	var stage := challenge.get_parent()
 	if stage == null:
-		return
+		return false
 	var landscape := stage.get_node_or_null("AresVallisLandscape_v33")
 	if landscape == null or not landscape.has_method("ground_height_at"):
-		return
+		return false
+
 	var rover := get_node_or_null(IMPORTED_NODE_NAME) as Node3D
 	if rover == null:
-		return
+		return false
 	var meshes: Array[MeshInstance3D] = []
 	_collect_meshes(rover, meshes)
-	var corrections: Array[float] = []
-	for wheel in meshes:
-		if not str(wheel.name).begins_with("RoverFrontWheel."):
-			continue
-		var local_box := wheel.get_aabb()
-		# El minimo vertical de la llanta se calcula con las ocho esquinas
-		# transformadas, sin depender de la orientacion de su malla.
-		var min_y := INF
-		var ground_xz := wheel.global_transform * (local_box.position + local_box.size * 0.5)
-		for idx in range(8):
-			var local_corner := local_box.position + Vector3(
-				local_box.size.x if (idx & 1) != 0 else 0.0,
-				local_box.size.y if (idx & 2) != 0 else 0.0,
-				local_box.size.z if (idx & 4) != 0 else 0.0
-			)
-			var world_corner := wheel.global_transform * local_corner
-			min_y = minf(min_y, world_corner.y)
-		var ground_y: float = float(landscape.call("ground_height_at", ground_xz.x, ground_xz.z))
-		corrections.append(ground_y - min_y)
-	if corrections.size() != 6:
-		push_warning("Sojourner: no encontre las seis ruedas para apoyar el modelo.")
-		return
-	# El chasis no cambia: nivelar con el promedio del relieve bajo
-	# las seis ruedas y dejar una pequena penetracion visual deliberada.
-	# Sin ello, varias ruedas parecen separadas del suelo en la vista 3/4.
-	# Como se calcula la diferencia de alturas actual, repetidas llamadas
-	# convergen al mismo apoyo sin bajar el rover indefinidamente.
-	var correction := 0.0
-	for amount in corrections:
-		correction += amount
-	correction /= float(corrections.size())
-	position.y += clampf(correction - WHEEL_GROUND_INSET, -0.25, 0.20)
 
+	var offsets: Array[float] = []
+	for wheel in meshes:
+		if not _is_wheel_mesh(wheel):
+			continue
+		# AABB rotada incluye volumen vacio: usar los vertices de la
+		# rueda que realmente se renderizan, en coordenadas mundiales.
+		var bottom_y := _wheel_lowest_vertex_y(wheel)
+		if not is_finite(bottom_y):
+			continue
+		var wheel_box := wheel.get_aabb()
+		var center_world := wheel.global_transform * (
+			wheel_box.position + wheel_box.size * 0.5
+		)
+		var terrain_y: float = float(landscape.call(
+			"ground_height_at", center_world.x, center_world.z
+		))
+		offsets.append(terrain_y - bottom_y)
+
+	if offsets.size() != 6:
+		push_warning("Sojourner: apoyo no aplicado; detectadas %d/6 ruedas." % offsets.size())
+		return false
+
+	# Prioriza que ninguna llanta quede suspendida sobre el relieve.
+	# Una penetracion minima evita el aspecto de levitacion sin alterar
+	# la suspension del GLB ni la colision de interaccion APXS.
+	offsets.sort()
+	var delta: float = offsets[0] - WHEEL_GROUND_INSET
+	if absf(delta) > 0.65:
+		push_warning("Sojourner: desfase de suelo anormal (%.3f m); ajuste cancelado." % delta)
+		return false
+	position.y += delta
+	return true
+
+
+func _is_wheel_mesh(instance: MeshInstance3D) -> bool:
+	return str(instance.name).to_lower().begins_with("roverfrontwheel")
+
+
+func _wheel_lowest_vertex_y(wheel: MeshInstance3D) -> float:
+	var bottom_y := INF
+	var mesh := wheel.mesh
+	if mesh == null:
+		return bottom_y
+	for surface_index in range(mesh.get_surface_count()):
+		var arrays := mesh.surface_get_arrays(surface_index)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for vertex in vertices:
+			var world_point := wheel.global_transform * vertex
+			bottom_y = minf(bottom_y, world_point.y)
+	return bottom_y
 
 
 func _show_legacy(should_show: bool) -> void:
