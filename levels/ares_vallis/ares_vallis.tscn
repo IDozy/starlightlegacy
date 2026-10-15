@@ -43,6 +43,21 @@ theme_override_colors/font_color = Color(0.98, 0.79, 0.45, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 0.90)
 theme_override_constants/outline_size = 5
 
+[node name="ArchiveHint" type="Label" parent="HUD"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 22.0
+offset_right = -24.0
+offset_bottom = 52.0
+grow_horizontal = 0
+text = "K · Archivo NASA"
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.82, 0.72, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.88)
+theme_override_constants/outline_size = 5
+
 [node name="Crosshair" type="Label" parent="HUD"]
 anchors_preset = 8
 anchor_left = 0.5

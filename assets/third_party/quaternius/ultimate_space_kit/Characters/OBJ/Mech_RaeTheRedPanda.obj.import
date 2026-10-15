@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://nlovf0nyupub"
+path="res://.godot/imported/Mech_RaeTheRedPanda.obj-c9a6507ce6078f70ec3bad99f8107b97.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Mech_RaeTheRedPanda.obj-c9a6507ce6078f70ec3bad99f8107b97.mesh"]
+
+source_file="res://assets/third_party/quaternius/ultimate_space_kit/Characters/OBJ/Mech_RaeTheRedPanda.obj"
+dest_files=["res://.godot/imported/Mech_RaeTheRedPanda.obj-c9a6507ce6078f70ec3bad99f8107b97.mesh", "res://.godot/imported/Mech_RaeTheRedPanda.obj-c9a6507ce6078f70ec3bad99f8107b97.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
