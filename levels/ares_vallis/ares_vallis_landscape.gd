@@ -5,7 +5,7 @@ extends Node3D
 const LANDSCAPE_SCENE: PackedScene = preload("res://assets/models/taller/Starlight_AresVallis_Desarrollo_v33.blend.glb")
 const TERRAIN_QUERY_MASK: int = 4 # Capa 3; la colision tambien usa la capa 1.
 const MAX_TRIANGLE_COLLISION_SURFACES: int = 128
-const FALLBACK_COLOR := Color(0.59, 0.34, 0.24)
+const FALLBACK_COLOR = Color(0.59, 0.34, 0.24)
 
 var _terrain_mesh: MeshInstance3D = null
 var _terrain_body: StaticBody3D = null
