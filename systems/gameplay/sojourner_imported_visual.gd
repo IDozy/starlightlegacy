@@ -9,9 +9,9 @@ const SOURCE_ROVER_NODE: String = "SojournerRover"
 const IMPORTED_NODE_NAME: String = "SojournerImportedModel"
 const TARGET_HORIZONTAL_SIZE: float = 0.82
 const WHEEL_CONTACT_Y: float = 0.0
-# Hundimiento visual leve de las ruedas: evita el efecto 'levitando' en Marte.
-# Se aplica dentro del ajuste de terreno, no como traslacion acumulativa.
-const WHEEL_GROUND_INSET: float = 0.014
+# Sin hundimiento artificial: colocar el neumatico en contacto con el suelo.
+# La diferencia de altura se sigue calculando con vertices reales de cada rueda.
+const WHEEL_GROUND_INSET: float = 0.0
 # En el GLB original el extremo del brazo perforador apunta al eje +X.
 # El recorrido hacia Yogi se hace hacia -Z local de RoverVisual.
 const MODEL_YAW_DEGREES: float = 90.0
@@ -219,9 +219,8 @@ func snap_to_terrain() -> bool:
 		push_warning("Sojourner: apoyo no aplicado; detectadas %d/6 ruedas." % offsets.size())
 		return false
 
-	# Prioriza que ninguna llanta quede suspendida sobre el relieve.
-	# Una penetracion minima evita el aspecto de levitacion sin alterar
-	# la suspension del GLB ni la colision de interaccion APXS.
+	# Apoyar la primera llanta sin sumarle hundimiento artificial.
+	# No se modifica la suspension del GLB ni la colision del desafio APXS.
 	offsets.sort()
 	var delta: float = offsets[0] - WHEEL_GROUND_INSET
 	if absf(delta) > 0.65:
