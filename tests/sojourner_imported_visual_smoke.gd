@@ -48,6 +48,25 @@ func _count_restored_surfaces(node: Node) -> int:
 	return total
 
 
+func _largest_wheel_gap(node: Node) -> float:
+	var gap := 0.0
+	if node is MeshInstance3D and str(node.name).begins_with("RoverFrontWheel."):
+		var wheel := node as MeshInstance3D
+		var bounds := wheel.get_aabb()
+		var low_y := INF
+		for i in range(8):
+			var corner := bounds.position + Vector3(
+				bounds.size.x if (i & 1) != 0 else 0.0,
+				bounds.size.y if (i & 2) != 0 else 0.0,
+				bounds.size.z if (i & 4) != 0 else 0.0
+			)
+			low_y = minf(low_y, (wheel.global_transform * corner).y)
+		gap = absf(low_y)
+	for child in node.get_children():
+		gap = maxf(gap, _largest_wheel_gap(child))
+	return gap
+
+
 func _run() -> void:
 	var packed := load("res://systems/gameplay/sojourner_scan_challenge.tscn") as PackedScene
 	if packed == null:
@@ -61,7 +80,14 @@ func _run() -> void:
 		quit(1)
 		return
 
-	root.add_child(challenge)
+	var stage := Node3D.new()
+	stage.name = "SojournerVisualSmokeStage"
+	root.add_child(stage)
+	var test_ground := Node3D.new()
+	test_ground.name = "AresVallisLandscape_v33"
+	test_ground.set_script(preload("res://tests/fixtures/flat_ares_terrain.gd"))
+	stage.add_child(test_ground)
+	stage.add_child(challenge)
 	await process_frame
 
 	var visual := challenge.get_node_or_null("RoverVisual") as Node3D
@@ -75,6 +101,14 @@ func _run() -> void:
 			"El Sojourner importado debe conservar exactamente seis ruedas.")
 		_check(imported.scale.x > 0.001 and imported.scale.x < 10.0,
 			"La escala del rover importado es inusual.")
+		_check(absf(imported.rotation_degrees.y - 90.0) < 0.2,
+			"El frente del rover no mira hacia la roca Yogi.")
+		_check(visual.has_method("snap_to_terrain"),
+			"Falta el ajuste de altura sobre las seis ruedas.")
+		if visual.has_method("snap_to_terrain"):
+			visual.call("snap_to_terrain")
+			_check(_largest_wheel_gap(imported) < 0.045,
+				"El rover aparece flotando sobre el terreno plano.")
 		var restored_surfaces := _count_restored_surfaces(imported)
 		_check(restored_surfaces >= 12,
 			"Falta restaurar la paleta del GLB: demasiadas superficies sin material.")
