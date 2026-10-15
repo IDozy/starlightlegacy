@@ -303,6 +303,19 @@ func _align_imported_gameplay() -> void:
 			var rover_visual := _sojourner.get_node_or_null("RoverVisual") as Node3D
 			if rover_visual != null and rover_visual.has_method("snap_to_terrain"):
 				rover_visual.call("snap_to_terrain")
+			# Yogi queda mas adelantada que el centro del reto: la altura
+			# del terreno puede variar bajo la roca. Corregir visual y collider
+			# JUNTOS para evitar que flote o quede enterrada en una pendiente.
+			var yogi_visual := _sojourner.get_node_or_null("Rock") as Node3D
+			var yogi_collision := _sojourner.get_node_or_null("YogiCollision") as CollisionShape3D
+			if yogi_visual != null and yogi_collision != null:
+				var yogi_world_pos := yogi_visual.global_position
+				var yogi_ground_y := float(_mars_landscape.call(
+					"ground_height_at", yogi_world_pos.x, yogi_world_pos.z
+				))
+				var terrain_delta: float = yogi_ground_y - ground_y
+				yogi_visual.position.y += terrain_delta
+				yogi_collision.position.y += terrain_delta
 
 
 
