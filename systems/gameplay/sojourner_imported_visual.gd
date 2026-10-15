@@ -1,0 +1,114 @@
+@tool
+extends Node3D
+## Sojourner importado desde BlendSwap (CC0). El GLB exportado contiene
+## tambien "ground" y "Rocks": se extrae SOLO la jerarquia SojournerRover.
+## Mantener el rover procedural original como respaldo si falla la importacion.
+
+const SOURCE_PATH: String = "res://assets/models/taller/Sojourner_v01.glb"
+const SOURCE_ROVER_NODE: String = "SojournerRover"
+const IMPORTED_NODE_NAME: String = "SojournerImportedModel"
+const TARGET_HORIZONTAL_SIZE: float = 0.82
+const WHEEL_CONTACT_Y: float = 0.012
+const LEGACY_PARTS := [
+	"Body", "SolarPanel", "APXS",
+	"WheelFL", "WheelML", "WheelRL",
+	"WheelFR", "WheelMR", "WheelRR",
+]
+
+
+func _ready() -> void:
+	# No se guardan instancias temporales en el .tscn; se generan tanto
+	# en el editor (@tool) como durante el juego.
+	_show_legacy(true)
+	_load_imported_rover()
+
+
+func _load_imported_rover() -> void:
+	if not ResourceLoader.exists(SOURCE_PATH):
+		push_warning("Sojourner: no se encuentra el GLB; se usa el rover provisional.")
+		return
+
+	var source := load(SOURCE_PATH) as PackedScene
+	if source == null:
+		push_warning("Sojourner: el GLB no pudo cargarse; se usa el rover provisional.")
+		return
+
+	var container := source.instantiate() as Node3D
+	if container == null:
+		push_warning("Sojourner: no se pudo crear el GLB; se usa el rover provisional.")
+		return
+
+	var rover := container.get_node_or_null(SOURCE_ROVER_NODE) as Node3D
+	if rover == null:
+		container.free()
+		push_warning("Sojourner: falta SojournerRover en el GLB; se usa el modelo provisional.")
+		return
+
+	# Solo SojournerRover sale del GLB. Ground y Rocks se liberan sin
+	# adjuntarse al nivel; asi no duplicamos el terreno de Ares Vallis.
+	container.remove_child(rover)
+	add_child(rover)
+	container.free()
+	rover.name = IMPORTED_NODE_NAME
+
+	var bounds := _model_bounds(rover)
+	var largest_dimension: float = maxf(bounds.size.x, bounds.size.z)
+	if largest_dimension <= 0.0001:
+		remove_child(rover)
+		rover.free()
+		push_warning("Sojourner: malla vacia; se usa el modelo provisional.")
+		return
+
+	# Las coordenadas del .blend original incluyen un offset de escenario
+	# y escala propia. Ajustar la geometria al soporte del reto APXS,
+	# conservando todas las ruedas, brazos y piezas en sus relaciones.
+	var factor: float = TARGET_HORIZONTAL_SIZE / largest_dimension
+	var center := bounds.position + bounds.size * 0.5
+	rover.rotation = Vector3.ZERO
+	rover.scale = Vector3.ONE * factor
+	rover.position = Vector3(
+		-center.x * factor,
+		(WHEEL_CONTACT_Y - bounds.position.y * factor),
+		-center.z * factor
+	)
+	_show_legacy(false)
+	print("[Sojourner] Modelo GLB integrado. Piezas de suelo/rocas excluidas. Tamano: ",
+		rover.scale, " / base Y: ", WHEEL_CONTACT_Y)
+
+
+func _show_legacy(should_show: bool) -> void:
+	for part_name in LEGACY_PARTS:
+		var node := get_node_or_null(part_name) as Node3D
+		if node != null:
+			node.visible = should_show
+
+
+func _collect_meshes(node: Node, output: Array[MeshInstance3D]) -> void:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		output.append(node as MeshInstance3D)
+	for child in node.get_children():
+		_collect_meshes(child, output)
+
+
+func _model_bounds(rover: Node3D) -> AABB:
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(rover, meshes)
+	var result := AABB()
+	var initialized := false
+	var inverse_root := rover.global_transform.affine_inverse()
+	for instance in meshes:
+		var box := instance.get_aabb()
+		var relative_transform := inverse_root * instance.global_transform
+		for corner_index in range(8):
+			var point := box.position + Vector3(
+				box.size.x if (corner_index & 1) != 0 else 0.0,
+				box.size.y if (corner_index & 2) != 0 else 0.0,
+				box.size.z if (corner_index & 4) != 0 else 0.0
+			)
+			var transformed_point := relative_transform * point
+			if not initialized:
+				result = AABB(transformed_point, Vector3.ZERO)
+				initialized = true
+			else:
+				result = result.expand(transformed_point)
+	return result
