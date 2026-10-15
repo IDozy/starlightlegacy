@@ -51,6 +51,17 @@ func _run_smoke_test() -> void:
 		"Los monticulos provisionales siguen visibles.")
 	_check(level.get_node_or_null("MarsSun") != null,
 		"Falta la iluminacion marciana del nivel.")
+	var mars_environment := level.get_node_or_null("MarsEnvironment") as WorldEnvironment
+	_check(mars_environment != null and mars_environment.environment != null,
+		"Falta el ambiente de Marte.")
+	if mars_environment != null and mars_environment.environment != null:
+		_check(mars_environment.environment.background_mode == Environment.BG_SKY,
+			"Volvio el cielo marron plano en vez del gradiente.")
+	if landscape != null:
+		var terrain_visual := landscape.get_node_or_null("AresVallis_v33_Visual") as Node3D
+		var colored := _count_terrain_override_materials(terrain_visual)
+		_check(colored >= 1,
+			"El suelo no tiene material estable; pueden reaparecer manchas blancas.")
 
 	var player := level.get_node_or_null("Player") as CharacterBody3D
 	_check(player != null, "Falta el jugador.")
@@ -81,3 +92,16 @@ func _run_smoke_test() -> void:
 		for failure in failures:
 			printerr("FAIL: ", failure)
 		quit(1)
+
+
+func _count_terrain_override_materials(node: Node) -> int:
+	if node == null:
+		return 0
+	var count := 0
+	if node is MeshInstance3D:
+		var instance := node as MeshInstance3D
+		if instance.name.to_lower().contains("av28_") and instance.material_override != null:
+			count += 1
+	for child in node.get_children():
+		count += _count_terrain_override_materials(child)
+	return count
