@@ -28,6 +28,26 @@ func _count_rover_wheels(node: Node) -> int:
 	return count
 
 
+
+func _count_restored_surfaces(node: Node) -> int:
+	var total := 0
+	if node is MeshInstance3D:
+		var instance := node as MeshInstance3D
+		if instance.mesh != null:
+			for i in range(instance.mesh.get_surface_count()):
+				var restored := instance.get_surface_override_material(i) as StandardMaterial3D
+				if restored != null and restored.resource_name.begins_with("SL_rover_"):
+					total += 1
+				elif restored != null and restored.resource_name == "SL_solarpanels":
+					_check(restored.albedo_color.b > restored.albedo_color.r, "El panel solar deberia ser azul oscuro.")
+					total += 1
+				elif restored != null and restored.resource_name.begins_with("SL_"):
+					total += 1
+	for child in node.get_children():
+		total += _count_restored_surfaces(child)
+	return total
+
+
 func _run() -> void:
 	var packed := load("res://systems/gameplay/sojourner_scan_challenge.tscn") as PackedScene
 	if packed == null:
@@ -55,6 +75,9 @@ func _run() -> void:
 			"El Sojourner importado debe conservar exactamente seis ruedas.")
 		_check(imported.scale.x > 0.001 and imported.scale.x < 10.0,
 			"La escala del rover importado es inusual.")
+		var restored_surfaces := _count_restored_surfaces(imported)
+		_check(restored_surfaces >= 12,
+			"Falta restaurar la paleta del GLB: demasiadas superficies sin material.")
 
 	for legacy_name in ["Body", "SolarPanel", "APXS", "WheelFL", "WheelFR"]:
 		var old := challenge.get_node_or_null("RoverVisual/" + legacy_name) as Node3D
@@ -75,7 +98,7 @@ func _run() -> void:
 			"El reto no mueve el rover cuando avanza.")
 
 	if failures.is_empty():
-		print("PASS: Sojourner GLB sin rocas/suelo duplicados, 6 ruedas y APXS intacto.")
+		print("PASS: Sojourner GLB con paleta reparada, 6 ruedas y APXS intacto.")
 		quit(0)
 	else:
 		for failure in failures:
