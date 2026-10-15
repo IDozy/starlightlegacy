@@ -9,6 +9,9 @@ const SOURCE_ROVER_NODE: String = "SojournerRover"
 const IMPORTED_NODE_NAME: String = "SojournerImportedModel"
 const TARGET_HORIZONTAL_SIZE: float = 0.82
 const WHEEL_CONTACT_Y: float = 0.0
+# Hundimiento visual leve de las ruedas: evita el efecto 'levitando' en Marte.
+# Se aplica dentro del ajuste de terreno, no como traslacion acumulativa.
+const WHEEL_GROUND_INSET: float = 0.055
 # En el GLB original el extremo del brazo perforador apunta al eje +X.
 # El recorrido hacia Yogi se hace hacia -Z local de RoverVisual.
 const MODEL_YAW_DEGREES: float = 90.0
@@ -209,13 +212,16 @@ func snap_to_terrain() -> void:
 	if corrections.size() != 6:
 		push_warning("Sojourner: no encontre las seis ruedas para apoyar el modelo.")
 		return
-	# La suspension importada tiene ruedas a alturas ligeramente distintas;
-	# el promedio minimiza la separacion visible sin desmontarlas.
+	# El chasis no cambia: nivelar con el promedio del relieve bajo
+	# las seis ruedas y dejar una pequena penetracion visual deliberada.
+	# Sin ello, varias ruedas parecen separadas del suelo en la vista 3/4.
+	# Como se calcula la diferencia de alturas actual, repetidas llamadas
+	# convergen al mismo apoyo sin bajar el rover indefinidamente.
 	var correction := 0.0
 	for amount in corrections:
 		correction += amount
 	correction /= float(corrections.size())
-	position.y += clampf(correction - 0.005, -0.15, 0.15)
+	position.y += clampf(correction - WHEEL_GROUND_INSET, -0.25, 0.20)
 
 
 
