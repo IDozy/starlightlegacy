@@ -21,7 +21,7 @@ func _check(condition: bool, message: String) -> void:
 
 func _count_rover_wheels(node: Node) -> int:
 	var count := 0
-	if node.name.begins_with("RoverFrontWheel."):
+	if str(node.name).to_lower().begins_with("roverfrontwheel"):
 		count += 1
 	for child in node.get_children():
 		count += _count_rover_wheels(child)
@@ -50,20 +50,16 @@ func _count_restored_surfaces(node: Node) -> int:
 
 func _largest_wheel_gap(node: Node) -> float:
 	var gap := 0.0
-	if node is MeshInstance3D and str(node.name).begins_with("RoverFrontWheel."):
+	if node is MeshInstance3D and str(node.name).to_lower().begins_with("roverfrontwheel"):
 		var wheel := node as MeshInstance3D
-		var bounds := wheel.get_aabb()
 		var low_y := INF
-		for i in range(8):
-			var corner := bounds.position + Vector3(
-				bounds.size.x if (i & 1) != 0 else 0.0,
-				bounds.size.y if (i & 2) != 0 else 0.0,
-				bounds.size.z if (i & 4) != 0 else 0.0
-			)
-			low_y = minf(low_y, (wheel.global_transform * corner).y)
-		# Solo medir holgura por arriba: una leve penetracion visual de
-		# la rueda es intencional para evitar el aspecto de levitacion.
-		gap = maxf(0.0, low_y)
+		for surface_idx in range(wheel.mesh.get_surface_count()):
+			var arrays := wheel.mesh.surface_get_arrays(surface_idx)
+			var positions: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for vertex in positions:
+				low_y = minf(low_y, (wheel.global_transform * vertex).y)
+		if low_y < INF:
+			gap = maxf(0.0, low_y)
 	for child in node.get_children():
 		gap = maxf(gap, _largest_wheel_gap(child))
 	return gap
@@ -119,9 +115,15 @@ func _run() -> void:
 		_check(visual.has_method("snap_to_terrain"),
 			"Falta el ajuste de altura sobre las seis ruedas.")
 		if visual.has_method("snap_to_terrain"):
-			visual.call("snap_to_terrain")
-			_check(_largest_wheel_gap(imported) < 0.08,
-				"El rover aparece flotando sobre el terreno plano.")
+			_check(bool(visual.call("snap_to_terrain")),
+				"No se detectaron las seis ruedas reales o no se aplico el apoyo.")
+			_check(_largest_wheel_gap(imported) < 0.025,
+				"Una o mas ruedas quedaron suspendidas respecto al terreno plano.")
+			var supported_y: float = visual.position.y
+			_check(bool(visual.call("snap_to_terrain")),
+				"El apoyo debe poder repetirse tras mover el rover.")
+			_check(absf(visual.position.y - supported_y) < 0.002,
+				"El apoyo se acumula y hunde al rover al ejecutar varias veces.")
 		var restored_surfaces := _count_restored_surfaces(imported)
 		_check(restored_surfaces >= 12,
 			"Falta restaurar la paleta del GLB: demasiadas superficies sin material.")
