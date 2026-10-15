@@ -189,13 +189,17 @@ func _build_ares_vallis() -> void:
 		Vector3(1.55, 0.018, 1.08),
 		LANDING_SCAR
 	)
-	_create_visual_sphere(
-		"SojournerSoilPatch",
-		Vector3(3.4, 0.004, -6.0),
-		0.95,
-		Vector3(1.55, 0.015, 1.20),
-		SAND_LIGHT
-	)
+	# El suelo v33 ya tiene su propio relieve. Una esfera aplanada forma
+	# una plataforma circular artificial alrededor de Sojourner.
+	# Conservar la marca solamente en el nivel de geometria provisional.
+	if not use_imported_ares_vallis:
+		_create_visual_sphere(
+			"SojournerSoilPatch",
+			Vector3(3.4, 0.004, -6.0),
+			0.95,
+			Vector3(1.55, 0.015, 1.20),
+			SAND_LIGHT
+		)
 
 	_pathfinder = PATHFINDER_STORY.instantiate()
 	_pathfinder.position = Vector3(-1.8, 0.05, 1.4)
@@ -232,18 +236,23 @@ func _build_ares_vallis() -> void:
 		var t: float = float(step) / 10.0
 		var z_pos: float = lerpf(0.15, -5.55, t)
 		var x_center: float = lerpf(-0.75, 3.05, t)
+		# Las huellas siguen indicando el camino, pero sobre el GLB real
+		# son marcas discretas, no barras negras elevadas del prototipo.
+		var track_height := 0.004 if use_imported_ares_vallis else 0.014
+		var track_size := Vector3(0.047, 0.005, 0.23) if use_imported_ares_vallis else Vector3(0.075, 0.020, 0.34)
+		var track_color := Color(0.38, 0.21, 0.15) if use_imported_ares_vallis else TRACK
 		_create_visual_box(
 			"TrackL_%d" % step,
-			Vector3(x_center - 0.20, 0.014, z_pos),
-			Vector3(0.075, 0.020, 0.34),
-			TRACK,
+			Vector3(x_center - 0.20, track_height, z_pos),
+			track_size,
+			track_color,
 			-34.0
 		)
 		_create_visual_box(
 			"TrackR_%d" % step,
-			Vector3(x_center + 0.20, 0.014, z_pos),
-			Vector3(0.075, 0.020, 0.34),
-			TRACK,
+			Vector3(x_center + 0.20, track_height, z_pos),
+			track_size,
+			track_color,
 			-34.0
 		)
 
