@@ -8,7 +8,10 @@ const SOURCE_PATH: String = "res://assets/models/taller/Sojourner_v01.glb"
 const SOURCE_ROVER_NODE: String = "SojournerRover"
 const IMPORTED_NODE_NAME: String = "SojournerImportedModel"
 const TARGET_HORIZONTAL_SIZE: float = 0.82
-const WHEEL_CONTACT_Y: float = 0.012
+const WHEEL_CONTACT_Y: float = 0.0
+# En el GLB original el extremo del brazo perforador apunta al eje +X.
+# El recorrido hacia Yogi se hace hacia -Z local de RoverVisual.
+const MODEL_YAW_DEGREES: float = 90.0
 const LEGACY_PARTS := [
 	"Body", "SolarPanel", "APXS",
 	"WheelFL", "WheelML", "WheelRL",
@@ -64,12 +67,16 @@ func _load_imported_rover() -> void:
 	# conservando todas las ruedas, brazos y piezas en sus relaciones.
 	var factor: float = TARGET_HORIZONTAL_SIZE / largest_dimension
 	var center := bounds.position + bounds.size * 0.5
-	rover.rotation = Vector3.ZERO
+	# Orientacion original: +X = frente (brazo perforador).
+	# Girar +90 grados sobre Y convierte ese frente en -Z, hacia Yogi.
+	var yaw_basis := Basis(Vector3.UP, deg_to_rad(MODEL_YAW_DEGREES))
+	var turned_center := yaw_basis * center
+	rover.rotation_degrees = Vector3(0.0, MODEL_YAW_DEGREES, 0.0)
 	rover.scale = Vector3.ONE * factor
 	rover.position = Vector3(
-		-center.x * factor,
-		(WHEEL_CONTACT_Y - bounds.position.y * factor),
-		-center.z * factor
+		-turned_center.x * factor,
+		WHEEL_CONTACT_Y - bounds.position.y * factor,
+		-turned_center.z * factor
 	)
 	_apply_missing_material_palette(rover)
 	_show_legacy(false)
@@ -160,6 +167,57 @@ func _palette_for_material(source_name: String) -> Dictionary:
 		"rover_gold_foil":
 			return {"color": Color(0.78, 0.58, 0.27), "metallic": 0.34, "roughness": 0.62}
 	return {}
+
+
+## Corrige la altura del aspecto visual usando el terreno real debajo de
+## las seis ruedas, NO la altura del centro del StaticBody (que puede caer
+## sobre una pendiente distinta). No modifica hitboxes ni mecanica APXS.
+## Se llama tras alinear el reto y en cada paso W/S del jugador.
+func snap_to_terrain() -> void:
+	if not is_inside_tree():
+		return
+	var stage := get_parent().get_parent()
+	if stage == null:
+		return
+	var landscape := stage.get_node_or_null("AresVallisLandscape_v33")
+	if landscape == null or not landscape.has_method("ground_height_at"):
+		return
+	var rover := get_node_or_null(IMPORTED_NODE_NAME) as Node3D
+	if rover == null:
+		return
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(rover, meshes)
+	var corrections: Array[float] = []
+	for wheel in meshes:
+		if not wheel.name.begins_with("RoverFrontWheel."):
+			continue
+		var local_box := wheel.get_aabb()
+		# El minimo vertical de la llanta se calcula con las ocho esquinas
+		# transformadas, sin depender de la orientacion de su malla.
+		var min_y := INF
+		var ground_xz := wheel.global_transform * (local_box.position + local_box.size * 0.5)
+		for idx in range(8):
+			var local_corner := local_box.position + Vector3(
+				local_box.size.x if (idx & 1) != 0 else 0.0,
+				local_box.size.y if (idx & 2) != 0 else 0.0,
+				local_box.size.z if (idx & 4) != 0 else 0.0
+			)
+			var world_corner := wheel.global_transform * local_corner
+			min_y = minf(min_y, world_corner.y)
+		var ground_y: float = float(landscape.call("ground_height_at", ground_xz.x, ground_xz.z))
+		corrections.append(ground_y - min_y)
+	if corrections.size() != 6:
+		push_warning("Sojourner: no encontre las seis ruedas para apoyar el modelo.")
+		return
+	# La suspension importada tiene ruedas a alturas ligeramente distintas;
+	# el promedio minimiza la separacion visible sin desmontarlas.
+	var correction := 0.0
+	for amount in corrections:
+		correction += amount
+	correction /= float(corrections.size())
+	position.y += clampf(correction - 0.005, -0.15, 0.15)
+
+
 
 func _show_legacy(should_show: bool) -> void:
 	for part_name in LEGACY_PARTS:
