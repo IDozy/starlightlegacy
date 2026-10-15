@@ -125,19 +125,28 @@ func _build_environment() -> void:
 	world_environment.name = "MarsEnvironment"
 
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.46, 0.25, 0.18)
+	# Cielo marciano con gradiente: no usar el antiguo fondo marron plano.
+	# Compatible con el renderer GL Compatibility del proyecto.
+	var mars_sky_material := ProceduralSkyMaterial.new()
+	mars_sky_material.sky_top_color = Color(0.25, 0.17, 0.18)
+	mars_sky_material.sky_horizon_color = Color(0.70, 0.38, 0.27)
+	mars_sky_material.ground_horizon_color = Color(0.57, 0.31, 0.23)
+	mars_sky_material.ground_bottom_color = Color(0.30, 0.17, 0.15)
+	var mars_sky := Sky.new()
+	mars_sky.sky_material = mars_sky_material
+	environment.background_mode = Environment.BG_SKY
+	environment.sky = mars_sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.66, 0.44, 0.34)
-	environment.ambient_light_energy = 0.50
+	environment.ambient_light_color = Color(0.58, 0.44, 0.37)
+	environment.ambient_light_energy = 0.38
 	world_environment.environment = environment
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "MarsSun"
 	sun.rotation_degrees = Vector3(-42.0, -34.0, 0.0)
-	sun.light_color = Color(1.0, 0.80, 0.66)
-	sun.light_energy = 1.12
+	sun.light_color = Color(1.0, 0.79, 0.67)
+	sun.light_energy = 0.85
 	sun.shadow_enabled = true
 	add_child(sun)
 
