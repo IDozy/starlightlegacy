@@ -51,43 +51,98 @@ func _disable_imported_lighting(node: Node) -> void:
 		_disable_imported_lighting(child)
 
 
+func _new_mars_material(color: Color) -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = color
+	material.roughness = 1.0
+	material.metallic = 0.0
+	# Los atributos AV32_COLOR/AV33_COLOR de Blender se renderizan
+	# de manera distinta en el importador GLB: usar un color estable.
+	material.vertex_color_use_as_albedo = false
+	return material
+
+
+func _is_replaced_blender_mesh(name: String) -> bool:
+	# Blender v33 creo COPIAS y oculto los originales, pero el GLB puede
+	# incluir tambien esas fuentes. No dibujar ambas superficies.
+	if name.begins_with("av33_"):
+		return false
+	if name.begins_with("av28_"):
+		return false
+	if name.begins_with("roca_gran_") or name.begins_with("roca_med_"):
+		return false
+	for old_prefix in [
+		"av20_aresvallis_terreno", "av24_aresvallis_terreno",
+		"av25_", "av26_", "av27_", "av29_", "av30_", "av31_", "av32_"
+	]:
+		if name.begins_with(old_prefix):
+			return true
+	return false
+
+
 func _fix_missing_materials(meshes: Array[MeshInstance3D]) -> void:
-	# Respetar albedos y materiales incrustados en el GLB.
-	var fallback := StandardMaterial3D.new()
-	fallback.albedo_color = FALLBACK_COLOR
-	fallback.roughness = 0.98
+	# Godot GL Compatibility puede mostrar partes casi blancas con los
+	# materiales de atributos procedurales exportados desde Blender.
+	# Sustituir SOLO materiales del paisaje, preservando las rocas v20
+	# y las formaciones de roca que ya se veian bien.
+	var sand := _new_mars_material(Color(0.56, 0.32, 0.23))
+	var seam := _new_mars_material(Color(0.54, 0.31, 0.23))
+	var distant := _new_mars_material(Color(0.60, 0.38, 0.30))
+	var rock := _new_mars_material(Color(0.43, 0.25, 0.19))
+	var fallback := _new_mars_material(FALLBACK_COLOR)
+	var hidden_count := 0
+	var recolored_count := 0
+
 	for instance in meshes:
-		if instance.material_override != null:
+		var name := instance.name.to_lower()
+		var label := name + " " + instance.mesh.resource_name.to_lower()
+		if _is_replaced_blender_mesh(name):
+			instance.visible = false
+			hidden_count += 1
 			continue
-		for surface_index in range(instance.mesh.get_surface_count()):
-			if instance.get_active_material(surface_index) == null:
-				instance.set_surface_override_material(surface_index, fallback)
+
+		var override_material: StandardMaterial3D = null
+		if label.contains("av28_") and (label.contains("terreno") or label.contains("terrain")):
+			override_material = sand
+		elif name.begins_with("av33_"):
+			if label.contains("cordillera") or label.contains("fondo") or label.contains("posterior"):
+				override_material = distant
+			elif label.contains("horizonte") or label.contains("cresta_continua"):
+				override_material = seam
+			elif label.contains("acantilado"):
+				override_material = rock
+			elif label.contains("terreno"):
+				override_material = sand
+		elif label.contains("terreno") and not label.contains("roca"):
+			override_material = sand
+
+		if override_material != null:
+			instance.material_override = override_material
+			recolored_count += 1
+		elif instance.material_override == null:
+			for index in range(instance.mesh.get_surface_count()):
+				if instance.get_active_material(index) == null:
+					instance.set_surface_override_material(index, fallback)
+	print("[Ares v33] Mallas antiguas ocultas: ", hidden_count,
+		" | Materiales de paisaje estabilizados: ", recolored_count)
 
 
 func _find_ground_mesh(meshes: Array[MeshInstance3D]) -> MeshInstance3D:
-	var best: MeshInstance3D = null
-	var best_score := -1.0
+	# La colision debe nacer del AV28 aprobado, no de un horizonte,
+	# copia temporal o una malla historica de dimensiones parecidas.
 	for instance in meshes:
-		var n := instance.name.to_lower()
+		var name := instance.name.to_lower()
+		if name.begins_with("av28_") and name.contains("terreno"):
+			return instance
+	# Los nombres de nodos pueden cambiar por el importador GLB.
+	for instance in meshes:
+		var name := instance.name.to_lower()
 		var mesh_name := instance.mesh.resource_name.to_lower()
-		var label := n + " " + mesh_name
-		if label.contains("horizonte") or label.contains("horizon") or label.contains("roca_") or label.contains("rock_"):
-			continue
-		var score := -1.0
-		if label.contains("terreno") or label.contains("terrain"):
-			score = 100.0
-			if label.contains("av28") or label.contains("av33") or label.contains("av26"):
-				score += 150.0
-			elif label.contains("av24"):
-				score += 100.0
-		if score < 0.0:
-			continue
-		var bounds := instance.get_aabb().size
-		score += minf(80.0, maxf(bounds.x, bounds.z) * 0.10)
-		if score > best_score:
-			best_score = score
-			best = instance
-	return best
+		if (name.contains("av28_") or mesh_name.contains("av28_")) and (
+			name.contains("terreno") or mesh_name.contains("terreno")
+		):
+			return instance
+	return null
 
 
 func _create_terrain_collision(instance: MeshInstance3D) -> bool:
