@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dt18xnqscr8e6"
+path="res://.godot/imported/Spaceship_BarbaraTheBee.obj-179aaefe7e8cb4510a334a33af4c6cd6.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Spaceship_BarbaraTheBee.obj-179aaefe7e8cb4510a334a33af4c6cd6.mesh"]
+
+source_file="res://assets/third_party/quaternius/ultimate_space_kit/Vehicles/OBJ/Spaceship_BarbaraTheBee.obj"
+dest_files=["res://.godot/imported/Spaceship_BarbaraTheBee.obj-179aaefe7e8cb4510a334a33af4c6cd6.mesh", "res://.godot/imported/Spaceship_BarbaraTheBee.obj-179aaefe7e8cb4510a334a33af4c6cd6.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
