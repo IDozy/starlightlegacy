@@ -108,6 +108,8 @@ func _unlock_return_portal() -> void:
 	_return_portal = SCENE_PORTAL.instantiate()
 	_return_portal.position = Vector3(-2.2, 0.65, 3.4)
 	add_child(_return_portal)
+	if use_imported_ares_vallis:
+		call_deferred("_align_imported_gameplay")
 
 
 func _has_discovery(discovery_id: String) -> bool:
