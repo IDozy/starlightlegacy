@@ -67,7 +67,9 @@ func interact(player: Node) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _active or not (event is InputEventKey) or not event.pressed or event.echo:
+	if not _active or not (event is InputEventKey):
+		return
+	if not event.pressed or event.echo:
 		return
 	if Engine.get_process_frames() == _started_frame:
 		return
