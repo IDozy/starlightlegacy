@@ -9,11 +9,18 @@ const PROBLEM_ID := "rescue_rover_impact_problem"
 const PATHFINDER_ID := "mars_pathfinder_lander"
 const SOJOURNER_ID := "sojourner_apxs"
 const UPGRADE_ID := "rescue_rover_airbag_upgrade"
+const ENERGY_PROBLEM_ID := "rescue_rover_energy_problem"
+const VANGUARD_ID := "vanguard_1"
+const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
 const MODE_UPGRADE := 2
 const MODE_REVIEW := 3
+const MODE_ENERGY_TEST := 4
+const MODE_ENERGY_WAITING := 5
+const MODE_SOLAR_UPGRADE := 6
+const MODE_SOLAR_REVIEW := 7
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -28,6 +35,7 @@ const OPTION_COUNT := 3
 @onready var feedback_label: Label = $ProjectHUD/Panel/Feedback
 @onready var hint_label: Label = $ProjectHUD/Panel/Hint
 @onready var upgrade_visual: Node3D = $UpgradeVisual
+@onready var solar_visual: Node3D = $SolarUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -35,6 +43,8 @@ var _active := false
 var _mode := MODE_TEST
 var _test_step := 0
 var _selection := OPTION_ELASTIC
+var _energy_selection := 1
+var _energy_test_step := 0
 var _started_frame := -1
 
 
@@ -44,8 +54,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(SOLAR_UPGRADE_ID):
+		return "E · Revisar sistema de energia del vehiculo"
+	if _has_discovery(VANGUARD_ID):
+		return "E · Instalar panel solar y ahorro de energia"
+	if _has_discovery(ENERGY_PROBLEM_ID):
+		return "E · Revisar la bateria agotada"
 	if _has_discovery(UPGRADE_ID):
-		return "E · Revisar Vehículo Explorador de Rescate"
+		return "E · Probar autonomia del Vehiculo Explorador"
 
 	if _memories_complete():
 		return "E · Aplicar lo aprendido al vehículo"
@@ -70,8 +86,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(UPGRADE_ID):
-		_open_review()
+	if _has_discovery(SOLAR_UPGRADE_ID):
+		_open_solar_review()
+	elif _has_discovery(VANGUARD_ID):
+		_open_solar_upgrade()
+	elif _has_discovery(ENERGY_PROBLEM_ID):
+		_open_energy_waiting()
+	elif _has_discovery(UPGRADE_ID):
+		_open_energy_test()
 	elif _memories_complete():
 		_open_upgrade()
 	elif _has_discovery(PROBLEM_ID):
@@ -106,7 +128,30 @@ func _unhandled_input(event: InputEvent) -> void:
 					_close_panel()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW:
+		MODE_ENERGY_TEST:
+			if _is_confirm_key(event):
+				if _energy_test_step == 0:
+					_record_energy_failure()
+					_energy_test_step = 1
+					_show_energy_failure_result()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_SOLAR_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT):
+				_energy_selection = 1 - _energy_selection
+				_render_solar_option()
+				get_viewport().set_input_as_handled()
+			elif INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_energy_selection = 1 - _energy_selection
+				_render_solar_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_solar_upgrade()
+				get_viewport().set_input_as_handled()
+
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -201,6 +246,88 @@ func _open_review() -> void:
 	hint_label.text = "E / Esc · Cerrar"
 
 
+func _open_energy_test() -> void:
+	_mode = MODE_ENERGY_TEST
+	_energy_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 2 · AUTONOMÍA ELÉCTRICA"
+	body_label.text = "La amortiguación funciona. Ahora enciende motores, cámara y luz de rescate. ¿La batería alcanzará para completar la búsqueda?"
+	option_label.text = "E · INICIAR PRUEBA ENERGÉTICA"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Ejecutar prueba    Esc · Salir"
+
+
+func _show_energy_failure_result() -> void:
+	status_label.text = "FALLO · BATERÍA AGOTADA"
+	body_label.text = "Los motores y las luces consumen la reserva antes de terminar la misión. El vehículo necesita conseguir y administrar mejor la energía."
+	option_label.text = "NUEVO PROBLEMA · AUTONOMÍA"
+	feedback_label.text = "Abuelo: Esto me recuerda a un pequeño satélite de 1958..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_energy_waiting() -> void:
+	_mode = MODE_ENERGY_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · ENERGÍA"
+	body_label.text = "El vehículo ya resiste la caída, pero la batería se agota. Habla con el abuelo para conocer Vanguard 1."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_solar_upgrade() -> void:
+	_mode = MODE_SOLAR_UPGRADE
+	_energy_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "VANGUARD 1 · ENERGÍA SOLAR"
+	body_label.text = "En el recuerdo viste cómo las células solares ayudan a extender el funcionamiento de una nave. ¿Qué mejora conviene al Vehículo Explorador de Rescate?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_solar_option()
+
+
+func _render_solar_option() -> void:
+	option_label.text = "◀ SOLO UNA BATERÍA MÁS GRANDE ▶" if _energy_selection == 0 else "◀ PANEL SOLAR + MODO DE AHORRO ▶"
+
+
+func _confirm_solar_upgrade() -> void:
+	if _energy_selection == 0:
+		feedback_label.text = "Una batería mayor dura más, pero no repone la energía consumida. Prueba otra solución."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "El sistema de descubrimientos no está disponible."
+		return
+	registry.call("register_discovery", SOLAR_UPGRADE_ID,
+		"Mejora: energía solar y ahorro",
+		"Proyecto del niño",
+		"El Vehículo Explorador integra un panel solar y una modalidad de ahorro para extender su autonomía cuando recibe luz.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_solar_review()
+
+
+func _open_solar_review() -> void:
+	_mode = MODE_SOLAR_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · ENERGÍA"
+	body_label.text = "El vehículo ya amortigua los impactos y cuenta con un módulo solar y ahorro de energía. El siguiente reto podrá exigir orientación del panel y de la cámara."
+	option_label.text = "PROYECTO EVOLUCIONADO · AUTONOMÍA"
+	feedback_label.text = "Vanguard 1 · Conocimiento aplicado"
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_energy_failure() -> void:
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", ENERGY_PROBLEM_ID,
+		"Problema: batería agotada",
+		"Proyecto del niño",
+		"El Vehículo Explorador de Rescate agota su batería al usar motor, luz y cámara antes de terminar la prueba.")
+	project_state_changed.emit()
+
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -235,6 +362,7 @@ func _register_upgrade() -> void:
 func _refresh_visual_state() -> void:
 	var upgraded := _has_discovery(UPGRADE_ID)
 	upgrade_visual.visible = upgraded
+	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID)
 
 	var box_shape := collision_shape.shape as BoxShape3D
 	if box_shape == null:
