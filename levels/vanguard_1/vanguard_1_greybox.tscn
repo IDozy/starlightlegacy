@@ -1,0 +1,103 @@
+[gd_scene load_steps=7 format=3]
+
+; Starlight Legacy - Vanguard 1 (1958), placeholder low-poly de escala real.
+; NASA NTRS: 6.44 pulgadas (0.1636 m) de diametro; seis conjuntos solares
+; y seis antenas. El nivel jugable podra ampliar su vista de inspeccion.
+; No agrega suelo, camara ni luces. No interviene en la campana.
+
+[sub_resource type="StandardMaterial3D" id="MatAluminum"]
+albedo_color = Color(0.62, 0.67, 0.70, 1)
+metallic = 0.50
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="MatSolar"]
+albedo_color = Color(0.065, 0.14, 0.28, 1)
+metallic = 0.12
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="MatAntenna"]
+albedo_color = Color(0.32, 0.36, 0.39, 1)
+metallic = 0.50
+roughness = 0.52
+
+[sub_resource type="SphereMesh" id="MeshCore"]
+material = SubResource("MatAluminum")
+radius = 0.082
+height = 0.164
+radial_segments = 16
+rings = 8
+
+[sub_resource type="BoxMesh" id="MeshSolarCell"]
+material = SubResource("MatSolar")
+size = Vector3(0.050, 0.003, 0.050)
+
+[sub_resource type="CylinderMesh" id="MeshAntenna"]
+material = SubResource("MatAntenna")
+top_radius = 0.002
+bottom_radius = 0.003
+height = 0.25
+radial_segments = 8
+rings = 1
+
+[node name="Vanguard1Greybox" type="Node3D"]
+
+[node name="ArtifactModel" type="Node3D" parent="."]
+
+[node name="SphereBody" type="MeshInstance3D" parent="ArtifactModel"]
+mesh = SubResource("MeshCore")
+
+[node name="Solar_PosY" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0.081, 0)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Solar_NegY" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, -0.081, 0)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Solar_PosX" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0.081, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Solar_NegX" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(-0.081, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Solar_PosZ" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0, 0.081)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Solar_NegZ" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0, -0.081)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("MeshSolarCell")
+
+[node name="Antenna_PosY" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0.197, 0)
+mesh = SubResource("MeshAntenna")
+
+[node name="Antenna_NegY" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, -0.197, 0)
+mesh = SubResource("MeshAntenna")
+
+[node name="Antenna_PosX" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0.197, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("MeshAntenna")
+
+[node name="Antenna_NegX" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(-0.197, 0, 0)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("MeshAntenna")
+
+[node name="Antenna_PosZ" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0, 0.197)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("MeshAntenna")
+
+[node name="Antenna_NegZ" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 0, -0.197)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("MeshAntenna")
