@@ -9,6 +9,13 @@ extends StaticBody3D
 
 
 func get_interaction_prompt() -> String:
+	# El mismo abuelo puede contar otro recuerdo despues de Pathfinder.
+	# No crear NPC ni controlador de dialogos duplicados.
+	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_energy_problem"):
+		if _has_discovery("vanguard_1"):
+			return "Abuelo · Aplica lo aprendido sobre energia"
+		return "E · Hablar con Abuelo sobre Vanguard 1"
+
 	if _is_completed():
 		return completed_prompt
 
@@ -19,18 +26,23 @@ func get_interaction_prompt() -> String:
 
 
 func interact(player: Node) -> void:
-	if player == null or not _requirement_met() or _is_completed():
+	if player == null:
 		return
-
+	var vanguard_pending := (
+		dialogue_id == "grandfather_intro"
+		and _has_discovery("rescue_rover_energy_problem")
+		and not _has_discovery("vanguard_1")
+	)
+	if not vanguard_pending and (not _requirement_met() or _is_completed()):
+		return
 	var main_node := player.get_parent()
 	if main_node == null:
 		return
-
 	var controller := main_node.get_node_or_null("DialogueController") as DialogueController
 	if controller == null:
 		return
-
-	controller.start_dialogue_by_id(dialogue_id, display_name, player)
+	var selected_dialogue := "grandfather_vanguard_1" if vanguard_pending else dialogue_id
+	controller.start_dialogue_by_id(selected_dialogue, display_name, player)
 
 
 func _requirement_met() -> bool:
