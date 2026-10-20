@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://systems/gameplay/rescue_rover_project.gd" id="1_project"]
 [ext_resource type="PackedScene" path="res://assets/third_party/quaternius/ultimate_space_kit/Vehicles/GLTF/Rover_2.gltf" id="2_rover"]
@@ -41,6 +41,15 @@ radius = 0.42
 height = 0.84
 radial_segments = 10
 rings = 5
+
+[sub_resource type="StandardMaterial3D" id="Mat_solar_vanguard"]
+albedo_color = Color(0.07, 0.13, 0.23, 1)
+metallic = 0.18
+roughness = 0.41
+
+[sub_resource type="BoxMesh" id="Mesh_solar_vanguard"]
+material = SubResource("Mat_solar_vanguard")
+size = Vector3(0.52, 0.037, 0.38)
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
 size = Vector3(0.50, 0.52, 0.72)
@@ -108,6 +117,14 @@ mesh = SubResource("Mesh_airbag")
 position = Vector3(0, 0.42, 0.62)
 scale = Vector3(1.20, 0.72, 0.48)
 mesh = SubResource("Mesh_airbag")
+
+[node name="SolarUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="SolarPanelVanguard" type="MeshInstance3D" parent="SolarUpgradeVisual"]
+position = Vector3(0.0, 0.78, 0.02)
+rotation_degrees = Vector3(-12, 0, 0)
+mesh = SubResource("Mesh_solar_vanguard")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.25, 0.0)
