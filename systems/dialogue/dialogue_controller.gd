@@ -115,6 +115,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Usamos paracaídas y retrocohetes para reducir la velocidad, y unos enormes airbags para absorber el impacto final.",
 				"Ven. Quiero mostrarte dónde terminó aquella máquina y qué aprendimos de ella."
 			])
+		"grandfather_vanguard_1":
+			return PackedStringArray([
+				"¡La amortiguación funcionó! Pero las luces y los motores agotaron tu batería antes de completar el rescate.",
+				"En 1958, antes de que la NASA comenzara sus operaciones, el programa Vanguard lanzó un satélite muy pequeño: Vanguard 1.",
+				"Usaba células solares para proporcionar energía a un transmisor. En la oscuridad, la reserva eléctrica seguía siendo importante.",
+				"Ven, veamos cómo un sistema de energía puede durar más tiempo si aprovechamos la luz y administramos el consumo."
+			])
 		_:
 			return PackedStringArray()
 
