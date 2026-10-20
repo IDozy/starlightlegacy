@@ -4,6 +4,9 @@ const PROBLEM_ID := "rescue_rover_impact_problem"
 const PATHFINDER_ID := "mars_pathfinder_lander"
 const SOJOURNER_ID := "sojourner_apxs"
 const UPGRADE_ID := "rescue_rover_airbag_upgrade"
+const ENERGY_PROBLEM_ID := "rescue_rover_energy_problem"
+const VANGUARD_ID := "vanguard_1"
+const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -59,20 +62,33 @@ func _on_project_active_changed(active: bool) -> void:
 
 
 func _on_dialogue_finished(dialogue_id: String) -> void:
-	if dialogue_id != "grandfather_intro":
-		return
-
+	var target_scene := ""
+	match dialogue_id:
+		"grandfather_intro":
+			target_scene = "res://levels/ares_vallis/ares_vallis.tscn"
+		"grandfather_vanguard_1":
+			target_scene = "res://levels/vanguard_1/vanguard_1_memory.tscn"
+		_:
+			return
 	if player.has_method("set_control_locked"):
 		player.call("set_control_locked", true)
-
 	var transition := get_node_or_null("/root/SceneTransition")
 	if transition != null and transition.has_method("fade_to_scene"):
-		transition.call("fade_to_scene", "res://levels/ares_vallis/ares_vallis.tscn")
+		transition.call("fade_to_scene", target_scene)
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(SOLAR_UPGRADE_ID):
+		project_objective.text = "PROYECTO · ENERGIA RESUELTA · Panel solar y ahorro instalados."
+		return
+	if _has_discovery(VANGUARD_ID):
+		project_objective.text = "PROYECTO · Aplica la energia solar de Vanguard 1 al vehículo."
+		return
+	if _has_discovery(ENERGY_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el abuelo: la batería se agota."
+		return
 	if _has_discovery(UPGRADE_ID):
-		project_objective.text = "PROYECTO · IMPACTO RESUELTO · Vehículo mejorado."
+		project_objective.text = "PROYECTO · Prueba ahora la autonomía del vehículo."
 		return
 
 	if _has_discovery(PATHFINDER_ID) and _has_discovery(SOJOURNER_ID):
