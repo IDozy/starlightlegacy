@@ -12,9 +12,10 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"title": "Vanguard 1",
 		"category": "Prólogo de la era espacial",
 		"optional": false,
-		"history": "Uno de los primeros satélites artificiales de Estados Unidos. En el juego funciona como prólogo histórico anterior a la creación de NASA.",
-		"engineering": "Su historia permite introducir energía eléctrica y el uso temprano de celdas solares para extender la vida de un satélite.",
-		"project": "Pendiente · Futuro reto de energía del Vehículo Explorador."
+		"history": "El programa Vanguard del Naval Research Laboratory lanzó Vanguard 1 el 17 de marzo de 1958, antes del inicio de operaciones de NASA. El satélite esférico utilizó pequeñas células solares; dejó de transmitir en 1964.",
+		"engineering": "Sus células solares convertían la luz en electricidad para un transmisor. En la sombra no producen energía: es útil conservar reserva eléctrica. La simulación del recuerdo no representa telemetría real.",
+		"project": "Aplicación · Panel solar pequeño y modo de ahorro energético para extender la autonomía del Vehículo Explorador de Rescate.",
+		"application_discovery_id": "rescue_rover_solar_upgrade"
 	},
 	{
 		"id": "surveyor_1",
