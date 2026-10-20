@@ -1,0 +1,149 @@
+[gd_scene load_steps=13 format=3]
+
+; Starlight Legacy - Surveyor 1 (1966), modelo temporal Godot.
+; Marco triangular, tres patas, camara, mastil, panel solar y antena.
+; Aproximacion visual; dimensiones publicadas NASA: ~3 m alto, ~4.2 m ancho.
+; No contiene suelo, luces, camara del jugador ni gameplay acoplado.
+
+[sub_resource type="StandardMaterial3D" id="MatFrame"]
+albedo_color = Color(0.64, 0.66, 0.66, 1)
+metallic = 0.35
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="MatGold"]
+albedo_color = Color(0.65, 0.49, 0.27, 1)
+metallic = 0.22
+roughness = 0.70
+
+[sub_resource type="StandardMaterial3D" id="MatSolar"]
+albedo_color = Color(0.055, 0.10, 0.17, 1)
+metallic = 0.09
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="MatDark"]
+albedo_color = Color(0.24, 0.25, 0.26, 1)
+metallic = 0.20
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="MeshHub"]
+material = SubResource("MatGold")
+size = Vector3(0.78, 0.42, 0.64)
+
+[sub_resource type="BoxMesh" id="MeshFrame"]
+material = SubResource("MatFrame")
+size = Vector3(1.52, 0.065, 0.075)
+
+[sub_resource type="CylinderMesh" id="MeshLeg"]
+material = SubResource("MatFrame")
+top_radius = 0.043
+bottom_radius = 0.055
+height = 2.10
+radial_segments = 10
+
+[sub_resource type="CylinderMesh" id="MeshFootpad"]
+material = SubResource("MatDark")
+top_radius = 0.22
+bottom_radius = 0.22
+height = 0.11
+radial_segments = 14
+
+[sub_resource type="CylinderMesh" id="MeshMast"]
+material = SubResource("MatFrame")
+top_radius = 0.038
+bottom_radius = 0.050
+height = 1.43
+radial_segments = 10
+
+[sub_resource type="BoxMesh" id="MeshSolarPanel"]
+material = SubResource("MatSolar")
+size = Vector3(0.96, 0.74, 0.045)
+
+[sub_resource type="CylinderMesh" id="MeshCamera"]
+material = SubResource("MatDark")
+top_radius = 0.100
+bottom_radius = 0.100
+height = 0.23
+radial_segments = 14
+
+[sub_resource type="CylinderMesh" id="MeshDish"]
+material = SubResource("MatFrame")
+top_radius = 0.28
+bottom_radius = 0.28
+height = 0.065
+radial_segments = 18
+
+[node name="Surveyor1Greybox" type="Node3D"]
+
+[node name="ArtifactModel" type="Node3D" parent="."]
+
+[node name="EquipmentBay" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 1.25, 0)
+mesh = SubResource("MeshHub")
+
+[node name="TriangleSide_A" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 1.05, -0.54)
+mesh = SubResource("MeshFrame")
+
+[node name="TriangleSide_B" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(-0.47, 1.05, 0.27)
+rotation_degrees = Vector3(0, 120, 0)
+mesh = SubResource("MeshFrame")
+
+[node name="TriangleSide_C" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0.47, 1.05, 0.27)
+rotation_degrees = Vector3(0, 240, 0)
+mesh = SubResource("MeshFrame")
+
+[node name="LegMount_A" type="Node3D" parent="ArtifactModel"]
+
+[node name="ShockStrut_A" type="MeshInstance3D" parent="ArtifactModel/LegMount_A"]
+position = Vector3(0, 0.72, -0.95)
+rotation_degrees = Vector3(-61, 0, 0)
+mesh = SubResource("MeshLeg")
+
+[node name="Footpad_A" type="MeshInstance3D" parent="ArtifactModel/LegMount_A"]
+position = Vector3(0, 0.10, -1.95)
+mesh = SubResource("MeshFootpad")
+
+[node name="LegMount_B" type="Node3D" parent="ArtifactModel"]
+rotation_degrees = Vector3(0, 120, 0)
+
+[node name="ShockStrut_B" type="MeshInstance3D" parent="ArtifactModel/LegMount_B"]
+position = Vector3(0, 0.72, -0.95)
+rotation_degrees = Vector3(-61, 0, 0)
+mesh = SubResource("MeshLeg")
+
+[node name="Footpad_B" type="MeshInstance3D" parent="ArtifactModel/LegMount_B"]
+position = Vector3(0, 0.10, -1.95)
+mesh = SubResource("MeshFootpad")
+
+[node name="LegMount_C" type="Node3D" parent="ArtifactModel"]
+rotation_degrees = Vector3(0, 240, 0)
+
+[node name="ShockStrut_C" type="MeshInstance3D" parent="ArtifactModel/LegMount_C"]
+position = Vector3(0, 0.72, -0.95)
+rotation_degrees = Vector3(-61, 0, 0)
+mesh = SubResource("MeshLeg")
+
+[node name="Footpad_C" type="MeshInstance3D" parent="ArtifactModel/LegMount_C"]
+position = Vector3(0, 0.10, -1.95)
+mesh = SubResource("MeshFootpad")
+
+[node name="SolarMast" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 2.03, 0)
+mesh = SubResource("MeshMast")
+
+[node name="SolarPanelStaticPreview" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0, 2.66, -0.08)
+rotation_degrees = Vector3(15, 0, 0)
+mesh = SubResource("MeshSolarPanel")
+
+[node name="TV_Camera" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(0.38, 1.52, -0.31)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("MeshCamera")
+
+[node name="DishAntenna" type="MeshInstance3D" parent="ArtifactModel"]
+position = Vector3(-0.46, 1.88, 0.30)
+rotation_degrees = Vector3(70, -18, 0)
+mesh = SubResource("MeshDish")
