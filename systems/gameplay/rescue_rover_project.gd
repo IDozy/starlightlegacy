@@ -72,8 +72,6 @@ func get_interaction_prompt() -> String:
 		return "E · Revisar fallo de orientacion"
 	if _has_discovery(SOLAR_UPGRADE_ID):
 		return "E · Probar orientacion de panel y camara"
-	if _has_discovery(SOLAR_UPGRADE_ID):
-		return "E · Revisar sistema de energia del vehiculo"
 	if _has_discovery(VANGUARD_ID):
 		return "E · Instalar panel solar y ahorro de energia"
 	if _has_discovery(ENERGY_PROBLEM_ID):
@@ -487,7 +485,6 @@ func _register_upgrade() -> void:
 func _refresh_visual_state() -> void:
 	var upgraded := _has_discovery(UPGRADE_ID)
 	upgrade_visual.visible = upgraded
-	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID)
 	adjustable_visual.visible = _has_discovery(ORIENTATION_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
