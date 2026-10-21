@@ -143,3 +143,27 @@ El niño añade al vehículo **un soporte regulable** para el panel solar y **un
 - [ ] Aprobar ritmo de dificultad con capturas; modelado final de Blender pendiente.
 
 **NO marcar estos capítulos como implementados ni fusionar hasta superar las pruebas.**  
+
+
+---
+
+## Avance del código — Surveyor 1 (20 de octubre de 2026)
+
+**Implementado en `feat/005a-discovery-archive`, pendiente de ejecutar Godot en local:**
+
+- `rescue_rover_orientation_problem`: tercer problema en el taller, después de la mejora solar `rescue_rover_solar_upgrade`.
+- `grandfather_surveyor_1`: el abuelo introduce el recuerdo de 1966 mediante el controlador de diálogo existente, sin duplicar personajes.
+- `levels/surveyor_1/surveyor_1_memory.tscn`: escenario gris de superficie lunar, el greybox aprobado, consola de órdenes, jugador y HUD. Reconstrucción estilizada, no cartografía de NASA.
+- `systems/gameplay/surveyor_command_console.gd`: reto progresivo de **orientación del panel → apuntar cámara → transmitir una imagen simulada**. En cada etapa se muestran ángulos ficticios y se descartan órdenes erróneas.
+- `surveyor_1`: registro en el Archivo NASA con fechas, historia y significado de ingeniería; respeta orden cronológico en la UI.
+- `rescue_rover_orientation_upgrade`: panel regulable y cámara instalados como modelo provisional del Vehículo Explorador en taller; conserva amortiguación y autonomía previas.
+- `tests/surveyor_1_story_loop_smoke.gd`: comprueba los ID y estados, rechazo de comandos erróneos, desbloqueo tardío, conexión a Archivo, portal y mejora final.
+
+**Límites de verificación:** referencias y secuencias revisadas en GitHub; **no se ejecutó Godot ni se validó Desktop/Web, colisiones, posiciones de la cámara o interacción con mouse/teclado en runtime**. Esas pruebas quedan pendientes para cuando se habilite el entorno local.
+
+**Fuentes para afirmaciones históricas:**
+- NASA Science: https://science.nasa.gov/mission/surveyor-1/
+- NASA NTRS / JPL: https://ntrs.nasa.gov/citations/19670015764
+- NASA/JPL, órdenes del panel solar: https://www.jpl.nasa.gov/news/surveyor-i-lands-on-the-moon/
+
+**Siguiente capítulo a diseñar, todavía NO implementado:** etapa de descenso de Apollo 11 (1969) conforme al catálogo existente `apollo_11_descent_stage`. Antes de crear una escena de memoria, definir el problema físico preciso que resuelve en el vehículo infantil y documentar las fuentes NASA, manteniendo la curva de dificultad.
