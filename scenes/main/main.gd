@@ -7,6 +7,9 @@ const UPGRADE_ID := "rescue_rover_airbag_upgrade"
 const ENERGY_PROBLEM_ID := "rescue_rover_energy_problem"
 const VANGUARD_ID := "vanguard_1"
 const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
+const ORIENTATION_PROBLEM_ID := "rescue_rover_orientation_problem"
+const SURVEYOR_ID := "surveyor_1"
+const ORIENTATION_UPGRADE_ID := "rescue_rover_orientation_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -68,6 +71,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/ares_vallis/ares_vallis.tscn"
 		"grandfather_vanguard_1":
 			target_scene = "res://levels/vanguard_1/vanguard_1_memory.tscn"
+		"grandfather_surveyor_1":
+			target_scene = "res://levels/surveyor_1/surveyor_1_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -78,8 +83,17 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(ORIENTATION_UPGRADE_ID):
+		project_objective.text = "PROYECTO · PANEL Y CÁMARA ORIENTABLES · Vehículo mejorado."
+		return
+	if _has_discovery(SURVEYOR_ID):
+		project_objective.text = "PROYECTO · Aplica la orientación de Surveyor 1 al vehículo."
+		return
+	if _has_discovery(ORIENTATION_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el Abuelo sobre orientación de panel y cámara."
+		return
 	if _has_discovery(SOLAR_UPGRADE_ID):
-		project_objective.text = "PROYECTO · ENERGIA RESUELTA · Panel solar y ahorro instalados."
+		project_objective.text = "PROYECTO · Comprueba cómo se orientan el panel y la cámara."
 		return
 	if _has_discovery(VANGUARD_ID):
 		project_objective.text = "PROYECTO · Aplica la energia solar de Vanguard 1 al vehículo."
