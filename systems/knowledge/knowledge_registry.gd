@@ -23,9 +23,10 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"title": "Surveyor 1",
 		"category": "Hardware lunar",
 		"optional": false,
-		"history": "Primer alunizaje suave exitoso de Estados Unidos. Su artículo se habilitará cuando el jugador llegue al reto correspondiente.",
-		"engineering": "Pendiente de cerrar con fuentes NASA antes de implementar el nivel.",
-		"project": "Pendiente · Futuro reto de orientación y energía."
+		"history": "Surveyor 1 fue lanzado el 30 de mayo de 1966 y alunizó suavemente en Oceanus Procellarum el 2 de junio. Fue el primer alunizaje suave estadounidense. Transmitió 11.240 imágenes de televisión y ayudó a preparar futuras exploraciones lunares.",
+		"engineering": "Su estructura de tres patas sostenía equipos, una cámara de televisión y un panel solar. Desde estaciones terrestres se enviaban comandos para operar la cámara y ajustar el panel. Los ángulos del recuerdo son una analogía jugable, no telemetría histórica.",
+		"project": "Aplicación · Soportes regulables del panel solar y la cámara para orientar la luz y observar el objetivo del Vehículo Explorador de Rescate.",
+		"application_discovery_id": "rescue_rover_orientation_upgrade"
 	},
 	{
 		"id": "apollo_11_descent_stage",
