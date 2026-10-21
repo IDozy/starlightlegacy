@@ -122,6 +122,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Usaba células solares para proporcionar energía a un transmisor. En la oscuridad, la reserva eléctrica seguía siendo importante.",
 				"Ven, veamos cómo un sistema de energía puede durar más tiempo si aprovechamos la luz y administramos el consumo."
 			])
+		"grandfather_surveyor_1":
+			return PackedStringArray([
+				"¡Ahora el vehículo tiene energía! Pero cuando la luz llega de lado, el panel carga peor, y la cámara no consigue ver el objeto.",
+				"En 1966 una nave de la NASA aterrizó suavemente en la Luna por primera vez para Estados Unidos: Surveyor 1.",
+				"Los equipos de Tierra enviaban órdenes para operar su cámara y orientar el panel solar. No hacía falta que la máquina adivinara todo por sí sola.",
+				"En el Océano de las Tormentas transmitió miles de imágenes. Vamos a practicar cómo orientar la luz y la observación con órdenes precisas."
+			])
 		_:
 			return PackedStringArray()
 
