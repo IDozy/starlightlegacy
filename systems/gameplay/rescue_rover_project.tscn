@@ -126,6 +126,29 @@ position = Vector3(0.0, 0.78, 0.02)
 rotation_degrees = Vector3(-12, 0, 0)
 mesh = SubResource("Mesh_solar_vanguard")
 
+[node name="OrientationUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="AdjustableSolarPivot" type="Node3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0, 0.79, 0.02)
+rotation_degrees = Vector3(-26, 0, 0)
+
+[node name="AdjustableSolarPanel" type="MeshInstance3D" parent="OrientationUpgradeVisual/AdjustableSolarPivot"]
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="SurveyorCameraSupport" type="MeshInstance3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0.32, 0.88, -0.19)
+scale = Vector3(0.16, 0.40, 0.16)
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="SurveyorCameraPivot" type="Node3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0.32, 1.02, -0.19)
+rotation_degrees = Vector3(0, -30, 0)
+
+[node name="SurveyorCameraBody" type="MeshInstance3D" parent="OrientationUpgradeVisual/SurveyorCameraPivot"]
+scale = Vector3(0.33, 1.35, 0.35)
+mesh = SubResource("Mesh_solar_vanguard")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.25, 0.0)
 shape = SubResource("Shape_body")
