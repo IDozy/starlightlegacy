@@ -12,6 +12,9 @@ const UPGRADE_ID := "rescue_rover_airbag_upgrade"
 const ENERGY_PROBLEM_ID := "rescue_rover_energy_problem"
 const VANGUARD_ID := "vanguard_1"
 const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
+const ORIENTATION_PROBLEM_ID := "rescue_rover_orientation_problem"
+const SURVEYOR_ID := "surveyor_1"
+const ORIENTATION_UPGRADE_ID := "rescue_rover_orientation_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -21,6 +24,10 @@ const MODE_ENERGY_TEST := 4
 const MODE_ENERGY_WAITING := 5
 const MODE_SOLAR_UPGRADE := 6
 const MODE_SOLAR_REVIEW := 7
+const MODE_ORIENTATION_TEST := 8
+const MODE_ORIENTATION_WAITING := 9
+const MODE_ORIENTATION_UPGRADE := 10
+const MODE_ORIENTATION_REVIEW := 11
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -36,6 +43,7 @@ const OPTION_COUNT := 3
 @onready var hint_label: Label = $ProjectHUD/Panel/Hint
 @onready var upgrade_visual: Node3D = $UpgradeVisual
 @onready var solar_visual: Node3D = $SolarUpgradeVisual
+@onready var adjustable_visual: Node3D = $OrientationUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -45,6 +53,8 @@ var _test_step := 0
 var _selection := OPTION_ELASTIC
 var _energy_selection := 1
 var _energy_test_step := 0
+var _orientation_test_step := 0
+var _orientation_selection := 1
 var _started_frame := -1
 
 
@@ -54,6 +64,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(ORIENTATION_UPGRADE_ID):
+		return "E · Revisar orientacion de panel y camara"
+	if _has_discovery(SURVEYOR_ID):
+		return "E · Aplicar orientacion del panel y la camara"
+	if _has_discovery(ORIENTATION_PROBLEM_ID):
+		return "E · Revisar fallo de orientacion"
+	if _has_discovery(SOLAR_UPGRADE_ID):
+		return "E · Probar orientacion de panel y camara"
 	if _has_discovery(SOLAR_UPGRADE_ID):
 		return "E · Revisar sistema de energia del vehiculo"
 	if _has_discovery(VANGUARD_ID):
@@ -86,8 +104,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(SOLAR_UPGRADE_ID):
-		_open_solar_review()
+	if _has_discovery(ORIENTATION_UPGRADE_ID):
+		_open_orientation_review()
+	elif _has_discovery(SURVEYOR_ID):
+		_open_orientation_upgrade()
+	elif _has_discovery(ORIENTATION_PROBLEM_ID):
+		_open_orientation_waiting()
+	elif _has_discovery(SOLAR_UPGRADE_ID):
+		_open_orientation_test()
 	elif _has_discovery(VANGUARD_ID):
 		_open_solar_upgrade()
 	elif _has_discovery(ENERGY_PROBLEM_ID):
@@ -128,6 +152,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_close_panel()
 				get_viewport().set_input_as_handled()
 
+		MODE_ORIENTATION_TEST:
+			if _is_confirm_key(event):
+				if _orientation_test_step == 0:
+					_record_orientation_failure()
+					_orientation_test_step = 1
+					_show_orientation_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_ORIENTATION_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_orientation_selection = 1 - _orientation_selection
+				_render_orientation_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_orientation_upgrade()
+				get_viewport().set_input_as_handled()
+
 		MODE_ENERGY_TEST:
 			if _is_confirm_key(event):
 				if _energy_test_step == 0:
@@ -151,7 +194,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -328,6 +371,88 @@ func _record_energy_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_orientation_test() -> void:
+	_mode = MODE_ORIENTATION_TEST
+	_orientation_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 3 · ORIENTACIÓN Y OBSERVACIÓN"
+	body_label.text = "Ya tienes energía solar, pero al cambiar la dirección de la luz el panel no recibe suficiente iluminación. La cámara apunta fuera del objetivo de rescate. Prueba ambos sistemas."
+	option_label.text = "E · INICIAR PRUEBA DE ORIENTACIÓN"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Ejecutar prueba    Esc · Salir"
+
+
+func _show_orientation_failure() -> void:
+	status_label.text = "FALLO · PANEL Y CÁMARA MAL ORIENTADOS"
+	body_label.text = "El panel recibe menos luz y la cámara no encuentra el objeto. No basta con tener electricidad: debemos dirigir los instrumentos correctamente."
+	option_label.text = "NUEVO PROBLEMA · ORIENTACIÓN"
+	feedback_label.text = "Abuelo: Surveyor 1 recibía órdenes de la Tierra para operar sobre la Luna..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_orientation_waiting() -> void:
+	_mode = MODE_ORIENTATION_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · ORIENTACIÓN"
+	body_label.text = "Nuestro panel y la cámara necesitan orientación controlada. Habla con el abuelo sobre Surveyor 1 antes de modificarlos."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_orientation_upgrade() -> void:
+	_mode = MODE_ORIENTATION_UPGRADE
+	_orientation_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "SURVEYOR 1 · ÓRDENES Y ORIENTACIÓN"
+	body_label.text = "En 1966 Surveyor 1 recibió órdenes desde Tierra para orientar sistemas y observar la Luna. ¿Cómo adaptarías esa idea al vehículo de la feria?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_orientation_option()
+
+
+func _render_orientation_option() -> void:
+	option_label.text = "◀ MÁS BRILLO EN LA PANTALLA ▶" if _orientation_selection == 0 else "◀ SOPORTE DE PANEL Y CÁMARA REGULABLES ▶"
+
+
+func _confirm_orientation_upgrade() -> void:
+	if _orientation_selection == 0:
+		feedback_label.text = "El brillo no orienta ni el panel solar ni la cámara. Prueba ajustar ambos mecanismos."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "No se pudo abrir el Archivo NASA."
+		return
+	registry.call("register_discovery", ORIENTATION_UPGRADE_ID,
+		"Mejora: panel y cámara orientables",
+		"Proyecto del niño",
+		"El Vehículo Explorador integra un soporte regulable para orientar un panel solar y una cámara hacia su objetivo.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_orientation_review()
+
+
+func _open_orientation_review() -> void:
+	_mode = MODE_ORIENTATION_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · ORIENTACIÓN"
+	body_label.text = "La amortiguación y la autonomía ya funcionaban. Ahora el panel se puede orientar y la cámara puede observar el objetivo sin girar todo el vehículo."
+	option_label.text = "PROYECTO EVOLUCIONADO · OBSERVACIÓN REMOTA"
+	feedback_label.text = "Surveyor 1 · Conocimiento aplicado"
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_orientation_failure() -> void:
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", ORIENTATION_PROBLEM_ID,
+		"Problema: orientar panel y cámara",
+		"Proyecto del niño",
+		"El Vehículo Explorador no orienta adecuadamente el panel hacia la luz ni la cámara hacia el objetivo.")
+	project_state_changed.emit()
+
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -363,6 +488,10 @@ func _refresh_visual_state() -> void:
 	var upgraded := _has_discovery(UPGRADE_ID)
 	upgrade_visual.visible = upgraded
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID)
+	adjustable_visual.visible = _has_discovery(ORIENTATION_UPGRADE_ID)
+	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
+	# el sistema de energía solar continúa instalado.
+	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)
 
 	var box_shape := collision_shape.shape as BoxShape3D
 	if box_shape == null:
