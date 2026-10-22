@@ -21,6 +21,9 @@ const MODULE_UPGRADE_ID := "rescue_rover_modular_release_upgrade"
 const TRACTION_PROBLEM_ID := "rescue_rover_traction_problem"
 const APOLLO15_ID := "apollo_15_lrv"
 const TRACTION_UPGRADE_ID := "rescue_rover_traction_upgrade"
+const SCIENCE_PROBLEM_ID := "rescue_rover_science_verification_problem"
+const VIKING_ID := "viking_1"
+const SCIENCE_UPGRADE_ID := "rescue_rover_science_verification_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -42,6 +45,10 @@ const MODE_TRACTION_TEST := 16
 const MODE_TRACTION_WAITING := 17
 const MODE_TRACTION_UPGRADE := 18
 const MODE_TRACTION_REVIEW := 19
+const MODE_SCIENCE_TEST := 20
+const MODE_SCIENCE_WAITING := 21
+const MODE_SCIENCE_UPGRADE := 22
+const MODE_SCIENCE_REVIEW := 23
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -62,6 +69,7 @@ const OPTION_COUNT := 3
 @onready var modular_visual: Node3D = $ModularReleaseVisual
 @onready var released_base_visual: Node3D = $ReleasedBaseVisual
 @onready var traction_visual: Node3D = $TractionWheelUpgradeVisual
+@onready var science_visual: Node3D = $ScienceVerificationUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -77,6 +85,8 @@ var _module_test_step := 0
 var _module_selection := 1
 var _traction_test_step := 0
 var _traction_selection := 1
+var _science_test_step := 0
+var _science_selection := 1
 var _started_frame := -1
 
 
@@ -86,8 +96,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(SCIENCE_UPGRADE_ID):
+		return "E · Revisar verificación científica del rover"
+	if _has_discovery(VIKING_ID):
+		return "E · Añadir comprobaciones científicas inspiradas en Viking 1"
+	if _has_discovery(SCIENCE_PROBLEM_ID):
+		return "E · Revisar alerta del sensor sin verificar"
 	if _has_discovery(TRACTION_UPGRADE_ID):
-		return "E · Revisar mejora de movilidad sobre terreno suelto"
+		return "E · Probar análisis de suelo con el vehículo"
 	if _has_discovery(APOLLO15_ID):
 		return "E · Mejorar tracción inspirada en Apollo 15"
 	if _has_discovery(TRACTION_PROBLEM_ID):
@@ -136,8 +152,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(TRACTION_UPGRADE_ID):
-		_open_traction_review()
+	if _has_discovery(SCIENCE_UPGRADE_ID):
+		_open_science_review()
+	elif _has_discovery(VIKING_ID):
+		_open_science_upgrade()
+	elif _has_discovery(SCIENCE_PROBLEM_ID):
+		_open_science_waiting()
+	elif _has_discovery(TRACTION_UPGRADE_ID):
+		_open_science_test()
 	elif _has_discovery(APOLLO15_ID):
 		_open_traction_upgrade()
 	elif _has_discovery(TRACTION_PROBLEM_ID):
@@ -194,6 +216,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_SCIENCE_TEST:
+			if _is_confirm_key(event):
+				if _science_test_step == 0:
+					_record_science_failure()
+					_science_test_step = 1
+					_show_science_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_SCIENCE_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_science_selection = 1 - _science_selection
+				_render_science_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_science_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_TRACTION_TEST:
@@ -276,7 +317,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -705,6 +746,91 @@ func _record_traction_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_science_test() -> void:
+	_mode = MODE_SCIENCE_TEST
+	_science_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 6 · ¿QUÉ SIGNIFICA LA SEÑAL?"
+	body_label.text = "El vehículo ya supera piedras y suelo suelto, pero un sensor de prueba marca una sustancia como 'señal de vida' sin ninguna comparación. No sabemos realmente qué ha detectado."
+	option_label.text = "E · REVISAR LECTURA DEL SENSOR"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Ejecutar prueba    Esc · Salir"
+
+
+func _show_science_failure() -> void:
+	status_label.text = "FALLO · CONCLUSIÓN SIN COMPROBACIÓN"
+	body_label.text = "Una lectura aislada no prueba la existencia de vida. El vehículo no distingue entre una reacción química y otra explicación. Necesita verificar las muestras y conservar los resultados antes de informar."
+	option_label.text = "NUEVO PROBLEMA · VERIFICAR EVIDENCIAS"
+	feedback_label.text = "Abuelo: Viking 1 intentó responder una pregunta parecida en Marte, pero la ciencia exige pruebas..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_science_waiting() -> void:
+	_mode = MODE_SCIENCE_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · EVIDENCIA INSUFICIENTE"
+	body_label.text = "El sensor marcó una reacción, pero faltan comprobaciones. Habla con el abuelo sobre el laboratorio de Viking 1."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_science_upgrade() -> void:
+	_mode = MODE_SCIENCE_UPGRADE
+	_science_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "VIKING 1 · INVESTIGAR ANTES DE AFIRMAR"
+	body_label.text = "Viking 1 recogió y analizó muestras en Marte, pero los resultados biológicos no confirmaron vida. ¿Cómo mejoramos la investigación de nuestro rover escolar?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_science_option()
+
+
+func _render_science_option() -> void:
+	option_label.text = "◀ PRESENTAR UNA SOLA SEÑAL COMO PRUEBA ▶" if _science_selection == 0 else "◀ MUESTRA + COMPARACIÓN + REGISTRO DE DATOS ▶"
+
+
+func _confirm_science_upgrade() -> void:
+	if _science_selection == 0:
+		feedback_label.text = "Un resultado aislado no permite conocer su causa. Registra una comprobación adicional y evita una conclusión precipitada."
+		return
+	if not _has_discovery(VIKING_ID) or not _has_discovery(TRACTION_UPGRADE_ID):
+		feedback_label.text = "Antes completa Viking 1 y conserva las mejoras previas."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", SCIENCE_UPGRADE_ID,
+		"Mejora: verificación de resultados",
+		"Proyecto del niño",
+		"El Vehículo Explorador añade un módulo escolar para comparar lecturas y registrar datos antes de anunciar conclusiones. Inspirado en la investigación científica de Viking 1.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_science_review()
+
+
+func _open_science_review() -> void:
+	_mode = MODE_SCIENCE_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · EVIDENCIA CIENTÍFICA"
+	body_label.text = "Ahora el vehículo registra muestras y contrasta resultados antes de sacar conclusiones. Conserva amortiguación, energía, cámara orientable, base liberable y ruedas con agarre."
+	option_label.text = "PROYECTO EVOLUCIONADO · VERIFICACIÓN"
+	feedback_label.text = "Viking 1 · Investigar con rigor."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_science_failure() -> void:
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", SCIENCE_PROBLEM_ID,
+		"Problema: sensor sin verificación",
+		"Proyecto del niño",
+		"Una señal química del sensor de ensayo se interpretó precipitadamente como vida. Se necesitan controles, comparación y registro de datos.")
+	project_state_changed.emit()
+
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -744,6 +870,7 @@ func _refresh_visual_state() -> void:
 	modular_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
 	released_base_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
 	traction_visual.visible = _has_discovery(TRACTION_UPGRADE_ID)
+	science_visual.visible = _has_discovery(SCIENCE_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)
