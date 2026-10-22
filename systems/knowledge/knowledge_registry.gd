@@ -118,11 +118,12 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"id": "perseverance_sky_crane",
 		"year": 2021,
 		"title": "Sky Crane · Perseverance",
-		"category": "Sistema de descenso",
+		"category": "Sistema de descenso en Marte",
 		"optional": false,
-		"history": "Artículo aún no recuperado.",
-		"engineering": "Pendiente · Separación segura, empuje e inercia.",
-		"project": "Pendiente."
+		"history": "El 18 de febrero de 2021 NASA logró aterrizar Perseverance en el cráter Jezero. Tras la entrada atmosférica, paracaídas, escudo y navegación relativa al terreno, su etapa de descenso con motores redujo la velocidad. La maniobra Sky Crane bajó el rover suspendido en cables; al detectar el contacto de las ruedas con Marte se cortaron los cables y la etapa se alejó antes de caer a distancia. La etapa de descenso no quedó junto al rover.",
+		"engineering": "La navegación relativa al terreno permitía elegir un punto seguro. La plataforma propulsada estabilizaba el descenso; bajaba el rover por cables y este desplegaba sus ruedas. El contacto con el suelo precedía al corte de cables y al alejamiento de la etapa. Fue una maniobra autónoma, no controlada en tiempo real desde la Tierra. La interacción educativa omite física y telemetría reales.",
+		"project": "Aplicación · Protocolo de confirmación de apoyo antes de liberar un soporte de entrega del vehículo escolar. No lleva cohetes y no equivale al sistema real de NASA.",
+		"application_discovery_id": "rescue_rover_touchdown_release_upgrade"
 	},
 	{
 		"id": "insight",

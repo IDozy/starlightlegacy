@@ -143,6 +143,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
 				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
 			])
+		"grandfather_sky_crane":
+			return PackedStringArray([
+				"Ahora tu rover está protegido y conoce su consumo de energía, pero la base de entrega se separa antes de que las ruedas toquen el suelo.",
+				"Perseverance aterrizó en el cráter Jezero de Marte el 18 de febrero de 2021. Durante su descenso usó navegación relativa al terreno para escoger un lugar seguro.",
+				"Una etapa con motores descendió y lo bajó por cables hasta que sus ruedas hicieron contacto. Solo entonces cortó las conexiones y la etapa salió volando para caer lejos del rover.",
+				"Esto no fue como Apollo 11: la etapa no quedó de plataforma en el mismo sitio. Nuestra maqueta aprenderá el orden: escoger terreno, bajar, detectar apoyo y liberar."
+			])
 		"grandfather_opportunity":
 			return PackedStringArray([
 				"Tu rover funciona, pero el panel ya no recibe la luz suficiente. Una tormenta artificial ha oscurecido la zona de pruebas.",

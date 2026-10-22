@@ -25,6 +25,9 @@ const SLIP_UPGRADE_ID := "rescue_rover_slip_guard_upgrade"
 const LOW_LIGHT_PROBLEM_ID := "rescue_rover_low_light_problem"
 const OPPORTUNITY_ID := "opportunity"
 const POWER_BUDGET_UPGRADE_ID := "rescue_rover_power_budget_upgrade"
+const DELIVERY_PROBLEM_ID := "rescue_rover_delivery_problem"
+const SKY_CRANE_ID := "perseverance_sky_crane"
+const DELIVERY_UPGRADE_ID := "rescue_rover_touchdown_release_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -98,6 +101,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/spirit/spirit_memory.tscn"
 		"grandfather_opportunity":
 			target_scene = "res://levels/opportunity/opportunity_memory.tscn"
+		"grandfather_sky_crane":
+			target_scene = "res://levels/perseverance_sky_crane/sky_crane_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -108,8 +113,17 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(DELIVERY_UPGRADE_ID):
+		project_objective.text = "PROYECTO · ENTREGA SEGURA · Liberación tras contacto confirmado."
+		return
+	if _has_discovery(SKY_CRANE_ID):
+		project_objective.text = "PROYECTO · Instala el protocolo de entrega aprendido de Sky Crane."
+		return
+	if _has_discovery(DELIVERY_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el abuelo sobre Perseverance y Sky Crane."
+		return
 	if _has_discovery(POWER_BUDGET_UPGRADE_ID):
-		project_objective.text = "PROYECTO · PRESUPUESTO ENERGÉTICO INSTALADO · Luz y consumo monitorizados."
+		project_objective.text = "PROYECTO · Prueba la entrega del rover desde su soporte."
 		return
 	if _has_discovery(OPPORTUNITY_ID):
 		project_objective.text = "PROYECTO · Aplica el modo de ahorro aprendido de Opportunity."

@@ -30,6 +30,9 @@ const SLIP_UPGRADE_ID := "rescue_rover_slip_guard_upgrade"
 const LOW_LIGHT_PROBLEM_ID := "rescue_rover_low_light_problem"
 const OPPORTUNITY_ID := "opportunity"
 const POWER_BUDGET_UPGRADE_ID := "rescue_rover_power_budget_upgrade"
+const DELIVERY_PROBLEM_ID := "rescue_rover_delivery_problem"
+const SKY_CRANE_ID := "perseverance_sky_crane"
+const DELIVERY_UPGRADE_ID := "rescue_rover_touchdown_release_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -63,6 +66,10 @@ const MODE_LOW_LIGHT_TEST := 28
 const MODE_LOW_LIGHT_WAITING := 29
 const MODE_LOW_LIGHT_UPGRADE := 30
 const MODE_LOW_LIGHT_REVIEW := 31
+const MODE_DELIVERY_TEST := 32
+const MODE_DELIVERY_WAITING := 33
+const MODE_DELIVERY_UPGRADE := 34
+const MODE_DELIVERY_REVIEW := 35
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -86,6 +93,7 @@ const OPTION_COUNT := 3
 @onready var science_visual: Node3D = $ScienceVerificationUpgradeVisual
 @onready var slip_visual: Node3D = $SlipSafetyUpgradeVisual
 @onready var power_visual: Node3D = $PowerBudgetUpgradeVisual
+@onready var delivery_visual: Node3D = $TouchdownReleaseUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -107,6 +115,8 @@ var _slip_test_step := 0
 var _slip_selection := 1
 var _light_test_step := 0
 var _light_selection := 1
+var _delivery_test_step := 0
+var _delivery_selection := 1
 var _started_frame := -1
 
 
@@ -116,8 +126,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(DELIVERY_UPGRADE_ID):
+		return "E · Revisar liberación segura al aterrizar"
+	if _has_discovery(SKY_CRANE_ID):
+		return "E · Instalar protocolo de entrega inspirado en Sky Crane"
+	if _has_discovery(DELIVERY_PROBLEM_ID):
+		return "E · Revisar descenso y liberación del soporte"
 	if _has_discovery(POWER_BUDGET_UPGRADE_ID):
-		return "E · Revisar el presupuesto de energía"
+		return "E · Probar descenso del vehículo de rescate"
 	if _has_discovery(OPPORTUNITY_ID):
 		return "E · Instalar ahorro inspirado en Opportunity"
 	if _has_discovery(LOW_LIGHT_PROBLEM_ID):
@@ -184,8 +200,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(POWER_BUDGET_UPGRADE_ID):
-		_open_low_light_review()
+	if _has_discovery(DELIVERY_UPGRADE_ID):
+		_open_delivery_review()
+	elif _has_discovery(SKY_CRANE_ID):
+		_open_delivery_upgrade()
+	elif _has_discovery(DELIVERY_PROBLEM_ID):
+		_open_delivery_waiting()
+	elif _has_discovery(POWER_BUDGET_UPGRADE_ID):
+		_open_delivery_test()
 	elif _has_discovery(OPPORTUNITY_ID):
 		_open_low_light_upgrade()
 	elif _has_discovery(LOW_LIGHT_PROBLEM_ID):
@@ -260,6 +282,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_DELIVERY_TEST:
+			if _is_confirm_key(event):
+				if _delivery_test_step == 0:
+					_record_delivery_failure()
+					_delivery_test_step = 1
+					_show_delivery_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_DELIVERY_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_delivery_selection = 1 - _delivery_selection
+				_render_delivery_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_delivery_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_LOW_LIGHT_TEST:
@@ -399,7 +440,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW, MODE_LOW_LIGHT_WAITING, MODE_LOW_LIGHT_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW, MODE_LOW_LIGHT_WAITING, MODE_LOW_LIGHT_REVIEW, MODE_DELIVERY_WAITING, MODE_DELIVERY_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -913,6 +954,93 @@ func _record_science_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_delivery_test() -> void:
+	_mode = MODE_DELIVERY_TEST
+	_delivery_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 9 · ENTREGA DEL ROVER"
+	body_label.text = "El vehículo está listo para la feria, pero al bajarlo desde un soporte de transporte, este se suelta demasiado pronto. El rover cae antes de apoyar sus ruedas."
+	option_label.text = "E · INICIAR PRUEBA DE ENTREGA"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Probar    Esc · Salir"
+
+
+func _show_delivery_failure() -> void:
+	status_label.text = "FALLO · SOPORTE LIBERADO ANTES DE TOCAR SUELO"
+	body_label.text = "Aunque el rover resiste golpes pequeños, una liberación prematura pone en riesgo las ruedas y los instrumentos. Necesitamos confirmar el apoyo y separar el soporte después."
+	option_label.text = "NUEVO PROBLEMA · SECUENCIA DE LIBERACIÓN"
+	feedback_label.text = "Abuelo: Perseverance llegó a Marte suspendido de cables bajo una etapa propulsada..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_delivery_waiting() -> void:
+	_mode = MODE_DELIVERY_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · ENTREGA SEGURA"
+	body_label.text = "El soporte de transporte se suelta cuando todavía falta altura. Habla con el abuelo sobre la maniobra Sky Crane de Perseverance."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_delivery_upgrade() -> void:
+	_mode = MODE_DELIVERY_UPGRADE
+	_delivery_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "SKY CRANE · NO CORTAR ANTES DE ATERRIZAR"
+	body_label.text = "Perseverance se posó sobre sus ruedas antes de cortar los cables y separar la etapa propulsada. ¿Cómo debe funcionar el soporte de entrega de TU rover escolar?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_delivery_option()
+
+
+func _render_delivery_option() -> void:
+	option_label.text = "◀ SOLTAR EL SOPORTE MIENTRAS EL ROVER CAE ▶" if _delivery_selection == 0 else "◀ BAJAR + CONFIRMAR APOYO + LIBERAR SOPORTE ▶"
+
+
+func _confirm_delivery_upgrade() -> void:
+	if _delivery_selection == 0:
+		feedback_label.text = "La separación ocurre después de un contacto confirmado, no durante la caída."
+		return
+	if not _has_discovery(SKY_CRANE_ID) or not _has_discovery(POWER_BUDGET_UPGRADE_ID):
+		feedback_label.text = "Termina primero el recuerdo Sky Crane y las mejoras anteriores."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", DELIVERY_UPGRADE_ID,
+		"Mejora: liberación al confirmar aterrizaje",
+		"Proyecto del niño",
+		"El rover escolar añade un seguro mecánico de transporte y una señal de apoyo antes de liberar la base tras una bajada controlada. Adaptación inspirada en Sky Crane, sin cohetes.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_delivery_review()
+
+
+func _open_delivery_review() -> void:
+	_mode = MODE_DELIVERY_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA INSTALADA · ENTREGA SEGURA"
+	body_label.text = "El sistema escolar espera apoyo confirmado antes de liberar su soporte de transporte. Mantiene la protección de impacto, los sensores, la energía solar y todas las mejoras previas."
+	option_label.text = "PROYECTO EVOLUCIONADO · CONFIRMAR Y LIBERAR"
+	feedback_label.text = "Perseverance 2021 · El orden importa."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_delivery_failure() -> void:
+	if not _has_discovery(POWER_BUDGET_UPGRADE_ID):
+		return
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", DELIVERY_PROBLEM_ID,
+		"Problema: liberación prematura del soporte",
+		"Proyecto del niño",
+		"En la demostración de entrega el vehículo se separa antes del contacto seguro con la superficie. Hace falta secuenciar descenso, detección de apoyo y liberación.")
+	project_state_changed.emit()
+
+
 func _open_low_light_test() -> void:
 	_mode = MODE_LOW_LIGHT_TEST
 	_light_test_step = 0
@@ -1128,6 +1256,7 @@ func _refresh_visual_state() -> void:
 	science_visual.visible = _has_discovery(SCIENCE_UPGRADE_ID)
 	slip_visual.visible = _has_discovery(SLIP_UPGRADE_ID)
 	power_visual.visible = _has_discovery(POWER_BUDGET_UPGRADE_ID)
+	delivery_visual.visible = _has_discovery(DELIVERY_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)
