@@ -16,6 +16,9 @@ const MODULE_UPGRADE_ID := "rescue_rover_modular_release_upgrade"
 const TRACTION_PROBLEM_ID := "rescue_rover_traction_problem"
 const APOLLO15_ID := "apollo_15_lrv"
 const TRACTION_UPGRADE_ID := "rescue_rover_traction_upgrade"
+const SCIENCE_PROBLEM_ID := "rescue_rover_science_verification_problem"
+const VIKING_ID := "viking_1"
+const SCIENCE_UPGRADE_ID := "rescue_rover_science_verification_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -83,6 +86,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/apollo_11/apollo_11_memory.tscn"
 		"grandfather_apollo_15":
 			target_scene = "res://levels/apollo_15/apollo_15_memory.tscn"
+		"grandfather_viking_1":
+			target_scene = "res://levels/viking_1/viking_1_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -93,8 +98,17 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(SCIENCE_UPGRADE_ID):
+		project_objective.text = "PROYECTO · DATOS VERIFICADOS · Comparación y registro instalados."
+		return
+	if _has_discovery(VIKING_ID):
+		project_objective.text = "PROYECTO · Aplica la verificación científica aprendida de Viking 1."
+		return
+	if _has_discovery(SCIENCE_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el abuelo sobre Viking 1 y los resultados."
+		return
 	if _has_discovery(TRACTION_UPGRADE_ID):
-		project_objective.text = "PROYECTO · MOVILIDAD MEJORADA · Ruedas con agarre y carga equilibrada."
+		project_objective.text = "PROYECTO · Prueba la interpretación de un sensor científico."
 		return
 	if _has_discovery(APOLLO15_ID):
 		project_objective.text = "PROYECTO · Aplica lo aprendido de las ruedas del LRV de Apollo 15."
