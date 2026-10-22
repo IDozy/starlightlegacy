@@ -34,9 +34,10 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"title": "Etapa de descenso · Apollo 11",
 		"category": "Hardware lunar",
 		"optional": false,
-		"history": "La etapa de descenso del módulo lunar quedó en la superficie después de servir como plataforma de alunizaje.",
-		"engineering": "Pendiente de cerrar con fuentes NASA antes de implementar el nivel.",
-		"project": "Pendiente · Futuro reto de masa y separación."
+		"history": "El módulo lunar Eagle alunizó en el Mar de la Tranquilidad el 20 de julio de 1969. El 21 de julio Armstrong y Aldrin despegaron a bordo de la etapa de ascenso, usando la etapa de descenso como plataforma. Esta quedó en la superficie lunar.",
+		"engineering": "Dos etapas con funciones diferentes: la etapa de descenso incluía las patas y el motor para alunizar; la etapa de ascenso contenía la cabina y el motor que devolvió a la tripulación a órbita lunar. El ejercicio de separación es una adaptación educativa, no un procedimiento real de cabina.",
+		"project": "Aplicación · Mecanismo liberable para dejar atrás la base auxiliar de transporte del Vehículo Explorador de Rescate y continuar con sus sistemas principales.",
+		"application_discovery_id": "rescue_rover_modular_release_upgrade"
 	},
 	{
 		"id": "apollo_15_lrv",
