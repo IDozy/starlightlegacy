@@ -10,6 +10,9 @@ const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
 const ORIENTATION_PROBLEM_ID := "rescue_rover_orientation_problem"
 const SURVEYOR_ID := "surveyor_1"
 const ORIENTATION_UPGRADE_ID := "rescue_rover_orientation_upgrade"
+const MODULE_PROBLEM_ID := "rescue_rover_module_separation_problem"
+const APOLLO_ID := "apollo_11_descent_stage"
+const MODULE_UPGRADE_ID := "rescue_rover_modular_release_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -73,6 +76,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/vanguard_1/vanguard_1_memory.tscn"
 		"grandfather_surveyor_1":
 			target_scene = "res://levels/surveyor_1/surveyor_1_memory.tscn"
+		"grandfather_apollo_11":
+			target_scene = "res://levels/apollo_11/apollo_11_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -83,8 +88,17 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(MODULE_UPGRADE_ID):
+		project_objective.text = "PROYECTO · BASE LIBERADA · Vehículo listo para nueva misión."
+		return
+	if _has_discovery(APOLLO_ID):
+		project_objective.text = "PROYECTO · Aplica la separación modular aprendida del Eagle."
+		return
+	if _has_discovery(MODULE_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el Abuelo sobre la etapa de descenso de Apollo 11."
+		return
 	if _has_discovery(ORIENTATION_UPGRADE_ID):
-		project_objective.text = "PROYECTO · PANEL Y CÁMARA ORIENTABLES · Vehículo mejorado."
+		project_objective.text = "PROYECTO · Prueba el acoplamiento de la base auxiliar."
 		return
 	if _has_discovery(SURVEYOR_ID):
 		project_objective.text = "PROYECTO · Aplica la orientación de Surveyor 1 al vehículo."
