@@ -10,6 +10,8 @@ extends StaticBody3D
 
 func get_interaction_prompt() -> String:
 	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_slip_problem"):
+		if _has_discovery("rescue_rover_slip_guard_upgrade"):
+			return "Abuelo · La historia de Spirit está completada"
 		if _has_discovery("spirit"):
 			return "Abuelo · Aplica lo aprendido de Spirit"
 		return "E · Hablar con Abuelo sobre Spirit"
