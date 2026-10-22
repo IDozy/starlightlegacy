@@ -1,9 +1,9 @@
 extends Node3D
 ## Perseverance Valley, borde del cráter Endeavour (2018). Reconstrucción educativa estilizada.
-## No representa telemetría, conducción ni rescate histórico.
+## No representa telemetría ni comandos reales de Opportunity.
 
 const ROVER := preload("res://levels/opportunity/opportunity_rover_greybox.tscn")
-const SLIP_CONSOLE := preload("res://systems/gameplay/opportunity_power_console.gd")
+const POWER_CONSOLE := preload("res://systems/gameplay/opportunity_power_console.gd")
 const RETURN_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
 const DISCOVERY_ID := "opportunity"
 
@@ -96,7 +96,7 @@ func _create_rover() -> void:
 
 
 func _create_console() -> void:
-	_console = SLIP_CONSOLE.new() as StaticBody3D
+	_console = POWER_CONSOLE.new() as StaticBody3D
 	_console.name = "OpportunityPowerConsole"
 	_console.position = Vector3(-1.65, 0.0, -1.70)
 	add_child(_console)
