@@ -97,7 +97,7 @@ func _create_lrv() -> void:
 
 func _create_console() -> void:
 	_console = TRACTION_CONSOLE.new() as StaticBody3D
-	_console.name = "Apollo15StageConsole"
+	_console.name = "Apollo15MobilityConsole"
 	_console.position = Vector3(-1.65, 0.0, -1.70)
 	add_child(_console)
 	_console.call("connect_rover", _lrv)
@@ -110,7 +110,7 @@ func _on_challenge_completed() -> void:
 
 func _update_progress() -> void:
 	if _has_discovery(DISCOVERY_ID):
-		objective_label.text = "HISTORIA RECUPERADA · Etapa de descenso Apollo 15 · Regresa al taller."
+		objective_label.text = "HISTORIA RECUPERADA · Lunar Roving Vehicle Apollo 15 · Regresa al taller."
 		_unlock_return_portal()
 	else:
 		objective_label.text = "OBJETIVO · Compara ruedas, reparte la carga y cruza suelo lunar."
