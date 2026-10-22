@@ -27,6 +27,9 @@ const SCIENCE_UPGRADE_ID := "rescue_rover_science_verification_upgrade"
 const SLIP_PROBLEM_ID := "rescue_rover_slip_problem"
 const SPIRIT_ID := "spirit"
 const SLIP_UPGRADE_ID := "rescue_rover_slip_guard_upgrade"
+const LOW_LIGHT_PROBLEM_ID := "rescue_rover_low_light_problem"
+const OPPORTUNITY_ID := "opportunity"
+const POWER_BUDGET_UPGRADE_ID := "rescue_rover_power_budget_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -56,6 +59,10 @@ const MODE_SLIP_TEST := 24
 const MODE_SLIP_WAITING := 25
 const MODE_SLIP_UPGRADE := 26
 const MODE_SLIP_REVIEW := 27
+const MODE_LOW_LIGHT_TEST := 28
+const MODE_LOW_LIGHT_WAITING := 29
+const MODE_LOW_LIGHT_UPGRADE := 30
+const MODE_LOW_LIGHT_REVIEW := 31
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -78,6 +85,7 @@ const OPTION_COUNT := 3
 @onready var traction_visual: Node3D = $TractionWheelUpgradeVisual
 @onready var science_visual: Node3D = $ScienceVerificationUpgradeVisual
 @onready var slip_visual: Node3D = $SlipSafetyUpgradeVisual
+@onready var power_visual: Node3D = $PowerBudgetUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -97,6 +105,8 @@ var _science_test_step := 0
 var _science_selection := 1
 var _slip_test_step := 0
 var _slip_selection := 1
+var _light_test_step := 0
+var _light_selection := 1
 var _started_frame := -1
 
 
@@ -106,15 +116,20 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(POWER_BUDGET_UPGRADE_ID):
+		return "E · Revisar el presupuesto de energía"
+	if _has_discovery(OPPORTUNITY_ID):
+		return "E · Instalar ahorro inspirado en Opportunity"
+	if _has_discovery(LOW_LIGHT_PROBLEM_ID):
+		return "E · Revisar pérdida de luz solar"
 	if _has_discovery(SLIP_UPGRADE_ID):
-		return "E · Revisar detector de patinaje"
+		return "E · Probar luz solar bajo tormenta simulada"
 	if _has_discovery(SPIRIT_ID):
 		return "E · Instalar monitor inspirado en Spirit"
 	if _has_discovery(SLIP_PROBLEM_ID):
 		return "E · Revisar deslizamiento del vehículo"
 	if _has_discovery(SCIENCE_UPGRADE_ID):
 		return "E · Probar detección de deslizamiento"
-		return "E · Revisar verificación científica del rover"
 	if _has_discovery(VIKING_ID):
 		return "E · Añadir comprobaciones científicas inspiradas en Viking 1"
 	if _has_discovery(SCIENCE_PROBLEM_ID):
@@ -169,8 +184,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(SLIP_UPGRADE_ID):
-		_open_slip_review()
+	if _has_discovery(POWER_BUDGET_UPGRADE_ID):
+		_open_low_light_review()
+	elif _has_discovery(OPPORTUNITY_ID):
+		_open_low_light_upgrade()
+	elif _has_discovery(LOW_LIGHT_PROBLEM_ID):
+		_open_low_light_waiting()
+	elif _has_discovery(SLIP_UPGRADE_ID):
+		_open_low_light_test()
 	elif _has_discovery(SPIRIT_ID):
 		_open_slip_upgrade()
 	elif _has_discovery(SLIP_PROBLEM_ID):
@@ -239,6 +260,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_LOW_LIGHT_TEST:
+			if _is_confirm_key(event):
+				if _light_test_step == 0:
+					_record_low_light_failure()
+					_light_test_step = 1
+					_show_low_light_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_LOW_LIGHT_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_light_selection = 1 - _light_selection
+				_render_low_light_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_low_light_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_SLIP_TEST:
@@ -359,7 +399,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW, MODE_LOW_LIGHT_WAITING, MODE_LOW_LIGHT_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -873,6 +913,93 @@ func _record_science_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_low_light_test() -> void:
+	_mode = MODE_LOW_LIGHT_TEST
+	_light_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 8 · PÉRDIDA DE LUZ SOLAR"
+	body_label.text = "La amortiguación, tracción y el detector de patinaje funcionan. Pero una pantalla que imita polvo reduce tanto la luz que el panel solar no repone el consumo de cámara, motor y radio."
+	option_label.text = "E · EJECUTAR PRUEBA DE ENERGÍA"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Probar    Esc · Salir"
+
+
+func _show_low_light_failure() -> void:
+	status_label.text = "FALLO · RESERVA ELÉCTRICA EN RIESGO"
+	body_label.text = "El panel no está roto: entra menos luz y varios sistemas siguen gastando energía. Necesitamos medir generación y consumos, y establecer prioridades."
+	option_label.text = "NUEVO PROBLEMA · PRESUPUESTO DE ENERGÍA"
+	feedback_label.text = "Abuelo: Opportunity vivió una tormenta de polvo que oscureció el Sol en Marte..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_low_light_waiting() -> void:
+	_mode = MODE_LOW_LIGHT_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · LUZ INSUFICIENTE"
+	body_label.text = "El rover escolar se queda sin reserva cuando baja demasiado la iluminación. Habla con el abuelo sobre Opportunity."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_low_light_upgrade() -> void:
+	_mode = MODE_LOW_LIGHT_UPGRADE
+	_light_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "OPPORTUNITY · PRIORIDADES Y RESERVA"
+	body_label.text = "Una tormenta marciana de 2018 redujo la luz para Opportunity. No volvió a responder. ¿Qué mejora puedes aplicar al presupuesto energético de TU vehículo escolar?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_low_light_option()
+
+
+func _render_low_light_option() -> void:
+	option_label.text = "◀ DEJAR TODOS LOS SISTEMAS ENCENDIDOS ▶" if _light_selection == 0 else "◀ MEDIR LUZ + PRIORIZAR CARGAS + RESERVA ▶"
+
+
+func _confirm_low_light_upgrade() -> void:
+	if _light_selection == 0:
+		feedback_label.text = "No se puede consumir indefinidamente sin recibir energía. Elige un presupuesto de consumo."
+		return
+	if not _has_discovery(OPPORTUNITY_ID) or not _has_discovery(SLIP_UPGRADE_ID):
+		feedback_label.text = "Primero completa Opportunity y el detector de patinaje de Spirit."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", POWER_BUDGET_UPGRADE_ID,
+		"Mejora: presupuesto energético de rescate",
+		"Proyecto del niño",
+		"El Vehículo Explorador mide luz y reserva eléctrica y puede desactivar cargas no esenciales durante pruebas de iluminación reducida.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_low_light_review()
+
+
+func _open_low_light_review() -> void:
+	_mode = MODE_LOW_LIGHT_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA INSTALADA · ENERGÍA PRIORIZADA"
+	body_label.text = "El rover del niño mide luz y reserva y detiene tareas no esenciales. Conserva todas sus mejoras anteriores. Opportunity nunca recuperó contacto en Marte."
+	option_label.text = "PROYECTO EVOLUCIONADO · MODO DE AHORRO"
+	feedback_label.text = "Opportunity · Aprender sin reescribir la historia."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_low_light_failure() -> void:
+	if not _has_discovery(SLIP_UPGRADE_ID):
+		return
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", LOW_LIGHT_PROBLEM_ID,
+		"Problema: luz insuficiente para el panel",
+		"Proyecto del niño",
+		"Una pantalla de polvo de prueba deja pasar poca luz; la maqueta agota su batería al mantener demasiadas cargas activas.")
+	project_state_changed.emit()
+
+
 func _open_slip_test() -> void:
 	_mode = MODE_SLIP_TEST
 	_slip_test_step = 0
@@ -1000,6 +1127,7 @@ func _refresh_visual_state() -> void:
 	traction_visual.visible = _has_discovery(TRACTION_UPGRADE_ID)
 	science_visual.visible = _has_discovery(SCIENCE_UPGRADE_ID)
 	slip_visual.visible = _has_discovery(SLIP_UPGRADE_ID)
+	power_visual.visible = _has_discovery(POWER_BUDGET_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)

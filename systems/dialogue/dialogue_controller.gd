@@ -143,6 +143,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
 				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
 			])
+		"grandfather_opportunity":
+			return PackedStringArray([
+				"Tu rover funciona, pero el panel ya no recibe la luz suficiente. Una tormenta artificial ha oscurecido la zona de pruebas.",
+				"Opportunity llegó a Marte en enero de 2004. Era gemelo de Spirit, fue diseñado para 90 soles y recorrió más de 45 kilómetros en casi quince años.",
+				"En junio de 2018 una gran tormenta de polvo oscureció Perseverance Valley. La última comunicación llegó el 10 de junio. Tras numerosos intentos sin éxito, NASA declaró terminada su misión el 13 de febrero de 2019.",
+				"No diremos que Opportunity volvió a despertar. Aprenderemos a calcular un presupuesto energético en tu propio rover escolar."
+			])
 		"grandfather_spirit":
 			return PackedStringArray([
 				"Tu rover ya registra datos, pero al cruzar polvo fino las ruedas giran sin avanzar. Si insistimos, puede hundirse aún más.",

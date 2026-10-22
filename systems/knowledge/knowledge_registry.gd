@@ -106,12 +106,13 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 	{
 		"id": "opportunity",
 		"year": 2018,
-		"title": "Opportunity",
+		"title": "Opportunity · Perseverance Valley",
 		"category": "Rover en Marte",
 		"optional": false,
-		"history": "Artículo aún no recuperado.",
-		"engineering": "Pendiente · Reto de energía y entorno.",
-		"project": "Pendiente."
+		"history": "Opportunity aterrizó en Marte el 24 de enero de 2004 (hora de California). Diseñado para 90 soles, recorrió 45,16 km. Durante la tormenta de polvo en Perseverance Valley llegó su última señal el 10 de junio de 2018. NASA declaró terminada la misión el 13 de febrero de 2019. Nunca recuperó el contacto; el rover permanece en Marte.",
+		"engineering": "Rover solar gemelo de Spirit, con seis ruedas, cámaras y brazo de instrumentos. El polvo atmosférico redujo la luz que recibían los paneles. Las decisiones del minijuego son ejercicios educativos de presupuesto energético, no telemetría ni órdenes reales de la NASA.",
+		"project": "Aplicación · Monitor de luz y reserva eléctrica más control de cargas no esenciales para el Vehículo Explorador de Rescate. No representa recuperación de Opportunity.",
+		"application_discovery_id": "rescue_rover_power_budget_upgrade"
 	},
 	{
 		"id": "perseverance_sky_crane",
