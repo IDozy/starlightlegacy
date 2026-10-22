@@ -122,6 +122,11 @@ func _confirm_budget() -> void:
 		_feedback = "Con poca luz, mantener motor, cámara y radio activos puede agotar la batería."
 		_show()
 		return
+	if _rover == null or not _rover.has_method("protect_power_budget"):
+		_feedback = "El módulo de ahorro no está disponible."
+		_show()
+		return
+	_rover.call("protect_power_budget")
 	_power_budget_protected = true
 	_step = STEP_HISTORY
 	_choice = 0
@@ -136,11 +141,6 @@ func _confirm_history() -> void:
 		_feedback = "Opportunity no volvió a comunicarse después del 10 de junio de 2018."
 		_show()
 		return
-	if _rover == null or not _rover.has_method("protect_power_budget"):
-		_feedback = "El módulo de ahorro no está disponible."
-		_show()
-		return
-	_rover.call("protect_power_budget")
 	_history_respected = true
 	_complete = true
 	_step = STEP_FINISHED
