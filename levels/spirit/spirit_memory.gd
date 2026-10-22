@@ -1,5 +1,5 @@
 extends Node3D
-## Troy Planitia (1976), reconstruccion educativa estilizada.
+## Troy, cráter Gusev (2009-2010). Reconstrucción educativa estilizada.
 ## No representa telemetría, conducción ni rescate histórico.
 
 const ROVER := preload("res://levels/spirit/spirit_rover_greybox.tscn")
