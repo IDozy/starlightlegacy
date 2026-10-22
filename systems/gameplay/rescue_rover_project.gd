@@ -18,6 +18,9 @@ const ORIENTATION_UPGRADE_ID := "rescue_rover_orientation_upgrade"
 const MODULE_PROBLEM_ID := "rescue_rover_module_separation_problem"
 const APOLLO_ID := "apollo_11_descent_stage"
 const MODULE_UPGRADE_ID := "rescue_rover_modular_release_upgrade"
+const TRACTION_PROBLEM_ID := "rescue_rover_traction_problem"
+const APOLLO15_ID := "apollo_15_lrv"
+const TRACTION_UPGRADE_ID := "rescue_rover_traction_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -35,6 +38,10 @@ const MODE_MODULE_TEST := 12
 const MODE_MODULE_WAITING := 13
 const MODE_MODULE_UPGRADE := 14
 const MODE_MODULE_REVIEW := 15
+const MODE_TRACTION_TEST := 16
+const MODE_TRACTION_WAITING := 17
+const MODE_TRACTION_UPGRADE := 18
+const MODE_TRACTION_REVIEW := 19
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -54,6 +61,7 @@ const OPTION_COUNT := 3
 @onready var transport_base_visual: Node3D = $TransportBaseVisual
 @onready var modular_visual: Node3D = $ModularReleaseVisual
 @onready var released_base_visual: Node3D = $ReleasedBaseVisual
+@onready var traction_visual: Node3D = $TractionWheelUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -67,6 +75,8 @@ var _orientation_test_step := 0
 var _orientation_selection := 1
 var _module_test_step := 0
 var _module_selection := 1
+var _traction_test_step := 0
+var _traction_selection := 1
 var _started_frame := -1
 
 
@@ -76,8 +86,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(TRACTION_UPGRADE_ID):
+		return "E · Revisar mejora de movilidad sobre terreno suelto"
+	if _has_discovery(APOLLO15_ID):
+		return "E · Mejorar tracción inspirada en Apollo 15"
+	if _has_discovery(TRACTION_PROBLEM_ID):
+		return "E · Revisar bloqueo por falta de tracción"
 	if _has_discovery(MODULE_UPGRADE_ID):
-		return "E · Revisar mecanismo de liberacion modular"
+		return "E · Probar desplazamiento por terreno irregular"
 	if _has_discovery(APOLLO_ID):
 		return "E · Aplicar diseño de separación Apollo 11"
 	if _has_discovery(MODULE_PROBLEM_ID):
@@ -120,8 +136,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(MODULE_UPGRADE_ID):
-		_open_module_review()
+	if _has_discovery(TRACTION_UPGRADE_ID):
+		_open_traction_review()
+	elif _has_discovery(APOLLO15_ID):
+		_open_traction_upgrade()
+	elif _has_discovery(TRACTION_PROBLEM_ID):
+		_open_traction_waiting()
+	elif _has_discovery(MODULE_UPGRADE_ID):
+		_open_traction_test()
 	elif _has_discovery(APOLLO_ID):
 		_open_module_upgrade()
 	elif _has_discovery(MODULE_PROBLEM_ID):
@@ -172,6 +194,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_TRACTION_TEST:
+			if _is_confirm_key(event):
+				if _traction_test_step == 0:
+					_record_traction_failure()
+					_traction_test_step = 1
+					_show_traction_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_TRACTION_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_traction_selection = 1 - _traction_selection
+				_render_traction_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_traction_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_MODULE_TEST:
@@ -235,7 +276,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -579,6 +620,91 @@ func _record_module_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_traction_test() -> void:
+	_mode = MODE_TRACTION_TEST
+	_traction_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 5 · MOVILIDAD SOBRE TERRENO SUELTO"
+	body_label.text = "Tras liberar la base, el vehículo debe cruzar arena fina y piedras sin perder la estabilidad. Las ruedas actuales patinan y no consiguen avanzar."
+	option_label.text = "E · EJECUTAR PRUEBA DE TRACCIÓN"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Probar    Esc · Salir"
+
+
+func _show_traction_failure() -> void:
+	status_label.text = "FALLO · RUEDAS SIN TRACCIÓN"
+	body_label.text = "Las ruedas giran, pero el vehículo apenas avanza sobre el suelo suelto. No necesitamos más potencia: debemos mejorar el contacto rueda-terreno y distribuir mejor la carga."
+	option_label.text = "NUEVO PROBLEMA · MOVILIDAD"
+	feedback_label.text = "Abuelo: Los astronautas de Apollo 15 exploraron la Luna usando ruedas muy especiales..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_traction_waiting() -> void:
+	_mode = MODE_TRACTION_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · TRACCIÓN"
+	body_label.text = "El rover no puede atravesar terreno suelto. Habla con el abuelo y conoce el Lunar Roving Vehicle de Apollo 15."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_traction_upgrade() -> void:
+	_mode = MODE_TRACTION_UPGRADE
+	_traction_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "APOLLO 15 · RUEDAS Y CARGA"
+	body_label.text = "El LRV tripulado tenía ruedas de malla metálica flexible con bandas de tracción. En tu vehículo de feria debes adaptar la idea de mejorar agarre y repartir la carga, sin copiar literalmente su estructura lunar."
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_traction_option()
+
+
+func _render_traction_option() -> void:
+	option_label.text = "◀ SOLO AUMENTAR POTENCIA DEL MOTOR ▶" if _traction_selection == 0 else "◀ RUEDAS CON AGARRE + CARGA EQUILIBRADA ▶"
+
+
+func _confirm_traction_upgrade() -> void:
+	if _traction_selection == 0:
+		feedback_label.text = "Más potencia no garantiza que las ruedas agarren un suelo suelto. Elige una solución para el contacto y el equilibrio."
+		return
+	if not _has_discovery(APOLLO15_ID) or not _has_discovery(MODULE_UPGRADE_ID):
+		feedback_label.text = "Completa primero Apollo 15 y la separación modular previa."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", TRACTION_UPGRADE_ID,
+		"Mejora: movilidad sobre terreno suelto",
+		"Proyecto del niño",
+		"El Vehículo Explorador recibe ruedas con bandas de agarre y una distribución de carga revisada, inspirado en la movilidad del Lunar Roving Vehicle de Apollo 15.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_traction_review()
+
+
+func _open_traction_review() -> void:
+	_mode = MODE_TRACTION_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · MOVILIDAD"
+	body_label.text = "Ahora el vehículo dispone de agarre y carga equilibrada. Conserva la amortiguación, el módulo solar, la cámara orientable y la liberación de su soporte. La siguiente prueba podrá centrarse en el terreno o los instrumentos."
+	option_label.text = "PROYECTO EVOLUCIONADO · TRACCIÓN"
+	feedback_label.text = "Apollo 15 · Conocimiento aplicado."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_traction_failure() -> void:
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", TRACTION_PROBLEM_ID,
+		"Problema: ruedas sin tracción",
+		"Proyecto del niño",
+		"El Vehículo Explorador pierde tracción al cruzar terreno de arena fina y piedras. Hay que adaptar ruedas y equilibrar su carga.")
+	project_state_changed.emit()
+
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -617,6 +743,7 @@ func _refresh_visual_state() -> void:
 	transport_base_visual.visible = _has_discovery(ORIENTATION_UPGRADE_ID) and not _has_discovery(MODULE_UPGRADE_ID)
 	modular_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
 	released_base_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
+	traction_visual.visible = _has_discovery(TRACTION_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)
