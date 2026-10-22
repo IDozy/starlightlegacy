@@ -143,6 +143,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
 				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
 			])
+		"grandfather_viking_1":
+			return PackedStringArray([
+				"¡El vehículo ya puede avanzar! Pero ahora el sensor ha marcado una reacción y casi anunciamos que encontramos vida, sin comprobar el resultado.",
+				"En 1976, Viking 1 aterrizó en Marte, en Chryse Planitia, con un laboratorio y un brazo capaz de recoger muestras de suelo.",
+				"Sus experimentos detectaron actividad química desconcertante. Sin embargo, no aportaron pruebas definitivas de vida. Una señal interesante no basta por sí sola.",
+				"Viking 1 quedó en Marte y aún puede verse desde órbita. Vamos a descubrir cómo observar, comparar y explicar resultados con cuidado."
+			])
 		_:
 			return PackedStringArray()
 
