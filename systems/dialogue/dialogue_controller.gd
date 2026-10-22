@@ -129,6 +129,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Los equipos de Tierra enviaban órdenes para operar su cámara y orientar el panel solar. No hacía falta que la máquina adivinara todo por sí sola.",
 				"En el Océano de las Tormentas transmitió miles de imágenes. Vamos a practicar cómo orientar la luz y la observación con órdenes precisas."
 			])
+		"grandfather_apollo_11":
+			return PackedStringArray([
+				"¡Ya tienes ruedas, energía y cámara orientable! Pero la base de transporte aún está unida al vehículo. Así no puede comenzar la misión de rescate.",
+				"Eso me recuerda al módulo lunar Eagle de Apollo 11. Armstrong y Aldrin aterrizaron en la Luna el 20 de julio de 1969.",
+				"El Eagle tenía dos partes: la etapa inferior sirvió para aterrizar y luego como plataforma. El 21 de julio la etapa superior despegó desde ella, y la inferior quedó en la Luna.",
+				"Nuestro rover no necesita despegar como una nave, pero sí puede aprender a separarse de una base que ya terminó su trabajo. Ven, veámoslo."
+			])
 		_:
 			return PackedStringArray()
 
