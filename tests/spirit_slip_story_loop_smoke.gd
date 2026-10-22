@@ -111,12 +111,12 @@ func _run() -> void:
 	_expect(registry.has_discovery(SLIP_UPGRADE), "Falta aplicar detector de patinaje.")
 	var safety := project.get_node_or_null("SlipSafetyUpgradeVisual") as Node3D
 	_expect(safety != null and safety.visible, "No se ve telemetría de patinaje.")
-	_expect(project.get_node_or_null("ScienceVerificationUpgradeVisual").visible,
-		"La mejora Viking se perdió.")
-	_expect(project.get_node_or_null("TractionWheelUpgradeVisual").visible,
-		"La mejora Apollo 15 se perdió.")
-	_expect(project.get_node_or_null("UpgradeVisual").visible,
-		"La amortiguación anterior se perdió.")
+	var science := project.get_node_or_null("ScienceVerificationUpgradeVisual") as Node3D
+	var traction := project.get_node_or_null("TractionWheelUpgradeVisual") as Node3D
+	var airbags := project.get_node_or_null("UpgradeVisual") as Node3D
+	_expect(science != null and science.visible, "La mejora Viking se perdió.")
+	_expect(traction != null and traction.visible, "La mejora Apollo 15 se perdió.")
+	_expect(airbags != null and airbags.visible, "La amortiguación anterior se perdió.")
 	for key in PREVIOUS:
 		_expect(registry.has_discovery(key), "Se perdió: " + key)
 	if failures.is_empty():
