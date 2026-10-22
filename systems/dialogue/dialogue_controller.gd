@@ -136,6 +136,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"El Eagle tenía dos partes: la etapa inferior sirvió para aterrizar y luego como plataforma. El 21 de julio la etapa superior despegó desde ella, y la inferior quedó en la Luna.",
 				"Nuestro rover no necesita despegar como una nave, pero sí puede aprender a separarse de una base que ya terminó su trabajo. Ven, veámoslo."
 			])
+		"grandfather_apollo_15":
+			return PackedStringArray([
+				"¡La base ya se libera! Pero sobre la arena y las piedras las ruedas patinan. Parece que el problema ya no es la potencia del motor.",
+				"En 1971, los astronautas David Scott y James Irwin exploraron la Luna con un vehículo eléctrico de cuatro ruedas: el Lunar Roving Vehicle de Apollo 15.",
+				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
+				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
+			])
 		_:
 			return PackedStringArray()
 
