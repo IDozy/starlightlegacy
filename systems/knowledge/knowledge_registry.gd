@@ -56,9 +56,10 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"title": "Viking 1",
 		"category": "Hardware en Marte",
 		"optional": false,
-		"history": "Viking 1 llevó a Marte una plataforma científica que permaneció en la superficie después de finalizar sus operaciones.",
-		"engineering": "Pendiente de cerrar con fuentes NASA antes de implementar el nivel.",
-		"project": "Pendiente · Futuro reto de descenso."
+		"history": "Viking 1 aterrizó en Chryse Planitia, Marte, el 20 de julio de 1976. Su brazo recolector analizó muestras de suelo y sus instrumentos buscaron señales de vida. La misión terminó en noviembre de 1982. La plataforma no fue recuperada y se fotografió desde órbita.",
+		"engineering": "Su aterrizador hexagonal, de tres patas, disponía de dos cámaras escaneadoras, brazo recolector, laboratorio químico/biológico, antenas y dos generadores de radioisótopos (RTG), no paneles solares. Los experimentos produjeron actividad química interesante pero NO pruebas definitivas de vida. El ejercicio es una simulación de método científico y no telemetría de Viking.",
+		"project": "Aplicación · Bandejas de comparación y registro para verificar lecturas del sensor antes de declarar hallazgos en el Vehículo Explorador de Rescate.",
+		"application_discovery_id": "rescue_rover_science_verification_upgrade"
 	},
 	{
 		"id": "pathfinder_backshell",
