@@ -15,6 +15,9 @@ const SOLAR_UPGRADE_ID := "rescue_rover_solar_upgrade"
 const ORIENTATION_PROBLEM_ID := "rescue_rover_orientation_problem"
 const SURVEYOR_ID := "surveyor_1"
 const ORIENTATION_UPGRADE_ID := "rescue_rover_orientation_upgrade"
+const MODULE_PROBLEM_ID := "rescue_rover_module_separation_problem"
+const APOLLO_ID := "apollo_11_descent_stage"
+const MODULE_UPGRADE_ID := "rescue_rover_modular_release_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -28,6 +31,10 @@ const MODE_ORIENTATION_TEST := 8
 const MODE_ORIENTATION_WAITING := 9
 const MODE_ORIENTATION_UPGRADE := 10
 const MODE_ORIENTATION_REVIEW := 11
+const MODE_MODULE_TEST := 12
+const MODE_MODULE_WAITING := 13
+const MODE_MODULE_UPGRADE := 14
+const MODE_MODULE_REVIEW := 15
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -44,6 +51,9 @@ const OPTION_COUNT := 3
 @onready var upgrade_visual: Node3D = $UpgradeVisual
 @onready var solar_visual: Node3D = $SolarUpgradeVisual
 @onready var adjustable_visual: Node3D = $OrientationUpgradeVisual
+@onready var transport_base_visual: Node3D = $TransportBaseVisual
+@onready var modular_visual: Node3D = $ModularReleaseVisual
+@onready var released_base_visual: Node3D = $ReleasedBaseVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -55,6 +65,8 @@ var _energy_selection := 1
 var _energy_test_step := 0
 var _orientation_test_step := 0
 var _orientation_selection := 1
+var _module_test_step := 0
+var _module_selection := 1
 var _started_frame := -1
 
 
@@ -64,8 +76,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(MODULE_UPGRADE_ID):
+		return "E · Revisar mecanismo de liberacion modular"
+	if _has_discovery(APOLLO_ID):
+		return "E · Aplicar diseño de separación Apollo 11"
+	if _has_discovery(MODULE_PROBLEM_ID):
+		return "E · Revisar base auxiliar bloqueada"
 	if _has_discovery(ORIENTATION_UPGRADE_ID):
-		return "E · Revisar orientacion de panel y camara"
+		return "E · Probar liberación de base auxiliar"
 	if _has_discovery(SURVEYOR_ID):
 		return "E · Aplicar orientacion del panel y la camara"
 	if _has_discovery(ORIENTATION_PROBLEM_ID):
@@ -102,8 +120,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(ORIENTATION_UPGRADE_ID):
-		_open_orientation_review()
+	if _has_discovery(MODULE_UPGRADE_ID):
+		_open_module_review()
+	elif _has_discovery(APOLLO_ID):
+		_open_module_upgrade()
+	elif _has_discovery(MODULE_PROBLEM_ID):
+		_open_module_waiting()
+	elif _has_discovery(ORIENTATION_UPGRADE_ID):
+		_open_module_test()
 	elif _has_discovery(SURVEYOR_ID):
 		_open_orientation_upgrade()
 	elif _has_discovery(ORIENTATION_PROBLEM_ID):
@@ -150,6 +174,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_close_panel()
 				get_viewport().set_input_as_handled()
 
+		MODE_MODULE_TEST:
+			if _is_confirm_key(event):
+				if _module_test_step == 0:
+					_record_module_failure()
+					_module_test_step = 1
+					_show_module_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_MODULE_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_module_selection = 1 - _module_selection
+				_render_module_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_module_upgrade()
+				get_viewport().set_input_as_handled()
+
 		MODE_ORIENTATION_TEST:
 			if _is_confirm_key(event):
 				if _orientation_test_step == 0:
@@ -192,7 +235,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -451,6 +494,91 @@ func _record_orientation_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_module_test() -> void:
+	_mode = MODE_MODULE_TEST
+	_module_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 4 · BASE AUXILIAR DE TRANSPORTE"
+	body_label.text = "Los instrumentos ya funcionan. Para iniciar la fase final de rescate, el rover debe desprenderse de su base auxiliar de transporte. Todavía no tiene un mecanismo de liberación: queda bloqueado."
+	option_label.text = "E · INICIAR PRUEBA DE SALIDA"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Ejecutar prueba    Esc · Salir"
+
+
+func _show_module_failure() -> void:
+	status_label.text = "FALLO · SOPORTE AUXILIAR FIJO"
+	body_label.text = "El vehículo tiene ruedas y energía, pero su soporte de transporte permanece unido y no puede continuar la ruta. Necesitamos separar funciones: una base estable para preparar la salida y un vehículo libre para explorar."
+	option_label.text = "NUEVO PROBLEMA · SEPARACIÓN SEGURA"
+	feedback_label.text = "Abuelo: Eagle utilizó dos etapas para aterrizar y regresar de la Luna."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_module_waiting() -> void:
+	_mode = MODE_MODULE_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · SEPARACIÓN"
+	body_label.text = "La base auxiliar sigue bloqueando el vehículo. Habla con el abuelo para conocer las dos etapas del módulo Eagle de Apollo 11."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_module_upgrade() -> void:
+	_mode = MODE_MODULE_UPGRADE
+	_module_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "APOLLO 11 · ETAPA DE DESCENSO"
+	body_label.text = "Eagle dejó su etapa inferior en la Luna y utilizó la superior para volver a la órbita. Tu rover de feria no despega, pero también necesita liberar una base que ya cumplió su función."
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Instalar    Esc · Salir"
+	_render_module_option()
+
+
+func _render_module_option() -> void:
+	option_label.text = "◀ QUITAR LAS RUEDAS PARA ALIGERAR ▶" if _module_selection == 0 else "◀ SISTEMA DE LIBERACIÓN DE BASE AUXILIAR ▶"
+
+
+func _confirm_module_upgrade() -> void:
+	if _module_selection == 0:
+		feedback_label.text = "Sin ruedas el vehículo no podrá explorar. La parte a separar es la base de transporte, no sus sistemas de movilidad."
+		return
+	if not _has_discovery(APOLLO_ID) or not _has_discovery(ORIENTATION_UPGRADE_ID):
+		feedback_label.text = "Completa primero el recuerdo de Apollo 11 y los pasos anteriores."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "No se encontró el registro de descubrimientos."
+		return
+	registry.call("register_discovery", MODULE_UPGRADE_ID,
+		"Mejora: liberación modular",
+		"Proyecto del niño",
+		"El rover incorpora un acoplamiento liberable para dejar la base auxiliar en el punto de partida y continuar la misión con sus sistemas de movilidad, energía y cámara.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_module_review()
+
+
+func _open_module_review() -> void:
+	_mode = MODE_MODULE_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · SEPARACIÓN MODULAR"
+	body_label.text = "La base auxiliar queda en el área de pruebas. El rover puede salir con sus ruedas, cámara, panel solar y protección de impacto. La etapa inferior de Eagle fue una plataforma lunar; aquí adaptamos la idea a un soporte de transporte."
+	option_label.text = "PROYECTO EVOLUCIONADO · BASE LIBERABLE"
+	feedback_label.text = "Apollo 11 · Conocimiento aplicado."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_module_failure() -> void:
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", MODULE_PROBLEM_ID,
+		"Problema: base de transporte no liberable",
+		"Proyecto del niño",
+		"El Vehículo Explorador de Rescate tiene un soporte auxiliar que le impide iniciar la exploración. Debe acoplarse y separarse sin perder sus sistemas principales.")
+	project_state_changed.emit()
+
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -486,6 +614,9 @@ func _refresh_visual_state() -> void:
 	var upgraded := _has_discovery(UPGRADE_ID)
 	upgrade_visual.visible = upgraded
 	adjustable_visual.visible = _has_discovery(ORIENTATION_UPGRADE_ID)
+	transport_base_visual.visible = _has_discovery(ORIENTATION_UPGRADE_ID) and not _has_discovery(MODULE_UPGRADE_ID)
+	modular_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
+	released_base_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)
