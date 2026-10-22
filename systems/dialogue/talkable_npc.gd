@@ -9,6 +9,10 @@ extends StaticBody3D
 
 
 func get_interaction_prompt() -> String:
+	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_aerial_scout_problem"):
+		if _has_discovery("ingenuity"):
+			return "Abuelo · Aplica lo aprendido de Ingenuity"
+		return "E · Hablar con Abuelo sobre Ingenuity"
 	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_delivery_problem"):
 		if _has_discovery("perseverance_sky_crane"):
 			return "Abuelo · Aplica lo aprendido de Sky Crane"
@@ -59,6 +63,11 @@ func get_interaction_prompt() -> String:
 func interact(player: Node) -> void:
 	if player == null:
 		return
+	var ingenuity_pending := (
+		dialogue_id == "grandfather_intro"
+		and _has_discovery("rescue_rover_aerial_scout_problem")
+		and not _has_discovery("ingenuity")
+	)
 	var sky_crane_pending := (
 		dialogue_id == "grandfather_intro"
 		and _has_discovery("rescue_rover_delivery_problem")
@@ -99,7 +108,7 @@ func interact(player: Node) -> void:
 		and _has_discovery("rescue_rover_energy_problem")
 		and not _has_discovery("vanguard_1")
 	)
-	if not sky_crane_pending and not opportunity_pending and not spirit_pending and not viking_pending and not apollo15_pending and not apollo_pending and not surveyor_pending and not vanguard_pending and (not _requirement_met() or _is_completed()):
+	if not ingenuity_pending and not sky_crane_pending and not opportunity_pending and not spirit_pending and not viking_pending and not apollo15_pending and not apollo_pending and not surveyor_pending and not vanguard_pending and (not _requirement_met() or _is_completed()):
 		return
 	var main_node := player.get_parent()
 	if main_node == null:
@@ -108,7 +117,9 @@ func interact(player: Node) -> void:
 	if controller == null:
 		return
 	var selected_dialogue := dialogue_id
-	if sky_crane_pending:
+	if ingenuity_pending:
+		selected_dialogue = "grandfather_ingenuity"
+	elif sky_crane_pending:
 		selected_dialogue = "grandfather_sky_crane"
 	elif opportunity_pending:
 		selected_dialogue = "grandfather_opportunity"

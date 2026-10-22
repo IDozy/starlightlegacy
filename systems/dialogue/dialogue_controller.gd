@@ -143,6 +143,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
 				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
 			])
+		"grandfather_ingenuity":
+			return PackedStringArray([
+				"Tu rover ya puede aterrizar seguro, pero su cámara no ve qué hay detrás de una cresta de rocas. Podríamos explorar desde arriba, sin que el rover vuele.",
+				"Ingenuity viajó sujeto a Perseverance. El 19 de abril de 2021 realizó el primer vuelo motorizado y controlado en otro planeta. En Marte el aire es muchísimo más tenue.",
+				"Era ligero y usaba dos rotores coaxiales que giraban en sentidos opuestos. Planeaban pocos vuelos de demostración, pero llegó a 72 y ayudó a observar rutas para Perseverance.",
+				"En su último vuelo, el 18 de enero de 2024, sufrió daños en las palas. NASA terminó su misión el 25 de enero. No volveremos a hacerlo despegar en la historia real: aprenderemos con una maqueta escolar de aeronave auxiliar."
+			])
 		"grandfather_sky_crane":
 			return PackedStringArray([
 				"Ahora tu rover está protegido y conoce su consumo de energía, pero la base de entrega se separa antes de que las ruedas toquen el suelo.",

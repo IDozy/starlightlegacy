@@ -33,6 +33,9 @@ const POWER_BUDGET_UPGRADE_ID := "rescue_rover_power_budget_upgrade"
 const DELIVERY_PROBLEM_ID := "rescue_rover_delivery_problem"
 const SKY_CRANE_ID := "perseverance_sky_crane"
 const DELIVERY_UPGRADE_ID := "rescue_rover_touchdown_release_upgrade"
+const AERIAL_PROBLEM_ID := "rescue_rover_aerial_scout_problem"
+const INGENUITY_ID := "ingenuity"
+const AERIAL_UPGRADE_ID := "rescue_rover_aerial_scout_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -70,6 +73,10 @@ const MODE_DELIVERY_TEST := 32
 const MODE_DELIVERY_WAITING := 33
 const MODE_DELIVERY_UPGRADE := 34
 const MODE_DELIVERY_REVIEW := 35
+const MODE_AERIAL_TEST := 36
+const MODE_AERIAL_WAITING := 37
+const MODE_AERIAL_UPGRADE := 38
+const MODE_AERIAL_REVIEW := 39
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -94,6 +101,7 @@ const OPTION_COUNT := 3
 @onready var slip_visual: Node3D = $SlipSafetyUpgradeVisual
 @onready var power_visual: Node3D = $PowerBudgetUpgradeVisual
 @onready var delivery_visual: Node3D = $TouchdownReleaseUpgradeVisual
+@onready var aerial_visual: Node3D = $AerialScoutUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -117,6 +125,8 @@ var _light_test_step := 0
 var _light_selection := 1
 var _delivery_test_step := 0
 var _delivery_selection := 1
+var _aerial_test_step := 0
+var _aerial_selection := 1
 var _started_frame := -1
 
 
@@ -126,8 +136,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(AERIAL_UPGRADE_ID):
+		return "E · Revisar explorador aéreo auxiliar"
+	if _has_discovery(INGENUITY_ID):
+		return "E · Aplicar exploración aérea inspirada en Ingenuity"
+	if _has_discovery(AERIAL_PROBLEM_ID):
+		return "E · Revisar obstáculo sin ruta visible"
 	if _has_discovery(DELIVERY_UPGRADE_ID):
-		return "E · Revisar liberación segura al aterrizar"
+		return "E · Probar reconocimiento aéreo de obstáculos"
 	if _has_discovery(SKY_CRANE_ID):
 		return "E · Instalar protocolo de entrega inspirado en Sky Crane"
 	if _has_discovery(DELIVERY_PROBLEM_ID):
@@ -200,8 +216,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(DELIVERY_UPGRADE_ID):
-		_open_delivery_review()
+	if _has_discovery(AERIAL_UPGRADE_ID):
+		_open_aerial_review()
+	elif _has_discovery(INGENUITY_ID):
+		_open_aerial_upgrade()
+	elif _has_discovery(AERIAL_PROBLEM_ID):
+		_open_aerial_waiting()
+	elif _has_discovery(DELIVERY_UPGRADE_ID):
+		_open_aerial_test()
 	elif _has_discovery(SKY_CRANE_ID):
 		_open_delivery_upgrade()
 	elif _has_discovery(DELIVERY_PROBLEM_ID):
@@ -282,6 +304,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_AERIAL_TEST:
+			if _is_confirm_key(event):
+				if _aerial_test_step == 0:
+					_record_aerial_failure()
+					_aerial_test_step = 1
+					_show_aerial_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_AERIAL_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_aerial_selection = 1 - _aerial_selection
+				_render_aerial_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_aerial_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_DELIVERY_TEST:
@@ -440,7 +481,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW, MODE_LOW_LIGHT_WAITING, MODE_LOW_LIGHT_REVIEW, MODE_DELIVERY_WAITING, MODE_DELIVERY_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW, MODE_LOW_LIGHT_WAITING, MODE_LOW_LIGHT_REVIEW, MODE_DELIVERY_WAITING, MODE_DELIVERY_REVIEW, MODE_AERIAL_WAITING, MODE_AERIAL_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -954,6 +995,93 @@ func _record_science_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_aerial_test() -> void:
+	_mode = MODE_AERIAL_TEST
+	_aerial_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 10 · VER MÁS ALLÁ DEL OBSTÁCULO"
+	body_label.text = "El rover ya se entrega con seguridad, pero una zona llena de rocas bloquea la vista de la ruta. Ir a ciegas puede atascarlo. Necesita explorar por encima sin convertirse él mismo en un vehículo volador."
+	option_label.text = "E · PROBAR EXPLORACIÓN DE RUTA"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Probar    Esc · Salir"
+
+
+func _show_aerial_failure() -> void:
+	status_label.text = "FALLO · NO PUEDE RECONOCER EL CAMINO"
+	body_label.text = "La cámara del rover terrestre solo ve desde el suelo. Hay una cresta de rocas delante y no sabemos cuál es el trayecto más seguro. Una pequeña plataforma exploradora podría mirar desde arriba."
+	option_label.text = "NUEVO PROBLEMA · RECONOCIMIENTO AÉREO"
+	feedback_label.text = "Abuelo: Ingenuity hizo historia volando junto a Perseverance en Marte..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_aerial_waiting() -> void:
+	_mode = MODE_AERIAL_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · RUTA NO OBSERVABLE"
+	body_label.text = "El rover escolar no ve qué hay detrás del obstáculo. Habla con el abuelo sobre el helicóptero Ingenuity y la exploración aérea."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_aerial_upgrade() -> void:
+	_mode = MODE_AERIAL_UPGRADE
+	_aerial_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "INGENUITY · EXPLORAR ANTES DE AVANZAR"
+	body_label.text = "Ingenuity era un helicóptero independiente que ayudó a estudiar rutas para Perseverance. ¿Qué solución tiene sentido para tu vehículo de feria?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_aerial_option()
+
+
+func _render_aerial_option() -> void:
+	option_label.text = "◀ PONER ROTORES PESADOS SOBRE EL ROVER ▶" if _aerial_selection == 0 else "◀ AÑADIR UN EXPLORADOR AÉREO AUXILIAR LIGERO ▶"
+
+
+func _confirm_aerial_upgrade() -> void:
+	if _aerial_selection == 0:
+		feedback_label.text = "El rover no necesita ni podría despegar con rotores improvisados. La aeronave exploradora es independiente y ligera."
+		return
+	if not _has_discovery(INGENUITY_ID) or not _has_discovery(DELIVERY_UPGRADE_ID):
+		feedback_label.text = "Completa Ingenuity y la entrega segura de Perseverance."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", AERIAL_UPGRADE_ID,
+		"Mejora: explorador aéreo auxiliar",
+		"Proyecto del niño",
+		"El proyecto escolar incorpora una pequeña maqueta aérea autónoma de reconocimiento con rotores protegidos, separada del vehículo terrestre, para observar rutas difíciles. No reproduce un vuelo real en Marte.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_aerial_review()
+
+
+func _open_aerial_review() -> void:
+	_mode = MODE_AERIAL_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · RECONOCIMIENTO DE RUTA"
+	body_label.text = "El rover terrestre permanece en el suelo y conserva todos sus sistemas. Su acompañante aéreo permite estudiar la ruta sin arriesgar las ruedas. La maqueta de feria no imita las condiciones de vuelo de Marte."
+	option_label.text = "PROYECTO EVOLUCIONADO · EXPLORADOR AUXILIAR"
+	feedback_label.text = "Ingenuity · Observar, planificar y perseverar."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_aerial_failure() -> void:
+	if not _has_discovery(DELIVERY_UPGRADE_ID):
+		return
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", AERIAL_PROBLEM_ID,
+		"Problema: ruta bloqueada para la cámara terrestre",
+		"Proyecto del niño",
+		"El Vehículo Explorador de Rescate no ve por encima de una cresta de rocas. Necesita reconocimiento antes de elegir camino, sin exigir que el rover terrestre pueda volar.")
+	project_state_changed.emit()
+
+
 func _open_delivery_test() -> void:
 	_mode = MODE_DELIVERY_TEST
 	_delivery_test_step = 0
@@ -1257,6 +1385,7 @@ func _refresh_visual_state() -> void:
 	slip_visual.visible = _has_discovery(SLIP_UPGRADE_ID)
 	power_visual.visible = _has_discovery(POWER_BUDGET_UPGRADE_ID)
 	delivery_visual.visible = _has_discovery(DELIVERY_UPGRADE_ID)
+	aerial_visual.visible = _has_discovery(AERIAL_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)

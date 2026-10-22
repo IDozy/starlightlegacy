@@ -28,6 +28,9 @@ const POWER_BUDGET_UPGRADE_ID := "rescue_rover_power_budget_upgrade"
 const DELIVERY_PROBLEM_ID := "rescue_rover_delivery_problem"
 const SKY_CRANE_ID := "perseverance_sky_crane"
 const DELIVERY_UPGRADE_ID := "rescue_rover_touchdown_release_upgrade"
+const AERIAL_PROBLEM_ID := "rescue_rover_aerial_scout_problem"
+const INGENUITY_ID := "ingenuity"
+const AERIAL_UPGRADE_ID := "rescue_rover_aerial_scout_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -103,6 +106,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/opportunity/opportunity_memory.tscn"
 		"grandfather_sky_crane":
 			target_scene = "res://levels/perseverance_sky_crane/sky_crane_memory.tscn"
+		"grandfather_ingenuity":
+			target_scene = "res://levels/ingenuity/ingenuity_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -113,8 +118,17 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(AERIAL_UPGRADE_ID):
+		project_objective.text = "PROYECTO · EXPLORADOR AÉREO AUXILIAR LISTO · Rover terrestre protegido."
+		return
+	if _has_discovery(INGENUITY_ID):
+		project_objective.text = "PROYECTO · Añade el explorador auxiliar inspirado en Ingenuity."
+		return
+	if _has_discovery(AERIAL_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el abuelo sobre Ingenuity y el vuelo en Marte."
+		return
 	if _has_discovery(DELIVERY_UPGRADE_ID):
-		project_objective.text = "PROYECTO · ENTREGA SEGURA · Liberación tras contacto confirmado."
+		project_objective.text = "PROYECTO · Prueba el reconocimiento de una ruta oculta."
 		return
 	if _has_discovery(SKY_CRANE_ID):
 		project_objective.text = "PROYECTO · Instala el protocolo de entrega aprendido de Sky Crane."

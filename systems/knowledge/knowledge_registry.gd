@@ -138,12 +138,13 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 	{
 		"id": "ingenuity",
 		"year": 2024,
-		"title": "Ingenuity",
-		"category": "Aeronave en Marte",
+		"title": "Ingenuity · Helicóptero de Marte",
+		"category": "Aeronave de exploración",
 		"optional": false,
-		"history": "Artículo aún no recuperado.",
-		"engineering": "Pendiente · Sustentación y vuelo en una atmósfera muy delgada.",
-		"project": "Pendiente."
+		"history": "Ingenuity llegó a Marte con Perseverance en febrero de 2021. El 19 de abril de 2021 logró el primer vuelo motorizado y controlado en otro planeta. Proyectado para hasta cinco vuelos de prueba, completó 72. Durante el último vuelo, el 18 de enero de 2024, resultó dañado al menos uno de sus rotores y dejó de poder volar. NASA anunció el final de la misión el 25 de enero de 2024. Permanece en Marte.",
+		"engineering": "Marte tiene una atmósfera muy tenue, aproximadamente un 1% de la presión superficial de la Tierra; se necesita una aeronave de baja masa y rotores capaces de mover suficiente aire. Ingenuity utilizaba dos rotores coaxiales contrarrotativos de 1,2 m de diámetro, con panel solar y navegación autónoma. Su función inicial fue demostrar el vuelo, y más adelante ayudó a explorar el terreno. La maqueta no simula fuerzas ni telemetría de vuelo reales.",
+		"project": "Aplicación · Explorador aéreo escolar independiente del rover terrestre, para reconocer obstáculos. Muestra de sustentación, masa y control; no supone que el rover vuele ni que Ingenuity real pueda volver a despegar.",
+		"application_discovery_id": "rescue_rover_aerial_scout_upgrade"
 	}
 ]
 
