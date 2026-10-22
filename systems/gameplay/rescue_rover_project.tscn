@@ -204,6 +204,36 @@ position = Vector3(0.44, 0.065, 0)
 scale = Vector3(0.12, 0.22, 1.65)
 mesh = SubResource("Mesh_top")
 
+[node name="TractionWheelUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+; Estos aros de agarre son marcadores greybox. No alteran las ruedas GLTF
+; del vehículo ni sustituyen su sistema de suspensión.
+[node name="GripWheelFL" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(-0.58, 0.26, -0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelFR" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0.58, 0.26, -0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelRL" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(-0.58, 0.26, 0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelRR" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0.58, 0.26, 0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="LoadBalanceMarker" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0, 0.83, 0.10)
+scale = Vector3(0.45, 0.26, 0.42)
+mesh = SubResource("Mesh_top")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.25, 0.0)
 shape = SubResource("Shape_body")
