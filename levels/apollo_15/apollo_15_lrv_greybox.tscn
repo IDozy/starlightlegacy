@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/apollo_15/apollo_15_lrv_greybox.gd" id="1_model"]
+
+[node name="Apollo15LRVGreybox" type="Node3D"]
+script = ExtResource("1_model")
