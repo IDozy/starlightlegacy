@@ -9,6 +9,10 @@ extends StaticBody3D
 
 
 func get_interaction_prompt() -> String:
+	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_traction_problem"):
+		if _has_discovery("apollo_15_lrv"):
+			return "Abuelo · Aplica lo aprendido de Apollo 15"
+		return "E · Hablar con Abuelo sobre Apollo 15"
 	if dialogue_id == "grandfather_intro" and _has_discovery("rescue_rover_module_separation_problem"):
 		if _has_discovery("apollo_11_descent_stage"):
 			return "Abuelo · Aplica lo aprendido de Apollo 11"
@@ -37,6 +41,11 @@ func get_interaction_prompt() -> String:
 func interact(player: Node) -> void:
 	if player == null:
 		return
+	var apollo15_pending := (
+		dialogue_id == "grandfather_intro"
+		and _has_discovery("rescue_rover_traction_problem")
+		and not _has_discovery("apollo_15_lrv")
+	)
 	var apollo_pending := (
 		dialogue_id == "grandfather_intro"
 		and _has_discovery("rescue_rover_module_separation_problem")
@@ -52,7 +61,7 @@ func interact(player: Node) -> void:
 		and _has_discovery("rescue_rover_energy_problem")
 		and not _has_discovery("vanguard_1")
 	)
-	if not apollo_pending and not surveyor_pending and not vanguard_pending and (not _requirement_met() or _is_completed()):
+	if not apollo15_pending and not apollo_pending and not surveyor_pending and not vanguard_pending and (not _requirement_met() or _is_completed()):
 		return
 	var main_node := player.get_parent()
 	if main_node == null:
@@ -61,7 +70,9 @@ func interact(player: Node) -> void:
 	if controller == null:
 		return
 	var selected_dialogue := dialogue_id
-	if apollo_pending:
+	if apollo15_pending:
+		selected_dialogue = "grandfather_apollo_15"
+	elif apollo_pending:
 		selected_dialogue = "grandfather_apollo_11"
 	elif surveyor_pending:
 		selected_dialogue = "grandfather_surveyor_1"
