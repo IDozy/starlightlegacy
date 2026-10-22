@@ -1,5 +1,5 @@
 extends SceneTree
-## Contrato Opportunity, pendiente de ejecutar en Godot Desktop/Web.
+## Contrato Opportunity: NO ejecutar aún. Godot Desktop/Web pendiente.
 ## godot --headless --editor --path . --quit
 ## godot --headless --path . --script res://tests/opportunity_power_story_loop_smoke.gd
 
@@ -11,12 +11,12 @@ const PREVIOUS := [
 	"rescue_rover_traction_upgrade",
 	"rescue_rover_science_verification_upgrade",
 	"rescue_rover_slip_guard_upgrade",
-	"viking_1"
+	"viking_1",
+	"spirit"
 ]
 const POWER_PROBLEM := "rescue_rover_low_light_problem"
-const SPIRIT := "opportunity"
+const OPPORTUNITY := "opportunity"
 const POWER_UPGRADE := "rescue_rover_power_budget_upgrade"
-
 var failures: Array[String] = []
 
 
@@ -37,91 +37,114 @@ func _run() -> void:
 		return
 	for key in PREVIOUS:
 		registry.call("register_discovery", key, key, "Prueba", "Resultado de prueba.")
+
 	var project_scene := load("res://systems/gameplay/rescue_rover_project.tscn") as PackedScene
 	var grandfather_scene := load("res://systems/dialogue/grandfather_placeholder.tscn") as PackedScene
 	var memory_scene := load("res://levels/opportunity/opportunity_memory.tscn") as PackedScene
 	if project_scene == null or grandfather_scene == null or memory_scene == null:
-		printerr("FAIL: faltan escenas Opportunity.")
+		printerr("FAIL: no cargaron las escenas Opportunity.")
 		quit(1)
 		return
+
 	var project := project_scene.instantiate() as StaticBody3D
 	root.add_child(project)
 	await process_frame
 	_expect(str(project.call("get_interaction_prompt")).contains("luz solar"),
-		"Tras Spirit no se ofrece prueba de luz solar.")
+		"Después de Spirit debe comenzar el reto de poca luz.")
 	_expect(not registry.has_discovery(POWER_PROBLEM),
-		"El fallo no debe registrarse antes de la prueba.")
+		"El problema no debe aparecer antes de hacer la prueba.")
 	project.call("_record_low_light_failure")
-	_expect(registry.has_discovery(POWER_PROBLEM), "Falta registrar el fallo.")
+	_expect(registry.has_discovery(POWER_PROBLEM), "No registró el fallo energético.")
+
 	var grandfather := grandfather_scene.instantiate() as StaticBody3D
 	root.add_child(grandfather)
 	await process_frame
 	_expect(str(grandfather.call("get_interaction_prompt")).contains("Opportunity"),
-		"El abuelo no reconoce el siguiente recuerdo.")
+		"El abuelo no introduce Opportunity.")
+
 	var memory := memory_scene.instantiate() as Node3D
 	root.add_child(memory)
 	await process_frame
 	var rover := memory.get_node_or_null("OpportunityMarsRover") as Node3D
-	var console := memory.get_node_or_null("OpportunitySlipConsole") as StaticBody3D
-	_expect(rover != null, "Falta modelo greybox Opportunity.")
-	_expect(console != null, "Falta consola de seguridad.")
+	var console := memory.get_node_or_null("OpportunityPowerConsole") as StaticBody3D
+	_expect(rover != null, "Falta el rover provisional Opportunity.")
+	_expect(console != null, "Falta consola de energía Opportunity.")
+
 	if rover != null and console != null:
-		_expect(bool(rover.call("has_six_wheels")), "Opportunity debe tener seis ruedas.")
+		_expect(bool(rover.call("has_six_wheels")), "Opportunity tenía seis ruedas.")
 		_expect(rover.get_node_or_null("MERHardware/SpiritHardware/SolarPanel_L") != null,
-			"Faltan paneles solares en Opportunity.")
-		_expect(rover.get_node_or_null("OpportunityHardware/CameraMast") != null,
-			"Falta el mástil de cámaras.")
-		_expect(not registry.has_discovery(SPIRIT), "Descubrimiento prematuro.")
+			"Falta el panel solar MER.")
+		_expect(rover.get_node_or_null("MERHardware/SpiritHardware/CameraMast") != null,
+			"Falta mástil de cámaras MER.")
+		_expect(not registry.has_discovery(OPPORTUNITY),
+			"No debe desbloquearse sin superar decisiones.")
+
 		console.set("_choice", 0)
 		console.call("_confirm_light")
 		_expect(not bool(console.get("_light_observed")),
-			"Acelerar en terreno blando no puede aprobar.")
+			"Reorientar el panel no despeja la tormenta.")
 		console.set("_choice", 1)
 		console.call("_confirm_light")
-		_expect(bool(console.get("_light_observed")), "Falta parada segura.")
+		_expect(bool(console.get("_light_observed")),
+			"No se midió la disminución de luz.")
+		_expect(bool(rover.get("_light_observed")), "No se mostró caída de iluminación.")
+
 		console.set("_choice", 0)
 		console.call("_confirm_budget")
-		_expect(not bool(console.get("_power_budget_protected")), "Forzar ruedas no es evaluación.")
+		_expect(not bool(console.get("_power_budget_protected")),
+			"No debe conservar todos los consumos al máximo.")
 		console.set("_choice", 1)
 		console.call("_confirm_budget")
-		_expect(bool(console.get("_power_budget_protected")), "Falta comprobación de riesgo.")
+		_expect(bool(console.get("_power_budget_protected")),
+			"Falta el presupuesto de energía.")
+		_expect(bool(rover.get("_power_guard_enabled")),
+			"No se refleja la activación de ahorro.")
+
 		console.set("_choice", 0)
 		console.call("_confirm_history")
-		_expect(not registry.has_discovery(SPIRIT),
-			"No se debe afirmar que Opportunity salió de Troy.")
+		_expect(not registry.has_discovery(OPPORTUNITY),
+			"La historia no debe decir que Opportunity volvió a comunicarse.")
 		console.set("_choice", 1)
 		console.call("_confirm_history")
-		_expect(bool(console.get("_history_respected")), "No priorizó ciencia.")
-		_expect(registry.has_discovery(SPIRIT), "Opportunity no figura en Archivo NASA.")
-		_expect(bool(rover.get("_power_guard_enabled")), "No se refleja plataforma fija.")
+		_expect(bool(console.get("_history_respected")),
+			"No reconoce el final real de la misión.")
+		_expect(registry.has_discovery(OPPORTUNITY),
+			"No se registró Opportunity en Archivo NASA.")
+
 	_expect(memory.get_node_or_null("ReturnToWorkshop") != null,
-		"Portal de regreso bloqueado tras completar el recuerdo.")
-	var entry: Dictionary = registry.call("get_catalog_entry", SPIRIT)
-	_expect(int(entry.get("year", 0)) == 2018, "El recuerdo Troy es de 2009.")
-	_expect(str(entry.get("application_discovery_id", "")) == POWER_UPGRADE,
-		"La ficha NASA no enlaza con la mejora.")
+		"Falta portal de regreso tras el recuerdo.")
+	var entry: Dictionary = registry.call("get_catalog_entry", OPPORTUNITY)
+	_expect(int(entry.get("year", 0)) == 2018,
+		"El Archivo debe listar el año de la última señal.")
 	_expect(str(entry.get("history", "")).contains("2019"),
-		"No se explica que Opportunity nunca escapó de Troy.")
+		"El Archivo debe distinguir última señal y cierre de misión.")
+	_expect(str(entry.get("application_discovery_id", "")) == POWER_UPGRADE,
+		"Falta vincular ficha Opportunity con mejora escolar.")
+
 	project.call("_open_low_light_upgrade")
 	project.set("_light_selection", 0)
-	project.call("_confirm_slip_upgrade")
+	project.call("_confirm_low_light_upgrade")
 	_expect(not registry.has_discovery(POWER_UPGRADE),
-		"Insistir con ruedas no debe autorizar mejora.")
+		"Ignorar el consumo nunca debe aplicar mejora.")
 	project.set("_light_selection", 1)
-	project.call("_confirm_slip_upgrade")
-	_expect(registry.has_discovery(POWER_UPGRADE), "Falta aplicar detector de patinaje.")
-	var safety := project.get_node_or_null("PowerBudgetUpgradeVisual") as Node3D
-	_expect(safety != null and safety.visible, "No se ve telemetría de patinaje.")
+	project.call("_confirm_low_light_upgrade")
+	_expect(registry.has_discovery(POWER_UPGRADE),
+		"No se instaló el presupuesto energético.")
+	var power := project.get_node_or_null("PowerBudgetUpgradeVisual") as Node3D
+	var slip := project.get_node_or_null("SlipSafetyUpgradeVisual") as Node3D
 	var science := project.get_node_or_null("ScienceVerificationUpgradeVisual") as Node3D
 	var traction := project.get_node_or_null("TractionWheelUpgradeVisual") as Node3D
 	var airbags := project.get_node_or_null("UpgradeVisual") as Node3D
-	_expect(science != null and science.visible, "La mejora Viking se perdió.")
-	_expect(traction != null and traction.visible, "La mejora Apollo 15 se perdió.")
-	_expect(airbags != null and airbags.visible, "La amortiguación anterior se perdió.")
+	_expect(power != null and power.visible, "Módulo de energía no visible.")
+	_expect(slip != null and slip.visible, "Se perdió el detector de Spirit.")
+	_expect(science != null and science.visible, "Se perdió la mejora Viking.")
+	_expect(traction != null and traction.visible, "Se perdió la mejora Apollo 15.")
+	_expect(airbags != null and airbags.visible, "Se perdió la amortiguación.")
 	for key in PREVIOUS:
-		_expect(registry.has_discovery(key), "Se perdió: " + key)
+		_expect(registry.has_discovery(key), "Se perdió descubrimiento previo: " + key)
+
 	if failures.is_empty():
-		print("PASS: Viking -> fallo de patinaje -> abuelo -> Opportunity -> Archivo -> seguridad.")
+		print("PASS: Spirit -> luz baja -> abuelo -> Opportunity -> Archivo -> presupuesto.")
 		quit(0)
 	else:
 		for failure in failures:
