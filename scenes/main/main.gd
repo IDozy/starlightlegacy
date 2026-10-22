@@ -115,9 +115,6 @@ func _update_project_objective() -> void:
 	if _has_discovery(SCIENCE_UPGRADE_ID):
 		project_objective.text = "PROYECTO · Prueba el vehículo sobre polvo suelto."
 		return
-	if false:
-		project_objective.text = "PROYECTO · DATOS VERIFICADOS · Comparación y registro instalados."
-		return
 	if _has_discovery(VIKING_ID):
 		project_objective.text = "PROYECTO · Aplica la verificación científica aprendida de Viking 1."
 		return
