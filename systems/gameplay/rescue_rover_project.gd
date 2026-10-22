@@ -24,6 +24,9 @@ const TRACTION_UPGRADE_ID := "rescue_rover_traction_upgrade"
 const SCIENCE_PROBLEM_ID := "rescue_rover_science_verification_problem"
 const VIKING_ID := "viking_1"
 const SCIENCE_UPGRADE_ID := "rescue_rover_science_verification_upgrade"
+const SLIP_PROBLEM_ID := "rescue_rover_slip_problem"
+const SPIRIT_ID := "spirit"
+const SLIP_UPGRADE_ID := "rescue_rover_slip_guard_upgrade"
 
 const MODE_TEST := 0
 const MODE_WAITING := 1
@@ -49,6 +52,10 @@ const MODE_SCIENCE_TEST := 20
 const MODE_SCIENCE_WAITING := 21
 const MODE_SCIENCE_UPGRADE := 22
 const MODE_SCIENCE_REVIEW := 23
+const MODE_SLIP_TEST := 24
+const MODE_SLIP_WAITING := 25
+const MODE_SLIP_UPGRADE := 26
+const MODE_SLIP_REVIEW := 27
 
 const OPTION_MOTOR := 0
 const OPTION_ELASTIC := 1
@@ -70,6 +77,7 @@ const OPTION_COUNT := 3
 @onready var released_base_visual: Node3D = $ReleasedBaseVisual
 @onready var traction_visual: Node3D = $TractionWheelUpgradeVisual
 @onready var science_visual: Node3D = $ScienceVerificationUpgradeVisual
+@onready var slip_visual: Node3D = $SlipSafetyUpgradeVisual
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var _player: Node = null
@@ -87,6 +95,8 @@ var _traction_test_step := 0
 var _traction_selection := 1
 var _science_test_step := 0
 var _science_selection := 1
+var _slip_test_step := 0
+var _slip_selection := 1
 var _started_frame := -1
 
 
@@ -96,7 +106,14 @@ func _ready() -> void:
 
 
 func get_interaction_prompt() -> String:
+	if _has_discovery(SLIP_UPGRADE_ID):
+		return "E · Revisar detector de patinaje"
+	if _has_discovery(SPIRIT_ID):
+		return "E · Instalar monitor inspirado en Spirit"
+	if _has_discovery(SLIP_PROBLEM_ID):
+		return "E · Revisar deslizamiento del vehículo"
 	if _has_discovery(SCIENCE_UPGRADE_ID):
+		return "E · Probar detección de deslizamiento"
 		return "E · Revisar verificación científica del rover"
 	if _has_discovery(VIKING_ID):
 		return "E · Añadir comprobaciones científicas inspiradas en Viking 1"
@@ -152,8 +169,14 @@ func interact(player: Node) -> void:
 	panel.visible = true
 	project_active_changed.emit(true)
 
-	if _has_discovery(SCIENCE_UPGRADE_ID):
-		_open_science_review()
+	if _has_discovery(SLIP_UPGRADE_ID):
+		_open_slip_review()
+	elif _has_discovery(SPIRIT_ID):
+		_open_slip_upgrade()
+	elif _has_discovery(SLIP_PROBLEM_ID):
+		_open_slip_waiting()
+	elif _has_discovery(SCIENCE_UPGRADE_ID):
+		_open_slip_test()
 	elif _has_discovery(VIKING_ID):
 		_open_science_upgrade()
 	elif _has_discovery(SCIENCE_PROBLEM_ID):
@@ -216,6 +239,25 @@ func _unhandled_input(event: InputEvent) -> void:
 					_show_failure_result()
 				else:
 					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_SLIP_TEST:
+			if _is_confirm_key(event):
+				if _slip_test_step == 0:
+					_record_slip_failure()
+					_slip_test_step = 1
+					_show_slip_failure()
+				else:
+					_close_panel()
+				get_viewport().set_input_as_handled()
+
+		MODE_SLIP_UPGRADE:
+			if INPUT_COMPAT.key_matches(event, KEY_A) or INPUT_COMPAT.key_matches(event, KEY_LEFT) or INPUT_COMPAT.key_matches(event, KEY_D) or INPUT_COMPAT.key_matches(event, KEY_RIGHT):
+				_slip_selection = 1 - _slip_selection
+				_render_slip_option()
+				get_viewport().set_input_as_handled()
+			elif _is_confirm_key(event):
+				_confirm_slip_upgrade()
 				get_viewport().set_input_as_handled()
 
 		MODE_SCIENCE_TEST:
@@ -317,7 +359,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_confirm_solar_upgrade()
 				get_viewport().set_input_as_handled()
 
-		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW:
+		MODE_WAITING, MODE_REVIEW, MODE_ENERGY_WAITING, MODE_SOLAR_REVIEW, MODE_ORIENTATION_WAITING, MODE_ORIENTATION_REVIEW, MODE_MODULE_WAITING, MODE_MODULE_REVIEW, MODE_TRACTION_WAITING, MODE_TRACTION_REVIEW, MODE_SCIENCE_WAITING, MODE_SCIENCE_REVIEW, MODE_SLIP_WAITING, MODE_SLIP_REVIEW:
 			if _is_confirm_key(event):
 				_close_panel()
 				get_viewport().set_input_as_handled()
@@ -831,6 +873,92 @@ func _record_science_failure() -> void:
 	project_state_changed.emit()
 
 
+func _open_slip_test() -> void:
+	_mode = MODE_SLIP_TEST
+	_slip_test_step = 0
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PRUEBA 7 · DESLIZAMIENTO EN TERRENO BLANDO"
+	body_label.text = "La tracción y la verificación científica funcionan, pero al entrar en polvo suelto las ruedas giran y el vehículo apenas avanza. ¿Qué ocurrirá si seguimos acelerando?"
+	option_label.text = "E · INICIAR PRUEBA DE DESLIZAMIENTO"
+	feedback_label.text = ""
+	hint_label.text = "E / Enter · Ejecutar prueba    Esc · Salir"
+
+
+func _show_slip_failure() -> void:
+	status_label.text = "FALLO · PATINA Y SE HUNDE"
+	body_label.text = "El movimiento de las ruedas no coincide con el avance observado. Insistir aumenta el riesgo de atasco. Necesitamos identificar el patinaje y detenernos antes de empeorar el problema."
+	option_label.text = "NUEVO PROBLEMA · DESLIZAMIENTO"
+	feedback_label.text = "Abuelo: Spirit se encontró con un suelo inesperadamente blando en Marte..."
+	hint_label.text = "E / Enter · Continuar"
+
+
+func _open_slip_waiting() -> void:
+	_mode = MODE_SLIP_WAITING
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "PROBLEMA PENDIENTE · RIESGO DE ATASCO"
+	body_label.text = "El vehículo patina sobre polvo suelto. Habla con el abuelo para conocer lo ocurrido al rover Spirit en Troy."
+	option_label.text = "OBJETIVO · HABLA CON EL ABUELO"
+	feedback_label.text = ""
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _open_slip_upgrade() -> void:
+	_mode = MODE_SLIP_UPGRADE
+	_slip_selection = 1
+	title_label.text = "APLICAR LO APRENDIDO"
+	status_label.text = "SPIRIT · DETENERSE A TIEMPO"
+	body_label.text = "Spirit se quedó atrapado en Troy y no pudo escapar. ¿Cómo puede tu rover escolar evitar agravar un atasco y proteger la energía disponible?"
+	feedback_label.text = ""
+	hint_label.text = "A / D · Elegir    E / Enter · Aplicar    Esc · Salir"
+	_render_slip_option()
+
+
+func _render_slip_option() -> void:
+	option_label.text = "◀ AUMENTAR EL GIRO DE LAS RUEDAS ▶" if _slip_selection == 0 else "◀ MEDIR PATINAJE + DETENERSE + AHORRAR ENERGÍA ▶"
+
+
+func _confirm_slip_upgrade() -> void:
+	if _slip_selection == 0:
+		feedback_label.text = "Más giro sin avance puede hundir las ruedas. Elige medir el riesgo y detener el sistema."
+		return
+	if not _has_discovery(SPIRIT_ID) or not _has_discovery(SCIENCE_UPGRADE_ID):
+		feedback_label.text = "Primero completa Spirit y la verificación de Viking 1."
+		return
+	var registry := _registry()
+	if registry == null:
+		feedback_label.text = "Archivo NASA no disponible."
+		return
+	registry.call("register_discovery", SLIP_UPGRADE_ID,
+		"Mejora: detección de patinaje y protección",
+		"Proyecto del niño",
+		"El Vehículo Explorador integra un monitor escolar que detecta giro sin avance, advierte inclinación y detiene la prueba antes de que el terreno lo hunda.")
+	_refresh_visual_state()
+	project_state_changed.emit()
+	_open_slip_review()
+
+
+func _open_slip_review() -> void:
+	_mode = MODE_SLIP_REVIEW
+	title_label.text = "VEHÍCULO EXPLORADOR DE RESCATE"
+	status_label.text = "MEJORA APLICADA · SEGURIDAD EN TERRENO BLANDO"
+	body_label.text = "El rover detecta patinaje, puede parar y proteger su energía. Conserva las mejoras anteriores. Spirit no salió de Troy: aprendimos a respetar los límites del terreno."
+	option_label.text = "PROYECTO EVOLUCIONADO · CONTROL DE RIESGO"
+	feedback_label.text = "Spirit · Medir, detenerse y replantear."
+	hint_label.text = "E / Esc · Cerrar"
+
+
+func _record_slip_failure() -> void:
+	if not _has_discovery(SCIENCE_UPGRADE_ID):
+		return
+	var registry := _registry()
+	if registry == null:
+		return
+	registry.call("register_discovery", SLIP_PROBLEM_ID,
+		"Problema: deslizamiento y hundimiento",
+		"Proyecto del niño",
+		"En polvo suelto las ruedas giran sin que el Vehículo Explorador avance; insistir puede hundirlo. Necesitamos una alarma de patinaje.")
+	project_state_changed.emit()
+
 func _record_failure() -> void:
 	var registry := _registry()
 	if registry == null:
@@ -871,6 +999,7 @@ func _refresh_visual_state() -> void:
 	released_base_visual.visible = _has_discovery(MODULE_UPGRADE_ID)
 	traction_visual.visible = _has_discovery(TRACTION_UPGRADE_ID)
 	science_visual.visible = _has_discovery(SCIENCE_UPGRADE_ID)
+	slip_visual.visible = _has_discovery(SLIP_UPGRADE_ID)
 	# La mejora de Surveyor sustituye SOLO el panel fijo visual anterior;
 	# el sistema de energía solar continúa instalado.
 	solar_visual.visible = _has_discovery(SOLAR_UPGRADE_ID) and not _has_discovery(ORIENTATION_UPGRADE_ID)

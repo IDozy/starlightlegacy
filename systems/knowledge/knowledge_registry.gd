@@ -94,13 +94,14 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 	},
 	{
 		"id": "spirit",
-		"year": 2010,
-		"title": "Spirit",
+		"year": 2009,
+		"title": "Spirit · Troy",
 		"category": "Rover en Marte",
 		"optional": false,
-		"history": "Artículo aún no recuperado.",
-		"engineering": "Pendiente · Reto de ruedas, hundimiento, fricción y energía.",
-		"project": "Pendiente."
+		"history": "Spirit exploró Gusev desde enero de 2004. En 2009 quedó atascado en suelo blando en Troy y no logró liberarse. En enero de 2010 NASA lo convirtió en plataforma científica estacionaria. La última comunicación fue el 22 de marzo de 2010; la misión concluyó en 2011. Spirit permanece en Marte.",
+		"engineering": "El rover tenía seis ruedas, paneles solares, mástil de cámaras y brazo con instrumentos. Durante el atasco, los equipos analizaron deslizamiento, hundimiento, inclinación y energía, y ensayaron maniobras. Las decisiones del minijuego son analogías educativas, no comandos históricos ni una recuperación exitosa.",
+		"project": "Aplicación · Monitor escolar de patinaje, inclinación y detención preventiva para el Vehículo Explorador de Rescate. No representa un rescate real de Spirit.",
+		"application_discovery_id": "rescue_rover_slip_guard_upgrade"
 	},
 	{
 		"id": "opportunity",

@@ -1,0 +1,135 @@
+extends Node3D
+## Troy Planitia (1976), reconstruccion educativa estilizada.
+## No representa telemetría, conducción ni rescate histórico.
+
+const ROVER := preload("res://levels/spirit/spirit_rover_greybox.tscn")
+const SLIP_CONSOLE := preload("res://systems/gameplay/spirit_slip_console.gd")
+const RETURN_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
+const DISCOVERY_ID := "spirit"
+
+@onready var player: CharacterBody3D = $Player
+@onready var objective_label: Label = $HUD/Objective
+@onready var interaction_prompt: Label = $HUD/InteractionPrompt
+
+var _rover: Node3D = null
+var _console: StaticBody3D = null
+var _portal: StaticBody3D = null
+
+
+func _ready() -> void:
+	_create_environment()
+	_create_surface()
+	_create_rover()
+	_create_console()
+	player.connect("interaction_prompt_changed", _on_interaction_prompt_changed)
+	interaction_prompt.visible = false
+	_update_progress()
+
+
+func _create_environment() -> void:
+	var world := WorldEnvironment.new()
+	world.name = "TroyEnvironment"
+	var background := Environment.new()
+	background.background_mode = Environment.BG_COLOR
+	background.background_color = Color(0.44, 0.24, 0.17)
+	background.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	background.ambient_light_color = Color(0.39, 0.41, 0.45)
+	background.ambient_light_energy = 0.56
+	world.environment = background
+	add_child(world)
+
+	var sunlight := DirectionalLight3D.new()
+	sunlight.name = "MartianSun"
+	sunlight.rotation_degrees = Vector3(-43, 27, 0)
+	sunlight.light_color = Color(1.0, 0.96, 0.86)
+	sunlight.light_energy = 1.10
+	sunlight.shadow_enabled = true
+	add_child(sunlight)
+
+
+func _create_surface() -> void:
+	var floor_body := StaticBody3D.new()
+	floor_body.name = "TroySurface"
+	floor_body.position = Vector3(0, -0.15, 0)
+	var mesh_instance := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = Vector3(28.0, 0.30, 28.0)
+	var soil := StandardMaterial3D.new()
+	soil.albedo_color = Color(0.48, 0.23, 0.16)
+	soil.roughness = 0.97
+	mesh.material = soil
+	mesh_instance.mesh = mesh
+	floor_body.add_child(mesh_instance)
+	var collider := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = mesh.size
+	collider.shape = shape
+	floor_body.add_child(collider)
+	add_child(floor_body)
+
+	for i in range(9):
+		var small_rock := MeshInstance3D.new()
+		small_rock.name = "TroyRock_%02d" % i
+		var rock_mesh := SphereMesh.new()
+		rock_mesh.radius = 0.25
+		rock_mesh.height = 0.50
+		rock_mesh.radial_segments = 7
+		rock_mesh.rings = 4
+		var rock_mat := StandardMaterial3D.new()
+		rock_mat.albedo_color = Color(0.35, 0.19, 0.13)
+		rock_mat.roughness = 0.96
+		rock_mesh.material = rock_mat
+		small_rock.mesh = rock_mesh
+		var angle := TAU * float(i) / 9.0
+		var radius := 6.5 + 0.50 * float(i % 3)
+		small_rock.position = Vector3(cos(angle) * radius, 0.08, sin(angle) * radius - 0.9)
+		small_rock.scale = Vector3(1.50, 0.38, 0.90)
+		add_child(small_rock)
+
+
+func _create_rover() -> void:
+	_rover = ROVER.instantiate() as Node3D
+	_rover.name = "SpiritMarsRover"
+	_rover.position = Vector3(1.05, 0.0, -4.25)
+	_rover.rotation_degrees.y = 18.0
+	add_child(_rover)
+
+
+func _create_console() -> void:
+	_console = SLIP_CONSOLE.new() as StaticBody3D
+	_console.name = "SpiritSlipConsole"
+	_console.position = Vector3(-1.65, 0.0, -1.70)
+	add_child(_console)
+	_console.call("connect_rover", _rover)
+	_console.connect("challenge_completed", _on_challenge_completed)
+
+
+func _on_challenge_completed() -> void:
+	_update_progress()
+
+
+func _update_progress() -> void:
+	if _has_discovery(DISCOVERY_ID):
+		objective_label.text = "HISTORIA RECUPERADA · Spirit · Decisión en Troy · Regresa al taller."
+		_unlock_return_portal()
+	else:
+		objective_label.text = "OBJETIVO · Detecta patinaje, evalúa riesgos y protege la misión."
+
+
+func _unlock_return_portal() -> void:
+	if _portal != null:
+		return
+	_portal = RETURN_PORTAL.instantiate() as StaticBody3D
+	_portal.name = "ReturnToWorkshop"
+	_portal.position = Vector3(2.8, 0.68, 1.00)
+	add_child(_portal)
+
+
+func _has_discovery(discovery_id: String) -> bool:
+	var registry := get_node_or_null("/root/KnowledgeRegistry")
+	return registry != null and registry.has_method("has_discovery") and bool(registry.call("has_discovery", discovery_id))
+
+
+func _on_interaction_prompt_changed(prompt: String) -> void:
+	interaction_prompt.text = prompt
+	interaction_prompt.visible = not prompt.is_empty()

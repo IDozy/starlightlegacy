@@ -252,6 +252,24 @@ position = Vector3(0.38, 0.74, -0.27)
 scale = Vector3(0.34, 0.20, 0.36)
 mesh = SubResource("Mesh_body")
 
+[node name="SlipSafetyUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="WheelSlipMonitor" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(0.20, 1.11, 0.24)
+scale = Vector3(0.38, 0.28, 0.25)
+mesh = SubResource("Mesh_top")
+
+[node name="SlopeWarningBeacon" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(-0.38, 1.07, -0.11)
+scale = Vector3(0.24, 0.29, 0.22)
+mesh = SubResource("Mesh_body")
+
+[node name="WheelTelemetryModule" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(0.37, 0.63, -0.27)
+scale = Vector3(0.26, 0.18, 0.30)
+mesh = SubResource("Mesh_top")
+
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.25, 0.0)
 shape = SubResource("Shape_body")

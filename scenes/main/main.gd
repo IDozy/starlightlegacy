@@ -19,6 +19,9 @@ const TRACTION_UPGRADE_ID := "rescue_rover_traction_upgrade"
 const SCIENCE_PROBLEM_ID := "rescue_rover_science_verification_problem"
 const VIKING_ID := "viking_1"
 const SCIENCE_UPGRADE_ID := "rescue_rover_science_verification_upgrade"
+const SLIP_PROBLEM_ID := "rescue_rover_slip_problem"
+const SPIRIT_ID := "spirit"
+const SLIP_UPGRADE_ID := "rescue_rover_slip_guard_upgrade"
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -88,6 +91,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 			target_scene = "res://levels/apollo_15/apollo_15_memory.tscn"
 		"grandfather_viking_1":
 			target_scene = "res://levels/viking_1/viking_1_memory.tscn"
+		"grandfather_spirit":
+			target_scene = "res://levels/spirit/spirit_memory.tscn"
 		_:
 			return
 	if player.has_method("set_control_locked"):
@@ -98,7 +103,19 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery(SLIP_UPGRADE_ID):
+		project_objective.text = "PROYECTO · DETECTOR DE PATINAJE INSTALADO · Detención segura."
+		return
+	if _has_discovery(SPIRIT_ID):
+		project_objective.text = "PROYECTO · Aplica el control de deslizamiento aprendido de Spirit."
+		return
+	if _has_discovery(SLIP_PROBLEM_ID):
+		project_objective.text = "PROYECTO · Habla con el abuelo sobre Spirit y Troy."
+		return
 	if _has_discovery(SCIENCE_UPGRADE_ID):
+		project_objective.text = "PROYECTO · Prueba el vehículo sobre polvo suelto."
+		return
+	if false:
 		project_objective.text = "PROYECTO · DATOS VERIFICADOS · Comparación y registro instalados."
 		return
 	if _has_discovery(VIKING_ID):

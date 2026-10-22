@@ -143,6 +143,13 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
 				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
 			])
+		"grandfather_spirit":
+			return PackedStringArray([
+				"Tu rover ya registra datos, pero al cruzar polvo fino las ruedas giran sin avanzar. Si insistimos, puede hundirse aún más.",
+				"Spirit aterrizó en Marte en 2004 con seis ruedas y paneles solares. En 2009 quedó atrapado en suelo muy blando en un lugar llamado Troy.",
+				"La NASA estudió el hundimiento y la inclinación, probó maniobras en la Tierra, pero no consiguió liberarlo. En enero de 2010 decidió utilizarlo como una plataforma científica estacionaria.",
+				"No vamos a fingir que Spirit escapó. Aprenderemos a detectar cuándo debemos parar, cuidar la energía y continuar investigando de otra manera."
+			])
 		"grandfather_viking_1":
 			return PackedStringArray([
 				"¡El vehículo ya puede avanzar! Pero ahora el sensor ha marcado una reacción y casi anunciamos que encontramos vida, sin comprobar el resultado.",
