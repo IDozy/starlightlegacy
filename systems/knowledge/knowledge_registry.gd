@@ -45,9 +45,10 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"title": "Lunar Roving Vehicle · Apollo 15",
 		"category": "Movilidad lunar",
 		"optional": false,
-		"history": "Vehículo lunar utilizado por la tripulación de Apollo 15 y dejado en la superficie al terminar la misión.",
-		"engineering": "Pendiente de cerrar con fuentes NASA antes de implementar el nivel.",
-		"project": "Pendiente · Futuro reto de tracción."
+		"history": "Apollo 15 fue la primera misión en utilizar el Lunar Roving Vehicle sobre la Luna el 31 de julio de 1971, en la región Hadley-Apennine. David Scott y James Irwin lo condujeron durante tres recorridos; el vehículo quedó en la Luna.",
+		"engineering": "El LRV era eléctrico, de cuatro ruedas y dos asientos, con equipo científico y una estructura plegable para viajar en el módulo lunar. Sus ruedas de malla metálica flexible incorporaban bandas para mejorar el agarre. La selección de ruta y reparto de carga en el juego son analogías educativas.",
+		"project": "Aplicación · Ruedas con bandas de agarre y carga distribuida en el Vehículo Explorador de Rescate; inspiración de movilidad, no una copia literal de las ruedas del LRV.",
+		"application_discovery_id": "rescue_rover_traction_upgrade"
 	},
 	{
 		"id": "viking_1",
