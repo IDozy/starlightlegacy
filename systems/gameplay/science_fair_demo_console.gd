@@ -1,11 +1,13 @@
 extends StaticBody3D
-## Cierre de campaña de Starlight Legacy. Prueba escolar, no misión NASA real.
+## Final del Capítulo I de Starlight Legacy, NO final de la saga.
+## La feria es una prueba escolar; los objetos NASA históricos permanecen aparte.
 
 signal exhibition_completed
 
 const INPUT_COMPAT := preload("res://systems/input/input_compat.gd")
 const FAIR_ID := "rescue_rover_science_fair_completed"
 const IN_SIGHT_SCENE := "res://levels/insight/insight_memory.tscn"
+const CHAPTER_TWO_TEASER := "res://levels/chapter_two_preview/chapter_two_preview.tscn"
 const REQUIRED_UPGRADES := [
 	"rescue_rover_airbag_upgrade",
 	"rescue_rover_solar_upgrade",
@@ -59,7 +61,7 @@ func is_ready_for_fair() -> bool:
 
 func get_interaction_prompt() -> String:
 	if _has_discovery(FAIR_ID):
-		return "E · Revisar exhibición y Saber más"
+		return "E · Capítulo I completado · Continuar / Saber más"
 	return "E · Presentar el rover en la feria" if is_ready_for_fair() else "E · Feria: faltan mejoras"
 
 
@@ -112,6 +114,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close()
 			if wants_more:
 				_go_to_optional_insight()
+			else:
+				_go_to_chapter_two_preview()
 	get_viewport().set_input_as_handled()
 
 
@@ -158,9 +162,9 @@ func _confirm_scout() -> void:
 		_show()
 		return
 	registry.call("register_discovery", FAIR_ID,
-		"Feria de ciencias · Vehículo Explorador de Rescate",
+		"Capítulo I · Primera feria de ciencias",
 		"Proyecto escolar de los niños",
-		"En la feria el rover demostró seguridad, uso responsable de la energía, entrega controlada y verificación científica con exploración aérea auxiliar. Las historias NASA se mantienen en el Archivo, separadas de la ficción escolar.")
+		"El primer capítulo termina con la presentación de un rover escolar: seguridad, energía, entrega y exploración auxiliar. El Archivo NASA sigue abierto; se desconocen otras historias por descubrir. La feria es un logro ficticio, no una misión NASA.")
 	_step = STEP_FINISHED
 	_choice = 0
 	_feedback = ""
@@ -176,7 +180,7 @@ func _advance(next_step: int, feedback: String) -> void:
 
 
 func _show() -> void:
-	_title.text = "FERIA DE CIENCIAS · VEHÍCULO EXPLORADOR DE RESCATE"
+	_title.text = "CAPÍTULO I · FERIA DE CIENCIAS"
 	if not is_ready_for_fair():
 		_status.text = "AÚN FALTAN MEJORAS"
 		_body.text = "Tienes que completar el rover en el taller antes de dar la demostración.\n\nMejoras pendientes: %d de %d.\n\n%s" % [missing_upgrades().size(), REQUIRED_UPGRADES.size(), _feedback]
@@ -196,14 +200,24 @@ func _show() -> void:
 			_status.text = "4 / 4 · EXPLORAR Y COMPROBAR"
 			_body.text = "La cámara no puede ver más allá de la cresta. ¿Cómo presentar resultados responsables?\n\n%s SUPONER QUE HAY UN CAMINO SEGURO\n%s OBSERVAR DESDE ARRIBA Y VERIFICAR DATOS\n\n%s" % ["▶" if _choice == 0 else " ", "▶" if _choice == 1 else " ", _feedback]
 		STEP_FINISHED:
-			_status.text = "¡PROYECTO PRESENTADO!"
-			_body.text = "El abuelo sonríe: «No has construido un rover de la NASA. Has aprendido a resolver problemas de ingeniería escuchando las historias de quienes lo intentaron antes».\n\nEl Vehículo Explorador de Rescate superó la feria. Tus descubrimientos siguen en el Archivo NASA.\n\n%s CONTINUAR · DISFRUTAR LA FERIA\n%s SABER MÁS · IN SIGHT, SISMOS DE MARTE" % ["▶" if _choice == 0 else " ", "▶" if _choice == 1 else " "]
+			_status.text = "CAPÍTULO I COMPLETADO · EL PRIMER LEGADO"
+			_body.text = "El abuelo sonríe: «Tu primer rover está listo. No has construido una máquina de la NASA; has aprendido a hacer preguntas y encontrar soluciones».\n\nLa primera feria termina entre aplausos. Pero el Archivo NASA todavía guarda siluetas y recuerdos pendientes de descubrir. Esta historia apenas comienza.\n\n%s CONTINUAR · UNA NUEVA PISTA\n%s SABER MÁS · INSIGHT, SISMOS DE MARTE" % ["▶" if _choice == 0 else " ", "▶" if _choice == 1 else " "]
 	_hint.text = "A / D · Elegir    E / Enter · Confirmar    Esc · Cerrar"
 
 
 func _has_discovery(discovery_id: String) -> bool:
 	var registry := get_node_or_null("/root/KnowledgeRegistry")
 	return registry != null and registry.has_method("has_discovery") and bool(registry.call("has_discovery", discovery_id))
+
+
+func _go_to_chapter_two_preview() -> void:
+	# Es una escena de presentación del futuro capítulo, NO contenido jugable aún.
+	# El logro del Capítulo I y los avances del Archivo permanecen intactos.
+	if not _has_discovery(FAIR_ID):
+		return
+	var transition := get_node_or_null("/root/SceneTransition")
+	if transition != null and transition.has_method("fade_to_scene"):
+		transition.call("fade_to_scene", CHAPTER_TWO_TEASER)
 
 
 func _go_to_optional_insight() -> void:

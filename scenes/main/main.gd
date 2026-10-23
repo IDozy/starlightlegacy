@@ -140,7 +140,7 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 func _update_project_objective() -> void:
 	if _has_discovery("rescue_rover_science_fair_completed"):
-		project_objective.text = "PROYECTO · Feria terminada. Revisa tu Archivo NASA o vuelve a presentarlo."
+		project_objective.text = "CAPÍTULO I SUPERADO · El legado continúa. Regresa a la feria o revisa el Archivo."
 		return
 	if _has_discovery(AERIAL_UPGRADE_ID):
 		project_objective.text = "PROYECTO · Vehículo completo. Usa el portal de la feria de ciencias."

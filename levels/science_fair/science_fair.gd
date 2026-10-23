@@ -1,5 +1,5 @@
 extends Node3D
-## Feria de ciencias ficticia. Proyecto escolar y objetos NASA separados.
+## Fin del Capítulo I, no del juego completo. Proyecto escolar separado de NASA.
 
 const DEMO := preload("res://systems/gameplay/science_fair_demo_console.gd")
 const ROVER := preload("res://systems/gameplay/rescue_rover_project.tscn")
@@ -98,9 +98,9 @@ func _sync_optional_insight_portal() -> void:
 
 func _update_objective() -> void:
 	if _has_discovery("rescue_rover_science_fair_completed"):
-		objective_label.text = "FERIA COMPLETADA · Tu aventura continúa en el Archivo NASA · InSight es opcional."
+		objective_label.text = "CAPÍTULO I COMPLETADO · Continúa hacia una nueva pista o explora InSight."
 	else:
-		objective_label.text = "OBJETIVO · Presenta la seguridad, la energía, la entrega y la exploración del rover."
+		objective_label.text = "CAPÍTULO I · Demuestra seguridad, energía, entrega y exploración."
 
 
 func _has_discovery(discovery_id: String) -> bool:

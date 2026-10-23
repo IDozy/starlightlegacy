@@ -1,8 +1,8 @@
-# Starlight Legacy — Epílogo: feria de ciencias y Saber más InSight
+# Starlight Legacy — Fin del Capítulo I: El primer legado (feria + InSight opcional)
 
 **Estado:** propuesta de cierre **implementada como guion y greybox** en rama `feat/005a-discovery-archive`. No se ejecutaron Godot Desktop/Web ni E2E. No fusionar ni marcar validado.
 
-## Final de la historia principal
+## Final del Capítulo I, NO final de Starlight Legacy
 Tras recuperar Ingenuity y añadir el explorador aéreo auxiliar, el niño regresa al taller. Se habilita un portal a la **feria de ciencias**: escenario independiente del taller con un rover expositor que refleja las mejoras registradas.
 
 La presentación tiene **cuatro pasos**: seguridad del suelo, gestión energética, liberación después de tocar superficie y exploración más verificación científica. Todos los 10 descubrimientos de mejora acumulados son requisitos; saltarse cualquiera impide declarar completada la exhibición. Las elecciones incorrectas bloquean el avance.
@@ -36,3 +36,18 @@ Tras ganar la feria, un portal extra conduce a la reconstrucción educativa de *
 - [ ] Probar sensor en el suelo, escudo, año 2022, K Archivo, volver a feria.
 - [ ] Verificar los 10 módulos visuales acumulados y ausencia de regresiones.
 - [ ] Ejecutar smoke test Godot Desktop, exportación Web, E2E y revisar modelos Blender.
+
+
+## Escena poscréditos — Una nueva pista
+El Capítulo I cierra con una victoria que tiene valor propio: la presentación de feria, todas las mejoras y la voz del abuelo. Al elegir **CONTINUAR · UNA NUEVA PISTA**, la historia lleva a `levels/chapter_two_preview/chapter_two_preview.tscn`. El escenario es una sala de archivo al anochecer con **tres siluetas sin identificar** y una **caja antigua sin etiqueta**. Al pulsar E para examinarla, el jugador escucha tres mensajes: la curiosidad del abuelo, la necesidad de identificar las fuentes y un «CONTINUARÁ…».
+
+**Nunca afirmamos que las siluetas corresponden a nuevas piezas históricas concretas ni agregamos años o artefactos inventados al Archivo NASA.** El contenido posterior queda abierto para una segunda parte. El portal regresa a la feria; puede consultarse el Archivo NASA con K.
+
+El progreso del Capítulo I continúa identificado por `rescue_rover_science_fair_completed` para mantener compatibilidad con la ruta y las pruebas existentes. **No se sustituye ni reinicia ese registro**. InSight permanece opcional en un camino separado y no se exige para ver la pista o completar la feria.
+
+### Extensión futura
+- Segunda parte todavía NO implementada: seleccionar y verificar con NASA nuevos objetos reales, su historia, sus lugares y la curva de retos.
+- Nuevas historias podrán añadirse a la cronología existente sin modificar los registros históricos anteriores.
+- El cierre del Capítulo I conserva todas las mecánicas, pero no pretende ser el producto final de la saga.
+- [ ] Probar Godot: feria → Continuar → escena de caja → E/Enter → regreso a feria, y rama Saber más → InSight por separado.
+- [ ] Verificar que el Archivo no registre entradas históricas ficticias ni se reinicie al entrar al teaser.

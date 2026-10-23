@@ -1,5 +1,5 @@
 extends SceneTree
-## Acceptance contract: science fair finale and optional InSight; NOT EXECUTED.
+## Contract: Chapter I finale, chapter II teaser and optional InSight; NOT EXECUTED.
 ## godot --headless --path . --script res://tests/science_fair_insight_story_loop_smoke.gd
 
 const REQUIRED := [
@@ -30,7 +30,8 @@ func _run() -> void:
 		return
 	var fair_scene := load("res://levels/science_fair/science_fair.tscn") as PackedScene
 	var insight_scene := load("res://levels/insight/insight_memory.tscn") as PackedScene
-	if fair_scene == null or insight_scene == null:
+	var teaser_scene := load("res://levels/chapter_two_preview/chapter_two_preview.tscn") as PackedScene
+	if fair_scene == null or insight_scene == null or teaser_scene == null:
 		printerr("FAIL: final scenes missing")
 		quit(1)
 		return
@@ -59,6 +60,17 @@ func _run() -> void:
 		_check(not registry.has_discovery("insight"), "Optional InSight must not auto-register")
 		_check(fair.get_node_or_null("OptionalInSightPortal") != null, "Optional portal missing after fair")
 		_check(fair.get_node_or_null("ReturnToWorkshop") != null, "Cannot revisit workshop")
+		_check(str(kiosk.call("get_interaction_prompt")).contains("Capítulo I"), "Chapter I ending missing")
+		_check(registry.has_discovery(FAIR), "Chapter I remains completed")
+	var teaser := teaser_scene.instantiate() as Node3D
+	root.add_child(teaser)
+	await process_frame
+	_check(teaser.get_node_or_null("ReturnToScienceFair") != null,
+		"Teaser must offer return to completed Chapter I")
+	_check(teaser.get_node_or_null("SealedArchiveCase") != null,
+		"Chapter II clue is missing")
+	_check(registry.has_discovery(FAIR), "Teaser erased Chapter I progress")
+	_check(not registry.has_discovery("insight"), "Preview should not unlock InSight")
 	var memory := insight_scene.instantiate() as Node3D
 	root.add_child(memory)
 	await process_frame
@@ -95,7 +107,7 @@ func _run() -> void:
 	for id in REQUIRED:
 		_check(registry.has_discovery(id), "Lost improvement: " + id)
 	if errors.is_empty():
-		print("PASS: Required fair, completion, optional InSight, returns, and history")
+		print("PASS: Chapter I, teaser return, optional InSight, preserved progress")
 		quit(0)
 	else:
 		for err in errors:
