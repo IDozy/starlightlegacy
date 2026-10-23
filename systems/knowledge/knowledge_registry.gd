@@ -134,7 +134,6 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 		"history": "InSight aterrizó en Elysium Planitia el 26 de noviembre de 2018. Colocó el sismómetro SEIS en la superficie mediante su brazo robótico el 19 de diciembre de 2018. Detectó 1.319 sismos marcianos (marsquakes), incluidos eventos debidos a impactos, y ayudó a estudiar la corteza, el manto y el núcleo de Marte. Su última comunicación fue el 15 de diciembre de 2022 y NASA declaró el fin de misión el 21 de diciembre de 2022. Quedó en Marte.",
 		"engineering": "Un sismómetro muy sensible mide vibraciones que viajan por el interior de un planeta. El instrumento SEIS, colocado directamente en el suelo, tuvo protección frente a perturbaciones como viento y temperatura para distinguir señales científicas del ruido. El polvo acumulado en los paneles solares redujo la energía hasta el final de la misión. La simulación educativa no reproduce datos sísmicos reales.",
 		"project": "Saber más · La feria incluye un experimento escolar de vibraciones y filtrado de ruido. No proporciona una mejora obligatoria y no bloquea el cierre de campaña."
-	}
 	},
 	{
 		"id": "ingenuity",
@@ -149,8 +148,132 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 	}
 ]
 
+# One local save for the full first chapter, including optional discoveries.
+# Save location intentionally belongs to user://, not the Git repository.
+const SAVE_VERSION := 1
+const SAVE_PATH := "user://starlight_legacy_chapter1_v1.json"
+
 var _discoveries: Dictionary = {}
 var _discovery_order: Array[String] = []
+var _save_path: String = SAVE_PATH
+var _persistence_enabled := true
+var _restoring := false
+
+
+func _ready() -> void:
+	# Headless smoke runs must not read or overwrite a player's real save file.
+	if OS.has_feature("headless") or Engine.is_editor_hint():
+		_persistence_enabled = false
+		return
+	load_progress()
+
+
+func configure_persistence(save_path: String, enabled: bool) -> void:
+	# Configurable path allows isolated acceptance tests without touching user saves.
+	if not save_path.begins_with("user://") or not save_path.ends_with(".json"):
+		push_warning("KnowledgeRegistry: rejected unsafe save path.")
+		return
+	_save_path = save_path
+	_persistence_enabled = enabled
+
+
+func save_now() -> bool:
+	if not _persistence_enabled:
+		return false
+	var entries: Array[Dictionary] = []
+	for discovery_id in _discovery_order:
+		var registered: Dictionary = _discoveries.get(discovery_id, {})
+		if registered.is_empty():
+			continue
+		entries.append({
+			"id": str(registered.get("id", "")),
+			"title": str(registered.get("title", "")),
+			"category": str(registered.get("category", "")),
+			"summary": str(registered.get("summary", ""))
+		})
+	var payload := {"version": SAVE_VERSION, "discoveries": entries}
+	var temporary_path := _save_path + ".tmp"
+	var file := FileAccess.open(temporary_path, FileAccess.WRITE)
+	if file == null:
+		push_warning("KnowledgeRegistry: unable to open save temp file.")
+		return false
+	file.store_string(JSON.stringify(payload))
+	file.flush()
+	file.close()
+	# Keep a valid previous snapshot to recover from interrupted writes.
+	if FileAccess.file_exists(_save_path) and not _read_payload(_save_path).is_empty():
+		var old_path := ProjectSettings.globalize_path(_save_path)
+		var backup_path := ProjectSettings.globalize_path(_save_path + ".bak")
+		if DirAccess.copy_absolute(old_path, backup_path) != OK:
+			push_warning("KnowledgeRegistry: previous snapshot could not be backed up.")
+	var result := DirAccess.rename_absolute(
+		ProjectSettings.globalize_path(temporary_path),
+		ProjectSettings.globalize_path(_save_path)
+	)
+	if result != OK:
+		push_warning("KnowledgeRegistry: unable to finalize progress save.")
+		return false
+	return true
+
+
+func load_progress() -> bool:
+	if not _persistence_enabled:
+		return false
+	var payload := _read_payload(_save_path)
+	if payload.is_empty():
+		payload = _read_payload(_save_path + ".bak")
+	if payload.is_empty():
+		return false
+	var records: Array = payload.get("discoveries", [])
+	_restoring = true
+	_discoveries.clear()
+	_discovery_order.clear()
+	for record in records:
+		# Each historic card is rehydrated from the authoritative catalog;
+		# saved data stores only the player's discovery status and summary.
+		var entry: Dictionary = record
+		var key := str(entry["id"])
+		var historic := get_catalog_entry(key)
+		register_discovery(
+			key,
+			str(historic.get("title", entry["title"])),
+			str(historic.get("category", entry["category"])),
+			str(entry["summary"])
+		)
+	_restoring = false
+	archive_updated.emit()
+	return true
+
+
+func _read_payload(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {}
+	var parsed: Variant = JSON.parse_string(file.get_as_text())
+	file.close()
+	if not (parsed is Dictionary):
+		return {}
+	var data: Dictionary = parsed
+	if data.get("version") != SAVE_VERSION:
+		return {}
+	var records: Variant = data.get("discoveries")
+	if not (records is Array) or records.size() > 300:
+		return {}
+	for record in records:
+		if not (record is Dictionary):
+			return {}
+		for field in ["id", "title", "category", "summary"]:
+			if not (record.get(field) is String):
+				return {}
+		if str(record["id"]).strip_edges().is_empty() or str(record["id"]).length() > 128:
+			return {}
+		if str(record["title"]).length() > 160 or str(record["category"]).length() > 160:
+			return {}
+		if str(record["summary"]).length() > 4000:
+			return {}
+	return data
 
 
 func register_discovery(
@@ -180,6 +303,8 @@ func register_discovery(
 	_discovery_order.append(normalized_id)
 	discovery_added.emit(discovery.duplicate(true))
 	archive_updated.emit()
+	if not _restoring:
+		save_now()
 	return true
 
 
