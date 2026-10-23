@@ -128,12 +128,13 @@ const TIMELINE_CATALOG: Array[Dictionary] = [
 	{
 		"id": "insight",
 		"year": 2022,
-		"title": "InSight",
-		"category": "Saber más · Hardware en Marte",
+		"title": "InSight · Escuchar los sismos de Marte",
+		"category": "Saber más · Sismología marciana",
 		"optional": true,
-		"history": "Artículo opcional aún no recuperado.",
-		"engineering": "Pendiente de diseñar como contenido complementario.",
-		"project": "Conocimiento opcional."
+		"history": "InSight aterrizó en Elysium Planitia el 26 de noviembre de 2018. Colocó el sismómetro SEIS en la superficie mediante su brazo robótico el 19 de diciembre de 2018. Detectó 1.319 sismos marcianos (marsquakes), incluidos eventos debidos a impactos, y ayudó a estudiar la corteza, el manto y el núcleo de Marte. Su última comunicación fue el 15 de diciembre de 2022 y NASA declaró el fin de misión el 21 de diciembre de 2022. Quedó en Marte.",
+		"engineering": "Un sismómetro muy sensible mide vibraciones que viajan por el interior de un planeta. El instrumento SEIS, colocado directamente en el suelo, tuvo protección frente a perturbaciones como viento y temperatura para distinguir señales científicas del ruido. El polvo acumulado en los paneles solares redujo la energía hasta el final de la misión. La simulación educativa no reproduce datos sísmicos reales.",
+		"project": "Saber más · La feria incluye un experimento escolar de vibraciones y filtrado de ruido. No proporciona una mejora obligatoria y no bloquea el cierre de campaña."
+	}
 	},
 	{
 		"id": "ingenuity",

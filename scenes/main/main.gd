@@ -31,6 +31,7 @@ const DELIVERY_UPGRADE_ID := "rescue_rover_touchdown_release_upgrade"
 const AERIAL_PROBLEM_ID := "rescue_rover_aerial_scout_problem"
 const INGENUITY_ID := "ingenuity"
 const AERIAL_UPGRADE_ID := "rescue_rover_aerial_scout_upgrade"
+const SCIENCE_FAIR := preload("res://systems/navigation/scene_portal.tscn")
 
 @onready var player = $Player
 @onready var dialogue_controller = $DialogueController
@@ -47,11 +48,31 @@ func _ready() -> void:
 	dialogue_controller.connect("dialogue_active_changed", _on_dialogue_active_changed)
 	dialogue_controller.connect("dialogue_finished", _on_dialogue_finished)
 	rescue_rover.connect("project_active_changed", _on_project_active_changed)
-	rescue_rover.connect("project_state_changed", _update_project_objective)
+	rescue_rover.connect("project_state_changed", _on_project_progress_updated)
 
 	interaction_prompt.visible = false
 	inspection_info.visible = false
+	_on_project_progress_updated()
+
+
+func _on_project_progress_updated() -> void:
 	_update_project_objective()
+	_sync_fair_entrance()
+
+
+func _sync_fair_entrance() -> void:
+	# La feria se desbloquea al instalar el acompañante de Ingenuity.
+	# El controlador de feria además comprueba TODOS los módulos al terminar.
+	if not _has_discovery(AERIAL_UPGRADE_ID):
+		return
+	if get_node_or_null("ScienceFairEntrance") != null:
+		return
+	var portal := SCIENCE_FAIR.instantiate() as StaticBody3D
+	portal.name = "ScienceFairEntrance"
+	portal.position = Vector3(2.2, 0.9, 5.8)
+	portal.set("prompt_text", "E · Presentar el rover en la feria de ciencias")
+	portal.set("target_scene", "res://levels/science_fair/science_fair.tscn")
+	add_child(portal)
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -118,8 +139,11 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 
 
 func _update_project_objective() -> void:
+	if _has_discovery("rescue_rover_science_fair_completed"):
+		project_objective.text = "PROYECTO · Feria terminada. Revisa tu Archivo NASA o vuelve a presentarlo."
+		return
 	if _has_discovery(AERIAL_UPGRADE_ID):
-		project_objective.text = "PROYECTO · EXPLORADOR AÉREO AUXILIAR LISTO · Rover terrestre protegido."
+		project_objective.text = "PROYECTO · Vehículo completo. Usa el portal de la feria de ciencias."
 		return
 	if _has_discovery(INGENUITY_ID):
 		project_objective.text = "PROYECTO · Añade el explorador auxiliar inspirado en Ingenuity."
