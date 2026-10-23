@@ -110,7 +110,7 @@ func _on_challenge_completed() -> void:
 
 func _update_progress() -> void:
 	if _has_discovery(DISCOVERY_ID):
-		objective_label.text = "HISTORIA RECUPERADA · InSight · Escuchar sismos de Marte · Regresa al taller."
+		objective_label.text = "HISTORIA RECUPERADA · InSight · Escuchar sismos de Marte · Regresa a la feria."
 		_unlock_return_portal()
 	else:
 		objective_label.text = "OBJETIVO OPCIONAL · Desplegar SEIS, reducir ruido y conocer InSight."
