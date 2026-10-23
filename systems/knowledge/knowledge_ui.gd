@@ -353,13 +353,18 @@ func _rebuild_timeline_buttons() -> void:
 
 
 func _find_latest_discovered_index() -> int:
-	var latest := 0
-
-	for index in range(_timeline_entries.size()):
-		if bool(_timeline_entries[index].get("discovered", false)):
-			latest = index
-
-	return latest
+	# Display order is chronological NASA entries + project entries.
+	# Recency must come from the registry's discovery order, NOT visual position.
+	var registry := get_node_or_null("/root/KnowledgeRegistry")
+	if registry == null or not registry.has_method("get_discoveries"):
+		return 0
+	var history: Array = registry.call("get_discoveries")
+	for history_index in range(history.size() - 1, -1, -1):
+		var discovery_id := str(history[history_index].get("id", ""))
+		for index in range(_timeline_entries.size()):
+			if str(_timeline_entries[index].get("id", "")) == discovery_id:
+				return index
+	return 0
 
 
 func _select_discovery(discovery_id: String) -> void:
