@@ -162,7 +162,7 @@ var _restoring := false
 
 func _ready() -> void:
 	# Headless smoke runs must not read or overwrite a player's real save file.
-	if OS.has_feature("headless") or Engine.is_editor_hint():
+	if DisplayServer.get_name() == "headless" or Engine.is_editor_hint():
 		_persistence_enabled = false
 		return
 	load_progress()
