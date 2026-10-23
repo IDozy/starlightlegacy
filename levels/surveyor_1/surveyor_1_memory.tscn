@@ -1,0 +1,93 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://levels/surveyor_1/surveyor_1_memory.gd" id="1_memory"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+
+[node name="Surveyor1Memory" type="Node3D"]
+script = ExtResource("1_memory")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+position = Vector3(0, 1.0, 2.70)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="MemoryTitle" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 840.0
+offset_bottom = 54.0
+text = "RECUERDO 03 · SURVEYOR 1 · OCEANUS PROCELLARUM · LUNA · 1966"
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.95, 0.75, 0.44, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.88)
+theme_override_constants/outline_size = 6
+
+[node name="Subtitle" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 56.0
+offset_right = 900.0
+offset_bottom = 88.0
+text = "Reconstrucción educativa · El reto usa comandos simulados desde Tierra"
+theme_override_font_sizes/font_size = 15
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.88)
+theme_override_constants/outline_size = 5
+
+[node name="Objective" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 91.0
+offset_right = 900.0
+offset_bottom = 125.0
+text = "OBJETIVO · Orienta el panel y cámara de Surveyor 1."
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.96, 0.86, 0.54, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.90)
+theme_override_constants/outline_size = 5
+
+[node name="ArchiveHint" type="Label" parent="HUD"]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -235.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 52.0
+grow_horizontal = 0
+text = "K · Archivo NASA"
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(0.82, 0.76, 0.61, 1)
+
+[node name="Crosshair" type="Label" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -8.0
+offset_top = -14.0
+offset_right = 8.0
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 5
+
+[node name="InteractionPrompt" type="Label" parent="HUD"]
+visible = false
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -90.0
+offset_right = 300.0
+offset_bottom = -45.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "E · Interactuar"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 19
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.90)
+theme_override_constants/outline_size = 7

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://systems/gameplay/rescue_rover_project.gd" id="1_project"]
 [ext_resource type="PackedScene" path="res://assets/third_party/quaternius/ultimate_space_kit/Vehicles/GLTF/Rover_2.gltf" id="2_rover"]
@@ -41,6 +41,15 @@ radius = 0.42
 height = 0.84
 radial_segments = 10
 rings = 5
+
+[sub_resource type="StandardMaterial3D" id="Mat_solar_vanguard"]
+albedo_color = Color(0.07, 0.13, 0.23, 1)
+metallic = 0.18
+roughness = 0.41
+
+[sub_resource type="BoxMesh" id="Mesh_solar_vanguard"]
+material = SubResource("Mat_solar_vanguard")
+size = Vector3(0.52, 0.037, 0.38)
 
 [sub_resource type="BoxShape3D" id="Shape_body"]
 size = Vector3(0.50, 0.52, 0.72)
@@ -108,6 +117,213 @@ mesh = SubResource("Mesh_airbag")
 position = Vector3(0, 0.42, 0.62)
 scale = Vector3(1.20, 0.72, 0.48)
 mesh = SubResource("Mesh_airbag")
+
+[node name="SolarUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="SolarPanelVanguard" type="MeshInstance3D" parent="SolarUpgradeVisual"]
+position = Vector3(0.0, 0.78, 0.02)
+rotation_degrees = Vector3(-12, 0, 0)
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="OrientationUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="AdjustableSolarPivot" type="Node3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0, 0.79, 0.02)
+rotation_degrees = Vector3(-26, 0, 0)
+
+[node name="AdjustableSolarPanel" type="MeshInstance3D" parent="OrientationUpgradeVisual/AdjustableSolarPivot"]
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="SurveyorCameraSupport" type="MeshInstance3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0.32, 0.88, -0.19)
+scale = Vector3(0.16, 0.40, 0.16)
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="SurveyorCameraPivot" type="Node3D" parent="OrientationUpgradeVisual"]
+position = Vector3(0.32, 1.02, -0.19)
+rotation_degrees = Vector3(0, -30, 0)
+
+[node name="SurveyorCameraBody" type="MeshInstance3D" parent="OrientationUpgradeVisual/SurveyorCameraPivot"]
+scale = Vector3(0.33, 1.35, 0.35)
+mesh = SubResource("Mesh_solar_vanguard")
+
+[node name="TransportBaseVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="TransportBaseAttached" type="MeshInstance3D" parent="TransportBaseVisual"]
+position = Vector3(0.0, 0.15, 0.0)
+scale = Vector3(0.81, 0.36, 1.05)
+mesh = SubResource("Mesh_body")
+
+[node name="TransportBaseRunnerLeft" type="MeshInstance3D" parent="TransportBaseVisual"]
+position = Vector3(-0.44, 0.065, 0)
+scale = Vector3(0.12, 0.22, 1.65)
+mesh = SubResource("Mesh_top")
+
+[node name="TransportBaseRunnerRight" type="MeshInstance3D" parent="TransportBaseVisual"]
+position = Vector3(0.44, 0.065, 0)
+scale = Vector3(0.12, 0.22, 1.65)
+mesh = SubResource("Mesh_top")
+
+[node name="ModularReleaseVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="ReleaseLockLeft" type="MeshInstance3D" parent="ModularReleaseVisual"]
+position = Vector3(-0.48, 0.38, 0.15)
+scale = Vector3(0.16, 0.46, 0.35)
+mesh = SubResource("Mesh_top")
+
+[node name="ReleaseLockRight" type="MeshInstance3D" parent="ModularReleaseVisual"]
+position = Vector3(0.48, 0.38, 0.15)
+scale = Vector3(0.16, 0.46, 0.35)
+mesh = SubResource("Mesh_top")
+
+[node name="ReleaseLatch" type="MeshInstance3D" parent="ModularReleaseVisual"]
+position = Vector3(0, 0.47, -0.23)
+scale = Vector3(0.34, 0.29, 0.24)
+mesh = SubResource("Mesh_top")
+
+[node name="ReleasedBaseVisual" type="Node3D" parent="."]
+visible = false
+position = Vector3(1.70, 0.0, 0)
+
+[node name="TransportBaseDetached" type="MeshInstance3D" parent="ReleasedBaseVisual"]
+position = Vector3(0.0, 0.15, 0.0)
+scale = Vector3(0.81, 0.36, 1.05)
+mesh = SubResource("Mesh_body")
+
+[node name="DetachedRunnerLeft" type="MeshInstance3D" parent="ReleasedBaseVisual"]
+position = Vector3(-0.44, 0.065, 0)
+scale = Vector3(0.12, 0.22, 1.65)
+mesh = SubResource("Mesh_top")
+
+[node name="DetachedRunnerRight" type="MeshInstance3D" parent="ReleasedBaseVisual"]
+position = Vector3(0.44, 0.065, 0)
+scale = Vector3(0.12, 0.22, 1.65)
+mesh = SubResource("Mesh_top")
+
+[node name="TractionWheelUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+; Estos aros de agarre son marcadores greybox. No alteran las ruedas GLTF
+; del vehículo ni sustituyen su sistema de suspensión.
+[node name="GripWheelFL" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(-0.58, 0.26, -0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelFR" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0.58, 0.26, -0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelRL" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(-0.58, 0.26, 0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="GripWheelRR" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0.58, 0.26, 0.36)
+rotation_degrees = Vector3(0, 0, 90)
+mesh = SubResource("Mesh_wheel")
+
+[node name="LoadBalanceMarker" type="MeshInstance3D" parent="TractionWheelUpgradeVisual"]
+position = Vector3(0, 0.83, 0.10)
+scale = Vector3(0.45, 0.26, 0.42)
+mesh = SubResource("Mesh_top")
+
+[node name="ScienceVerificationUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="ScienceDataRecorder" type="MeshInstance3D" parent="ScienceVerificationUpgradeVisual"]
+position = Vector3(-0.08, 0.92, 0.30)
+scale = Vector3(0.57, 0.35, 0.46)
+mesh = SubResource("Mesh_top")
+
+[node name="SampleTray" type="MeshInstance3D" parent="ScienceVerificationUpgradeVisual"]
+position = Vector3(-0.37, 0.74, -0.27)
+scale = Vector3(0.34, 0.20, 0.36)
+mesh = SubResource("Mesh_body")
+
+[node name="ControlSampleTray" type="MeshInstance3D" parent="ScienceVerificationUpgradeVisual"]
+position = Vector3(0.38, 0.74, -0.27)
+scale = Vector3(0.34, 0.20, 0.36)
+mesh = SubResource("Mesh_body")
+
+[node name="SlipSafetyUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="WheelSlipMonitor" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(0.20, 1.11, 0.24)
+scale = Vector3(0.38, 0.28, 0.25)
+mesh = SubResource("Mesh_top")
+
+[node name="SlopeWarningBeacon" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(-0.38, 1.07, -0.11)
+scale = Vector3(0.24, 0.29, 0.22)
+mesh = SubResource("Mesh_body")
+
+[node name="WheelTelemetryModule" type="MeshInstance3D" parent="SlipSafetyUpgradeVisual"]
+position = Vector3(0.37, 0.63, -0.27)
+scale = Vector3(0.26, 0.18, 0.30)
+mesh = SubResource("Mesh_top")
+
+[node name="PowerBudgetUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="PowerBudgetMonitor" type="MeshInstance3D" parent="PowerBudgetUpgradeVisual"]
+position = Vector3(-0.22, 1.14, 0.25)
+scale = Vector3(0.40, 0.29, 0.30)
+mesh = SubResource("Mesh_top")
+
+[node name="BatteryReserveModule" type="MeshInstance3D" parent="PowerBudgetUpgradeVisual"]
+position = Vector3(0.27, 0.89, 0.25)
+scale = Vector3(0.31, 0.23, 0.29)
+mesh = SubResource("Mesh_body")
+
+[node name="PriorityLoadSwitch" type="MeshInstance3D" parent="PowerBudgetUpgradeVisual"]
+position = Vector3(0.40, 0.73, -0.20)
+scale = Vector3(0.24, 0.19, 0.25)
+mesh = SubResource("Mesh_top")
+
+[node name="TouchdownReleaseUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="TouchdownContactSensor" type="MeshInstance3D" parent="TouchdownReleaseUpgradeVisual"]
+position = Vector3(-0.43, 0.39, -0.26)
+scale = Vector3(0.30, 0.22, 0.26)
+mesh = SubResource("Mesh_top")
+
+[node name="ReleaseSafetyLatch" type="MeshInstance3D" parent="TouchdownReleaseUpgradeVisual"]
+position = Vector3(0.43, 0.71, 0.20)
+scale = Vector3(0.30, 0.32, 0.30)
+mesh = SubResource("Mesh_body")
+
+[node name="DeliverySequenceIndicator" type="MeshInstance3D" parent="TouchdownReleaseUpgradeVisual"]
+position = Vector3(0.03, 1.25, -0.20)
+scale = Vector3(0.22, 0.24, 0.22)
+mesh = SubResource("Mesh_top")
+
+[node name="AerialScoutUpgradeVisual" type="Node3D" parent="."]
+visible = false
+
+[node name="AerialScoutDock" type="MeshInstance3D" parent="AerialScoutUpgradeVisual"]
+position = Vector3(-0.44, 0.94, -0.26)
+scale = Vector3(0.45, 0.24, 0.34)
+mesh = SubResource("Mesh_top")
+
+[node name="ScoutRotorUpper" type="MeshInstance3D" parent="AerialScoutUpgradeVisual"]
+position = Vector3(-0.44, 1.23, -0.26)
+scale = Vector3(0.65, 0.05, 0.12)
+mesh = SubResource("Mesh_body")
+
+[node name="ScoutRotorLower" type="MeshInstance3D" parent="AerialScoutUpgradeVisual"]
+position = Vector3(-0.44, 1.16, -0.26)
+rotation_degrees = Vector3(0, 90, 0)
+scale = Vector3(0.65, 0.05, 0.12)
+mesh = SubResource("Mesh_body")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 position = Vector3(0, 0.25, 0.0)

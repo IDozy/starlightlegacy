@@ -6,6 +6,7 @@ signal story_active_changed(active: bool)
 signal story_completed
 
 const DISCOVERY_ID := "mars_pathfinder_lander"
+const OPTIONAL_DISCOVERY_ID := "pathfinder_backshell"
 const LAST_PAGE := 2
 
 @onready var panel: Control = $StoryHUD/Panel
@@ -18,6 +19,8 @@ var _player: Node = null
 var _active := false
 var _completed := false
 var _review_only := false
+var _choice_active := false
+var _choice_index := 0
 var _page_index := 0
 var _started_frame := -1
 
@@ -75,6 +78,29 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 
+	if _choice_active:
+		if (
+			INPUT_COMPAT.key_matches(event, KEY_A)
+			or INPUT_COMPAT.key_matches(event, KEY_D)
+			or INPUT_COMPAT.key_matches(event, KEY_LEFT)
+			or INPUT_COMPAT.key_matches(event, KEY_RIGHT)
+		):
+			_choice_index = 1 - _choice_index
+			_refresh_choice()
+			get_viewport().set_input_as_handled()
+			return
+
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER):
+			_confirm_choice()
+			get_viewport().set_input_as_handled()
+			return
+
+		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
+			_choice_index = 0
+			_confirm_choice()
+			get_viewport().set_input_as_handled()
+			return
+
 	if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
 		_close_panel()
 		get_viewport().set_input_as_handled()
@@ -116,17 +142,49 @@ func _show_page() -> void:
 
 func _complete_story() -> void:
 	_completed = true
-	_review_only = true
+	_review_only = false
 	_register_discovery()
 	story_completed.emit()
+	_open_post_discovery_choice()
 
+
+func _open_post_discovery_choice() -> void:
+	_choice_active = true
+	_choice_index = 0
 	stage_label.text = "HISTORIA RECUPERADA · MARS PATHFINDER"
-	body_label.text = "Airbags → pétalos → Sojourner. El hardware quedó en Ares Vallis, pero aquel aterrizaje demostró una forma nueva y económica de llevar ciencia a Marte."
-	progress_label.text = "3 / 3 · COMPLETADO"
-	hint_label.text = "E / Esc · Continuar"
+	progress_label.text = "DESCUBRIMIENTO PRINCIPAL · 1997"
+	_refresh_choice()
+
+
+func _refresh_choice() -> void:
+	var continue_marker := "▶" if _choice_index == 0 else " "
+	var more_marker := "▶" if _choice_index == 1 else " "
+
+	body_label.text = "Airbags → pétalos → Sojourner. Ya recuperaste la historia principal.\n\n%s CONTINUAR EXPLORANDO\n%s SABER MÁS · investigar qué otro hardware del descenso quedó en Marte" % [
+		continue_marker,
+		more_marker
+	]
+	hint_label.text = "A / D · Elegir    E / Enter · Confirmar    Esc · Continuar"
+
+
+func _confirm_choice() -> void:
+	if _choice_index == 0:
+		_close_panel()
+		return
+
+	var registry := get_node_or_null("/root/KnowledgeRegistry")
+	if registry != null and registry.has_method("unlock_catalog_discovery"):
+		registry.call("unlock_catalog_discovery", OPTIONAL_DISCOVERY_ID)
+
+	_close_panel()
+
+	var archive := get_node_or_null("/root/KnowledgeUI")
+	if archive != null and archive.has_method("open_archive"):
+		archive.call("open_archive", OPTIONAL_DISCOVERY_ID, 0)
 
 
 func _open_review() -> void:
+	_choice_active = false
 	_review_only = true
 	stage_label.text = "MARS PATHFINDER · ARES VALLIS · 1997"
 	body_label.text = "Pathfinder aterrizó con airbags, abrió sus pétalos y desplegó a Sojourner. La estación quedó en Marte como Carl Sagan Memorial Station."
@@ -151,6 +209,7 @@ func _register_discovery() -> void:
 func _close_panel() -> void:
 	_active = false
 	_review_only = false
+	_choice_active = false
 	panel.visible = false
 
 	if _player != null and _player.has_method("set_control_locked"):

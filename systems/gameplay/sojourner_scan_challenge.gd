@@ -23,6 +23,8 @@ var _player: Node = null
 var _active := false
 var _completed := false
 var _review_only := false
+var _choice_active := false
+var _choice_index := 0
 var _drive_step := 0
 var _scanning := false
 var _scan_elapsed := 0.0
@@ -75,6 +77,29 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		return
 
+	if _choice_active:
+		if (
+			INPUT_COMPAT.key_matches(event, KEY_A)
+			or INPUT_COMPAT.key_matches(event, KEY_D)
+			or INPUT_COMPAT.key_matches(event, KEY_LEFT)
+			or INPUT_COMPAT.key_matches(event, KEY_RIGHT)
+		):
+			_choice_index = 1 - _choice_index
+			_refresh_choice()
+			get_viewport().set_input_as_handled()
+			return
+
+		if INPUT_COMPAT.key_matches(event, KEY_E) or INPUT_COMPAT.key_matches(event, KEY_ENTER):
+			_confirm_choice()
+			get_viewport().set_input_as_handled()
+			return
+
+		if INPUT_COMPAT.key_matches(event, KEY_ESCAPE):
+			_choice_index = 0
+			_confirm_choice()
+			get_viewport().set_input_as_handled()
+			return
+
 	if _scanning:
 		return
 
@@ -119,6 +144,7 @@ func _process(delta: float) -> void:
 func _start_challenge() -> void:
 	_active = true
 	_review_only = false
+	_choice_active = false
 	_scanning = false
 	_scan_elapsed = 0.0
 
@@ -138,6 +164,7 @@ func _start_challenge() -> void:
 func _open_review() -> void:
 	_active = true
 	_review_only = true
+	_choice_active = false
 
 	if _player != null and _player.has_method("set_control_locked"):
 		_player.call("set_control_locked", true)
@@ -180,17 +207,48 @@ func _finish_scan() -> void:
 			"Sojourner fue el primer vehículo con ruedas utilizado en otro planeta. Su APXS estudió rocas y suelo en Ares Vallis. En Yogi encontró poco cuarzo y una composición más parecida a basaltos terrestres que la roca Barnacle Bill."
 		)
 
+	challenge_completed.emit()
+	_open_post_discovery_choice()
+
+
+
+func _open_post_discovery_choice() -> void:
+	_review_only = false
+	_choice_active = true
+	_choice_index = 0
 	mission_label.text = "ANÁLISIS COMPLETADO · SOJOURNER"
 	instruction_label.text = "YOGI · RESULTADO DEL APXS"
 	distance_label.text = "POCO CUARZO · PARECIDA A BASALTOS TERRESTRES"
-	status_label.text = "Los primeros resultados mostraron una roca más primitiva que Barnacle Bill y parecida a basaltos comunes de la Tierra. La misión terminó, pero el hardware quedó en Marte."
-	hint_label.text = "E / Esc · Continuar"
-	challenge_completed.emit()
+	_refresh_choice()
+
+
+func _refresh_choice() -> void:
+	var continue_marker := "▶" if _choice_index == 0 else " "
+	var more_marker := "▶" if _choice_index == 1 else " "
+
+	status_label.text = "El recuerdo está completo.\n%s SEGUIR CONSTRUYENDO · regresar al proyecto\n%s SABER MÁS · abrir Historia / Ingeniería / Tu proyecto" % [
+		continue_marker,
+		more_marker
+	]
+	hint_label.text = "A / D · Elegir    E / Enter · Confirmar    Esc · Seguir construyendo"
+
+
+func _confirm_choice() -> void:
+	if _choice_index == 0:
+		_close_panel()
+		return
+
+	_close_panel()
+
+	var archive := get_node_or_null("/root/KnowledgeUI")
+	if archive != null and archive.has_method("open_archive"):
+		archive.call("open_archive", DISCOVERY_ID, 0)
 
 
 func _close_panel() -> void:
 	_active = false
 	_review_only = false
+	_choice_active = false
 	panel.visible = false
 	scan_progress.visible = false
 	_scanning = false
@@ -220,4 +278,9 @@ func _update_rover_position() -> void:
 	if max_drive_steps > 0:
 		ratio = float(_drive_step) / float(max_drive_steps)
 
-	rover_visual.position.z = lerpf(0.48, -0.55, ratio)
+		# Yogi ahora esta mas lejos: mantener separacion al inicio y permitir
+	# que el brazo delantero alcance la roca al completar los cuatro pasos.
+	rover_visual.position.z = lerpf(0.48, -1.10, ratio)
+	# La altura debe seguir el suelo real bajo las seis ruedas al avanzar.
+	if rover_visual.has_method("snap_to_terrain"):
+		rover_visual.call("snap_to_terrain")

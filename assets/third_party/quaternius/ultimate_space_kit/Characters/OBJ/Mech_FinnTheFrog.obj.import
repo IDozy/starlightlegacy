@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c1bca83ht6eht"
+path="res://.godot/imported/Mech_FinnTheFrog.obj-9c45683ff28fd2e0f448bfe165549dad.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Mech_FinnTheFrog.obj-9c45683ff28fd2e0f448bfe165549dad.mesh"]
+
+source_file="res://assets/third_party/quaternius/ultimate_space_kit/Characters/OBJ/Mech_FinnTheFrog.obj"
+dest_files=["res://.godot/imported/Mech_FinnTheFrog.obj-9c45683ff28fd2e0f448bfe165549dad.mesh", "res://.godot/imported/Mech_FinnTheFrog.obj-9c45683ff28fd2e0f448bfe165549dad.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
