@@ -275,7 +275,10 @@ for j in range(12):
     a = math.tau * j / 12
     bar("Suspension line %02d" % j, (math.cos(a) * 3.15, math.sin(a) * 3.15, 0),
         (0.4 * math.cos(a), 0.4 * math.sin(a), -4.7), 0.015, GRAPHITE, canopy)
-key_visibility(canopy, [(0, True), (3.5, True), (3.6, False), (16, False)])
+# Empty visibility does not reliably hide the rendered descendant geometry.
+for part in canopy.children:
+    if part.type == "MESH":
+        key_visibility(part, [(0, True), (3.5, True), (3.6, False), (16, False)])
 
 flame = sphere("Braking rockets / conceptual", (0, 0, -0.7), (0.6, 0.6, 1.4), FIRE, landing)
 key_scale(flame, [(0, 0.001), (2.4, 0.001), (2.7, 1.0),
@@ -303,7 +306,10 @@ sphere("APXS probe", (0, -0.84, 0.13), (0.12, 0.12, 0.095), GRAPHITE, rover)
 bar("Sojourner camera mast", (0.10, 0.25, 0.56), (0.10, 0.25, 0.84),
     0.035, GOLD, rover)
 sphere("Camera", (0.10, 0.25, 0.87), (0.11, 0.13, 0.09), GRAPHITE, rover)
-key_visibility(rover, [(0, False), (11.4, False), (11.45, True), (16, True)])
+# Rover geometry appears after the date jump to Sol 2, not at landing.
+for part in rover.children:
+    if part.type == "MESH":
+        key_visibility(part, [(0, False), (11.4, False), (11.45, True), (16, True)])
 key_location(rover, [(0, (0, 0.5, 0.6)), (11.45, (0, 0.5, 0.6)),
                      (13.9, (0, -1.45, 0.34)), (16, (0, -2.4, 0.34))])
 
