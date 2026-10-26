@@ -388,6 +388,9 @@ func _build_lander_proxy() -> void:
 
 
 func _build_rover_proxy() -> void:
+	# A missing imported rover must not send the camera to world origin.
+	_rover_goal = _rover.global_position
+	_rover_start = _lander.global_position + Vector3(0.7, 0.22, -1.15)
 	var source_root := _rover.get_node_or_null("RoverVisual") as Node3D
 	if source_root == null:
 		return
@@ -397,7 +400,6 @@ func _build_rover_proxy() -> void:
 	_rover_pose.global_transform = source_root.global_transform
 	_copy_visible_meshes(source_root, source_root, _rover_pose)
 	_rover_goal = source_root.global_position
-	_rover_start = _lander.global_position + Vector3(0.7, 0.22, -1.15)
 	_rover_pose.global_position = _rover_start
 	_rover_pose.visible = false
 

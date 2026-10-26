@@ -12,6 +12,7 @@ $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $tests = @(
     "tests/workshop_glb_smoke.gd",
     "tests/ares_vallis_v33_smoke.gd",
+    "tests/pathfinder_cinematic_intro_smoke.gd",
     "tests/sojourner_imported_visual_smoke.gd",
     "tests/vanguard_1_story_loop_smoke.gd",
     "tests/surveyor_1_story_loop_smoke.gd",
