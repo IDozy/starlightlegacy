@@ -13,7 +13,7 @@ const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_
 const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
 
 @export var use_imported_ares_vallis: bool = true
-@export var enable_pathfinder_intro: bool = true # Piloto: reproducir cada visita para comparar.
+@export var enable_pathfinder_intro: bool = false # Alternativa 3D preservada, video es ruta principal.
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
