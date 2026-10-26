@@ -4,7 +4,7 @@ La **secuencia 3D con el greybox** solo se conserva para comparar; este nuevo pr
 
 ## Crear el vídeo en Windows (Blender 5.2)
 
-1. Instala **FFmpeg** si no lo tienes: `winget install --id Gyan.FFmpeg -e` y reinicia PowerShell.
+1. **No necesitas WinGet.** Si falta FFmpeg, el ejecutor descargará la versión portable Essentials ZIP desde gyan.dev, comprobará el SHA-256 publicado y la conservará en `.tools/pathfinder-ffmpeg/` sin cambiar el PATH del sistema ni pedir permisos de administrador.
 2. Desde la raíz del repositorio ejecuta:
    ```powershell
    .\scripts\cinematics\render_pathfinder.ps1 -Quality draft

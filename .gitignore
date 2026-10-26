@@ -7,3 +7,6 @@
 /renders/
 # Final video files are reviewed before large binary commits
 /assets/videos/pathfinder/*.ogv
+
+# Portable FFmpeg cached by the cinematic renderer
+/.tools/

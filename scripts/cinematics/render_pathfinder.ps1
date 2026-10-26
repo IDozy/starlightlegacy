@@ -1,5 +1,6 @@
 # Render a stylized Mars Pathfinder intro, convert to Godot 4 .ogv.
-# Blender 5.2 auto-detection; FFmpeg must be on PATH or passed explicitly.
+# Blender 5.2 auto-detection; if FFmpeg is missing, install a local portable copy.
+# No WinGet, admin rights or permanent PATH edits required.
 param(
     [ValidateSet("draft", "final")]
     [string]$Quality = "draft",
@@ -28,8 +29,44 @@ if (-not $BlenderBinary -or -not (Test-Path $BlenderBinary -PathType Leaf)) {
     throw "Blender not found. Use -BlenderBinary 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe'"
 }
 if (-not (Get-Command $FfmpegBinary -ErrorAction SilentlyContinue)) {
-    throw "FFmpeg missing. Install with: winget install --id Gyan.FFmpeg -e ; restart PowerShell."
+    if ($FfmpegBinary -ne "ffmpeg") {
+        throw "Requested FFmpeg binary not found: $FfmpegBinary"
+    }
+
+    # On many Windows installations winget is not present. Use a cached,
+    # verified Essentials release without changing the user's system.
+    $cacheDir = Join-Path $repo ".tools\pathfinder-ffmpeg"
+    $portableExe = Join-Path $cacheDir "ffmpeg.exe"
+    if (-not (Test-Path $portableExe -PathType Leaf)) {
+        New-Item -Path $cacheDir -ItemType Directory -Force | Out-Null
+        $archive = Join-Path $cacheDir "ffmpeg-release-essentials.zip"
+        $extracted = Join-Path $cacheDir "extracted"
+        $sourceUrl = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+        $hashUrl = "$sourceUrl.sha256"
+        Write-Host "WinGet is not required. Downloading portable FFmpeg Essentials (~109 MB) from gyan.dev..."
+        Write-Host "Checking the published SHA-256 before extracting..."
+        $expectedResponse = Invoke-WebRequest -Uri $hashUrl -UseBasicParsing
+        $expectedHash = [regex]::Match([string]$expectedResponse.Content, "(?i)[0-9a-f]{64}").Value.ToUpperInvariant()
+        if ($expectedHash.Length -ne 64) {
+            throw "No trustworthy SHA-256 hash was returned for FFmpeg; refusing download."
+        }
+        Invoke-WebRequest -Uri $sourceUrl -OutFile $archive -UseBasicParsing
+        $actualHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $archive).Hash.ToUpperInvariant()
+        if ($actualHash -ne $expectedHash) {
+            Remove-Item -LiteralPath $archive -Force
+            throw "FFmpeg SHA-256 mismatch. Removed download; no executable will be used."
+        }
+        Expand-Archive -LiteralPath $archive -DestinationPath $extracted -Force
+        $found = @(Get-ChildItem -Path $extracted -Recurse -File -Filter "ffmpeg.exe")
+        if ($found.Count -ne 1) {
+            throw "FFmpeg Essentials ZIP did not contain exactly one ffmpeg.exe."
+        }
+        Copy-Item -LiteralPath $found[0].FullName -Destination $portableExe -Force
+        Write-Host "Portable FFmpeg ready: $portableExe"
+    }
+    $FfmpegBinary = $portableExe
 }
+
 
 New-Item -Path $framesDir -ItemType Directory -Force | Out-Null
 New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
