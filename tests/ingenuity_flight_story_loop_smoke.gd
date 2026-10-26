@@ -71,6 +71,16 @@ func _run() -> void:
 	_expect(helicopter != null, "Falta el helicóptero provisional.")
 	_expect(console != null, "Falta la consola del recuerdo.")
 	if helicopter != null and console != null:
+		# Regresión de formato: al usar el operador % de GDScript, el
+		# porcentaje literal de la atmósfera debe escapar como %%.
+		console.call("_show")
+		var description: Label = console.get("_description") as Label
+		_expect(description != null, "La consola de Ingenuity no tiene descripción.")
+		if description != null:
+			_expect(description.text.contains("1% de la presión"),
+				"La atmósfera debe mostrarse como 1% sin error de formato.")
+			_expect(description.text.contains("AERONAVE LIGERA"),
+				"Faltan las opciones del primer desafío de Ingenuity.")
 		_expect(bool(helicopter.call("has_twin_counter_rotors")), "Faltan rotores coaxiales.")
 		_expect(bool(helicopter.call("has_four_legs")), "Ingenuity tenía cuatro patas.")
 		_expect(not bool(helicopter.call("begin_controlled_hover")),

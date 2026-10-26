@@ -169,7 +169,7 @@ func _show() -> void:
 	match _step:
 		STEP_AIR:
 			_status.text = "1 / 3 · ¿CÓMO VOLAR CON POCO AIRE?"
-			_description.text = "La atmósfera superficial marciana ejerce cerca del 1% de la presión de la terrestre.\n\n%s USAR UN HELICÓPTERO TERRESTRE MUY PESADO\n%s USAR UNA AERONAVE LIGERA Y ROTORES ADECUADOS\n\n%s" % [
+			_description.text = "La atmósfera superficial marciana ejerce cerca del 1%% de la presión de la terrestre.\n\n%s USAR UN HELICÓPTERO TERRESTRE MUY PESADO\n%s USAR UNA AERONAVE LIGERA Y ROTORES ADECUADOS\n\n%s" % [
 				"▶" if _choice == 0 else " ", "▶" if _choice == 1 else " ", _feedback
 			]
 		STEP_ROTORS:
