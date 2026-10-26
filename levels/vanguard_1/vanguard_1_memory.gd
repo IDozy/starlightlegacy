@@ -141,6 +141,6 @@ func _has_discovery(discovery_id: String) -> bool:
 	return registry != null and registry.has_method("has_discovery") and bool(registry.call("has_discovery", discovery_id))
 
 
-func _on_interaction_prompt(prompt: String) -> void:
+func _on_interaction_prompt_changed(prompt: String) -> void:
 	interaction_prompt.text = prompt
 	interaction_prompt.visible = not prompt.is_empty()
