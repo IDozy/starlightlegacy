@@ -1,3 +1,9 @@
-# Local film renders and playable video binaries require review before commit.
-renders/
-assets/videos/pathfinder/*.ogv
+# Godot 4+ specific ignores
+.godot/
+/android/
+/build/
+
+# Local source frames and procedural scene
+/renders/
+# Final video files are reviewed before large binary commits
+/assets/videos/pathfinder/*.ogv
