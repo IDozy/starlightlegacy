@@ -3,6 +3,7 @@ extends Node3D
 const PATHFINDER_STORY := preload("res://systems/gameplay/pathfinder_story_point.tscn")
 const SOJOURNER_CHALLENGE := preload("res://systems/gameplay/sojourner_scan_challenge.tscn")
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
+const PATHFINDER_INTRO_SCRIPT := preload("res://systems/cinematics/pathfinder_intro_controller.gd")
 const ROCK_1_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_1.gltf")
 const ROCK_2_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_2.gltf")
 const ROCK_3_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_3.gltf")
@@ -12,6 +13,7 @@ const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_
 const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
 
 @export var use_imported_ares_vallis: bool = true
+@export var enable_pathfinder_intro: bool = true # Piloto: reproducir cada visita para comparar.
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -34,6 +36,8 @@ var _pathfinder: Node = null
 var _sojourner: Node = null
 var _return_portal: Node = null
 var _mars_landscape: Node3D = null
+var _intro_started := false
+var _intro_controller: Node3D = null
 
 
 func _ready() -> void:
@@ -52,6 +56,22 @@ func _ready() -> void:
 	_update_progress()
 	if use_imported_ares_vallis:
 		call_deferred("_align_imported_gameplay")
+	else:
+		_start_pathfinder_intro_once()
+
+
+func _start_pathfinder_intro_once() -> void:
+	# Esperar a que el terreno importado y Sojourner estén alineados. Solo
+	# bloquea controles y oculta HUD mientras dure la reconstrucción.
+	if _intro_started or not enable_pathfinder_intro:
+		return
+	if not is_instance_valid(_pathfinder) or not is_instance_valid(_sojourner):
+		return
+	_intro_started = true
+	_intro_controller = PATHFINDER_INTRO_SCRIPT.new() as Node3D
+	_intro_controller.name = "PathfinderCinematicIntro"
+	add_child(_intro_controller)
+	_intro_controller.call("begin", _pathfinder, _sojourner, player, $HUD)
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -280,6 +300,7 @@ func _align_imported_gameplay() -> void:
 	# apoyar cada elemento en la altura real del suelo, tras crear su colision.
 	await get_tree().physics_frame
 	if not is_instance_valid(_mars_landscape):
+		_start_pathfinder_intro_once()
 		return
 	for child in get_children():
 		if not child is Node3D:
@@ -316,7 +337,7 @@ func _align_imported_gameplay() -> void:
 				var terrain_delta: float = yogi_ground_y - ground_y
 				yogi_visual.position.y += terrain_delta
 				yogi_collision.position.y += terrain_delta
-
+	_start_pathfinder_intro_once()
 
 
 func _add_nasa_pathfinder_terrain_preview() -> void:
