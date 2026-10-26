@@ -1,0 +1,1 @@
+Render target: `pathfinder_intro.ogv` (generated locally via scripts/cinematics/render_pathfinder.ps1). Never substitute .mp4 directly in Godot 4; use Ogg Theora.\n
