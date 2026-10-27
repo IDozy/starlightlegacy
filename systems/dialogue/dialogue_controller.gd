@@ -115,6 +115,69 @@ func _get_dialogue_lines(dialogue_id: String) -> PackedStringArray:
 				"Usamos paracaídas y retrocohetes para reducir la velocidad, y unos enormes airbags para absorber el impacto final.",
 				"Ven. Quiero mostrarte dónde terminó aquella máquina y qué aprendimos de ella."
 			])
+		"grandfather_vanguard_1":
+			return PackedStringArray([
+				"¡La amortiguación funcionó! Pero las luces y los motores agotaron tu batería antes de completar el rescate.",
+				"En 1958, antes de que la NASA comenzara sus operaciones, el programa Vanguard lanzó un satélite muy pequeño: Vanguard 1.",
+				"Usaba células solares para proporcionar energía a un transmisor. En la oscuridad, la reserva eléctrica seguía siendo importante.",
+				"Ven, veamos cómo un sistema de energía puede durar más tiempo si aprovechamos la luz y administramos el consumo."
+			])
+		"grandfather_surveyor_1":
+			return PackedStringArray([
+				"¡Ahora el vehículo tiene energía! Pero cuando la luz llega de lado, el panel carga peor, y la cámara no consigue ver el objeto.",
+				"En 1966 una nave de la NASA aterrizó suavemente en la Luna por primera vez para Estados Unidos: Surveyor 1.",
+				"Los equipos de Tierra enviaban órdenes para operar su cámara y orientar el panel solar. No hacía falta que la máquina adivinara todo por sí sola.",
+				"En el Océano de las Tormentas transmitió miles de imágenes. Vamos a practicar cómo orientar la luz y la observación con órdenes precisas."
+			])
+		"grandfather_apollo_11":
+			return PackedStringArray([
+				"¡Ya tienes ruedas, energía y cámara orientable! Pero la base de transporte aún está unida al vehículo. Así no puede comenzar la misión de rescate.",
+				"Eso me recuerda al módulo lunar Eagle de Apollo 11. Armstrong y Aldrin aterrizaron en la Luna el 20 de julio de 1969.",
+				"El Eagle tenía dos partes: la etapa inferior sirvió para aterrizar y luego como plataforma. El 21 de julio la etapa superior despegó desde ella, y la inferior quedó en la Luna.",
+				"Nuestro rover no necesita despegar como una nave, pero sí puede aprender a separarse de una base que ya terminó su trabajo. Ven, veámoslo."
+			])
+		"grandfather_apollo_15":
+			return PackedStringArray([
+				"¡La base ya se libera! Pero sobre la arena y las piedras las ruedas patinan. Parece que el problema ya no es la potencia del motor.",
+				"En 1971, los astronautas David Scott y James Irwin exploraron la Luna con un vehículo eléctrico de cuatro ruedas: el Lunar Roving Vehicle de Apollo 15.",
+				"Sus ruedas no tenían cámaras de aire: utilizaban malla metálica flexible y bandas para mejorar el contacto con el suelo. Además transportaba a los astronautas y sus instrumentos.",
+				"Vamos al recuerdo de Hadley-Apennine. Aprenderemos a elegir ruedas y distribuir la carga; nuestro vehículo escolar usará una adaptación diferente."
+			])
+		"grandfather_ingenuity":
+			return PackedStringArray([
+				"Tu rover ya puede aterrizar seguro, pero su cámara no ve qué hay detrás de una cresta de rocas. Podríamos explorar desde arriba, sin que el rover vuele.",
+				"Ingenuity viajó sujeto a Perseverance. El 19 de abril de 2021 realizó el primer vuelo motorizado y controlado en otro planeta. En Marte el aire es muchísimo más tenue.",
+				"Era ligero y usaba dos rotores coaxiales que giraban en sentidos opuestos. Planeaban pocos vuelos de demostración, pero llegó a 72 y ayudó a observar rutas para Perseverance.",
+				"En su último vuelo, el 18 de enero de 2024, sufrió daños en las palas. NASA terminó su misión el 25 de enero. No volveremos a hacerlo despegar en la historia real: aprenderemos con una maqueta escolar de aeronave auxiliar."
+			])
+		"grandfather_sky_crane":
+			return PackedStringArray([
+				"Ahora tu rover está protegido y conoce su consumo de energía, pero la base de entrega se separa antes de que las ruedas toquen el suelo.",
+				"Perseverance aterrizó en el cráter Jezero de Marte el 18 de febrero de 2021. Durante su descenso usó navegación relativa al terreno para escoger un lugar seguro.",
+				"Una etapa con motores descendió y lo bajó por cables hasta que sus ruedas hicieron contacto. Solo entonces cortó las conexiones y la etapa salió volando para caer lejos del rover.",
+				"Esto no fue como Apollo 11: la etapa no quedó de plataforma en el mismo sitio. Nuestra maqueta aprenderá el orden: escoger terreno, bajar, detectar apoyo y liberar."
+			])
+		"grandfather_opportunity":
+			return PackedStringArray([
+				"Tu rover funciona, pero el panel ya no recibe la luz suficiente. Una tormenta artificial ha oscurecido la zona de pruebas.",
+				"Opportunity llegó a Marte en enero de 2004. Era gemelo de Spirit, fue diseñado para 90 soles y recorrió más de 45 kilómetros en casi quince años.",
+				"En junio de 2018 una gran tormenta de polvo oscureció Perseverance Valley. La última comunicación llegó el 10 de junio. Tras numerosos intentos sin éxito, NASA declaró terminada su misión el 13 de febrero de 2019.",
+				"No diremos que Opportunity volvió a despertar. Aprenderemos a calcular un presupuesto energético en tu propio rover escolar."
+			])
+		"grandfather_spirit":
+			return PackedStringArray([
+				"Tu rover ya registra datos, pero al cruzar polvo fino las ruedas giran sin avanzar. Si insistimos, puede hundirse aún más.",
+				"Spirit aterrizó en Marte en 2004 con seis ruedas y paneles solares. En 2009 quedó atrapado en suelo muy blando en un lugar llamado Troy.",
+				"La NASA estudió el hundimiento y la inclinación, probó maniobras en la Tierra, pero no consiguió liberarlo. En enero de 2010 decidió utilizarlo como una plataforma científica estacionaria.",
+				"No vamos a fingir que Spirit escapó. Aprenderemos a detectar cuándo debemos parar, cuidar la energía y continuar investigando de otra manera."
+			])
+		"grandfather_viking_1":
+			return PackedStringArray([
+				"¡El vehículo ya puede avanzar! Pero ahora el sensor ha marcado una reacción y casi anunciamos que encontramos vida, sin comprobar el resultado.",
+				"En 1976, Viking 1 aterrizó en Marte, en Chryse Planitia, con un laboratorio y un brazo capaz de recoger muestras de suelo.",
+				"Sus experimentos detectaron actividad química desconcertante. Sin embargo, no aportaron pruebas definitivas de vida. Una señal interesante no basta por sí sola.",
+				"Viking 1 quedó en Marte y aún puede verse desde órbita. Vamos a descubrir cómo observar, comparar y explicar resultados con cuidado."
+			])
 		_:
 			return PackedStringArray()
 

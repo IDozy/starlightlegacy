@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c763rdwhkamgj"
+path="res://.godot/imported/Building_L.obj-6aa9706b3ad4f0d99578c5a52babbacf.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Building_L.obj-6aa9706b3ad4f0d99578c5a52babbacf.mesh"]
+
+source_file="res://assets/third_party/quaternius/ultimate_space_kit/Environment/OBJ/Building_L.obj"
+dest_files=["res://.godot/imported/Building_L.obj-6aa9706b3ad4f0d99578c5a52babbacf.mesh", "res://.godot/imported/Building_L.obj-6aa9706b3ad4f0d99578c5a52babbacf.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

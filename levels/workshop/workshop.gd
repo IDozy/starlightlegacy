@@ -1,5 +1,32 @@
 extends Node3D
 
+# La geometría arquitectónica se importa desde Blender; la lógica del taller
+# y sus elementos interactivos continúan siendo nodos propios de Godot.
+const WORKSHOP_MODEL := preload("res://assets/models/taller/Taller_NASA_v02.glb")
+@export var use_imported_workshop: bool = true
+# Ajustes rápidos desde el Inspector para la iluminación interior del GLB.
+@export_range(0.0, 4.0, 0.05) var ceiling_light_energy: float = 1.85
+@export_range(0.0, 2.0, 0.05) var workshop_ambient_energy: float = 1.10
+
+# Blender: 14 x 20 m, Z alto=1 m, plataforma alta=6.4 m,
+# rampa de 4.2 x 3.8 m. Godot invierte el signo del eje Y de Blender en Z.
+const MODEL_WIDTH: float = 14.0
+const MODEL_DEPTH: float = 20.0
+const UPPER_DEPTH: float = 6.4
+const UPPER_HEIGHT: float = 1.0
+const RAMP_WIDTH: float = 4.2
+const RAMP_LENGTH: float = 3.8
+const PROPS_OFFSET_Z: float = 5.0
+const TEST_AREA_EXTRA_OFFSET_Z: float = 1.5
+# Mesa en primer nivel: lejos de puerta lateral (-X) y más cerca del
+# portón principal (-Z). Se deja a la izquierda de la rampa sin invadirla.
+# Tablero resultante: X=-4.10, Y=0.90, Z=-2.00.
+const WORKBENCH_LOWER_OFFSET := Vector3(-4.10, 0.0, 1.70)
+const GRANDFATHER_UPPER_POSITION := Vector3(4.45, 1.0, -4.90)
+# Protección invisible por encima del pasamanos visible; no cruza la rampa.
+const UPPER_SAFETY_HEIGHT: float = 2.60
+const UPPER_SAFETY_CENTER_Y: float = UPPER_HEIGHT + UPPER_SAFETY_HEIGHT * 0.5
+
 const INSPECTABLE_OBJECT := preload("res://systems/interaction/inspectable_object.tscn")
 const GRANDFATHER := preload("res://systems/dialogue/grandfather_placeholder.tscn")
 const RESCUE_ROVER_PROJECT := preload("res://systems/gameplay/rescue_rover_project.tscn")
@@ -25,9 +52,176 @@ const PANEL_COLOR := Color(0.16, 0.19, 0.22)
 
 func _ready() -> void:
 	_build_lighting()
-	_build_room()
-	_build_workshop_props()
+	if use_imported_workshop:
+		_build_imported_room()
+	else:
+		_build_room()
 
+	# Mantener los hijos directamente bajo Workshop: main.gd espera
+	# $Workshop/RescueRoverProject y no se debe alterar esa ruta.
+	var previous_children := get_children()
+	_build_workshop_props()
+	if use_imported_workshop:
+		_reposition_legacy_props(previous_children)
+
+
+func _build_imported_room() -> void:
+	var model := WORKSHOP_MODEL.instantiate() as Node3D
+	if model == null:
+		push_error("No se pudo instanciar el modelo 3D del taller.")
+		return
+	model.name = "Taller_NASA_v02_Visual"
+	add_child(model)
+
+	# Colisiones sencillas, independientes de la geometría decorativa del GLB.
+	# La superficie de la losa inferior coincide con Y=0.
+	_create_collision_box(
+		"ImportedLowerFloor", Vector3(0.0, -0.125, 0.0),
+		Vector3(MODEL_WIDTH - 0.25, 0.25, MODEL_DEPTH - 0.25)
+	)
+
+	var upper_front_z := -(MODEL_DEPTH * 0.5 - UPPER_DEPTH)
+	var upper_back_z := -MODEL_DEPTH * 0.5
+	_create_collision_box(
+		"ImportedUpperPlatform",
+		Vector3(0.0, UPPER_HEIGHT * 0.5, (upper_front_z + upper_back_z) * 0.5),
+		Vector3(MODEL_WIDTH - 0.25, UPPER_HEIGHT, UPPER_DEPTH)
+	)
+
+	# La rampa del GLB fue ajustada manualmente en Blender para acabar
+	# exactamente a Y=0 y Y=1; esta cuña de colisión sigue esa pendiente.
+	_create_ramp_collision(upper_front_z)
+
+	# La puerta central queda libre; las colisiones de pared son laterales.
+	for side in [-1.0, 1.0]:
+		var suffix := "Left" if side < 0.0 else "Right"
+		_create_collision_box(
+			"ImportedWall" + suffix,
+			Vector3(side * (MODEL_WIDTH * 0.5 - 0.12), 2.9, 0.0),
+			Vector3(0.24, 5.8, MODEL_DEPTH - 0.15)
+		)
+
+	# Cerramiento del extremo del PRIMER NIVEL, contrario al portón de arriba.
+	# La apertura del nivel superior queda libre para el futuro exterior.
+	# Cubierta color marfil y zócalo azul a juego con el GLB.
+	var back_z := MODEL_DEPTH * 0.5 - 0.20
+	_create_static_box(
+		"ImportedBackWall", Vector3(0.0, 2.9, back_z),
+		Vector3(MODEL_WIDTH - 0.30, 5.8, 0.20), Color(0.86, 0.83, 0.77)
+	)
+	_create_visual_box(
+		"ImportedBackWallLower", Vector3(0.0, 0.55, back_z - 0.115),
+		Vector3(MODEL_WIDTH - 0.34, 1.10, 0.035), Color(0.31, 0.43, 0.53)
+	)
+	_create_visual_box(
+		"ImportedBackWallStripe", Vector3(0.0, 2.34, back_z - 0.136),
+		Vector3(MODEL_WIDTH - 0.40, 0.085, 0.040), TEST_BORDER_COLOR
+	)
+
+	# La barrera física es más alta que el salto del personaje. No se
+	# dibuja: mantiene la estética de las barandas bajas de Blender.
+	# Los dos tramos frontales dejan abierto el centro para la rampa.
+	var gap_half := RAMP_WIDTH * 0.5 + 0.42
+	var end_x := MODEL_WIDTH * 0.5 - 0.50
+	var rail_length := end_x - gap_half
+	var rail_center := (end_x + gap_half) * 0.5
+	for side in [-1.0, 1.0]:
+		var suffix := "Left" if side < 0.0 else "Right"
+		for z in [upper_front_z - 0.18, upper_back_z + 0.45]:
+			var end_name := "RampEdge" if z > upper_back_z + 1.0 else "GarageEdge"
+			_create_collision_box(
+				"ImportedRail" + end_name + suffix,
+				Vector3(side * rail_center, UPPER_SAFETY_CENTER_Y, z),
+				Vector3(rail_length, UPPER_SAFETY_HEIGHT, 0.10)
+			)
+
+		# Mismo límite invisible junto a cada baranda lateral alta.
+		var side_rail_back_z := upper_back_z + 0.45
+		var side_rail_front_z := upper_front_z - 0.90
+		_create_collision_box(
+			"ImportedSideSafety" + suffix,
+			Vector3(
+				side * end_x, UPPER_SAFETY_CENTER_Y,
+				(side_rail_back_z + side_rail_front_z) * 0.5
+			),
+			Vector3(0.10, UPPER_SAFETY_HEIGHT, side_rail_front_z - side_rail_back_z)
+		)
+
+
+func _create_collision_box(
+	body_name: String, center: Vector3, dimensions: Vector3
+) -> void:
+	var body := StaticBody3D.new()
+	body.name = body_name
+	body.position = center
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = dimensions
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+
+func _create_ramp_collision(upper_front_z: float) -> void:
+	var bottom_z := upper_front_z + RAMP_LENGTH
+	var half_width := RAMP_WIDTH * 0.5
+	# ConvexPolygonShape3D proporciona una cuña maciza para evitar que el
+	# jugador atraviese la rampa. La pendiente es de ~14.7 grados.
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = PackedVector3Array([
+		Vector3(-half_width, -0.20, bottom_z),
+		Vector3( half_width, -0.20, bottom_z),
+		Vector3(-half_width, -0.20, upper_front_z),
+		Vector3( half_width, -0.20, upper_front_z),
+		Vector3(-half_width, 0.0, bottom_z),
+		Vector3( half_width, 0.0, bottom_z),
+		Vector3(-half_width, UPPER_HEIGHT, upper_front_z),
+		Vector3( half_width, UPPER_HEIGHT, upper_front_z)
+	])
+	var body := StaticBody3D.new()
+	body.name = "ImportedRampCollision"
+	var collision := CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+
+func _reposition_legacy_props(previous_children: Array[Node]) -> void:
+	# Todos los props se crearon directamente bajo Workshop para conservar
+	# sus rutas, diálogos, colisiones y señales.
+	for child in get_children():
+		if not (child is Node3D) or previous_children.has(child):
+			continue
+		var prop := child as Node3D
+		var prop_name := str(prop.name)
+
+		if prop_name == "Grandfather":
+			# Segundo nivel, junto a la baranda derecha.
+			prop.position = GRANDFATHER_UPPER_POSITION
+			prop.rotation_degrees = Vector3(0.0, -115.0, 0.0)
+		elif prop_name.begins_with("Workbench") or prop_name == "PrototypeDevice":
+			# Mesa completa en el primer nivel (sin elevar piezas).
+			# Todas las partes y el objeto interactivo mantienen sus
+			# desplazamientos relativos a la mesa original.
+			prop.position += WORKBENCH_LOWER_OFFSET
+		else:
+			var extra_z := 0.0
+			if prop_name == "RescueRoverProject":
+				extra_z = TEST_AREA_EXTRA_OFFSET_Z
+			prop.position.z += PROPS_OFFSET_Z + extra_z
+
+	# El gran panel negro detrás de la mesa procede del prototipo antiguo.
+	# No pertenece al mobiliario aprobado: se retira (incluida su colisión).
+	var old_backboard := get_node_or_null("WorkbenchBackboard")
+	if old_backboard != null:
+		old_backboard.queue_free()
+
+	# Decoraciones antiguas asociadas a coordenadas de paredes de 12x10 m:
+	# esconderlas hasta ubicarlas en la nueva arquitectura 14x20 m.
+	for path in ["WorkbenchWallDisplay", "WorkshopWallDetailLeft", "EnergyWallSwitch"]:
+		var decoration := get_node_or_null(path) as Node3D
+		if decoration != null:
+			decoration.visible = false
 
 func _build_lighting() -> void:
 	var world_environment := WorldEnvironment.new()
@@ -35,10 +229,18 @@ func _build_lighting() -> void:
 
 	var environment := Environment.new()
 	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.035, 0.043, 0.058)
+	environment.background_color = (
+		Color(0.63, 0.76, 0.88) if use_imported_workshop
+		else Color(0.035, 0.043, 0.058)
+	)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.48, 0.46, 0.42)
-	environment.ambient_light_energy = 0.50
+	environment.ambient_light_color = (
+		Color(0.79, 0.81, 0.84) if use_imported_workshop
+		else Color(0.48, 0.46, 0.42)
+	)
+	environment.ambient_light_energy = (
+		workshop_ambient_energy if use_imported_workshop else 0.50
+	)
 	world_environment.environment = environment
 	add_child(world_environment)
 
@@ -46,27 +248,60 @@ func _build_lighting() -> void:
 	sun.name = "DirectionalLight3D"
 	sun.rotation_degrees = Vector3(-48.0, -32.0, 0.0)
 	sun.light_color = Color(1.0, 0.86, 0.70)
-	sun.light_energy = 0.48
+	sun.light_energy = 0.95 if use_imported_workshop else 0.48
 	sun.shadow_enabled = true
 	add_child(sun)
 
 	var bench_light := OmniLight3D.new()
 	bench_light.name = "BenchLight"
-	bench_light.position = Vector3(-0.4, 2.55, -3.35)
+	bench_light.position = (
+		Vector3(-4.00, 2.55, -2.00) if use_imported_workshop
+		else Vector3(-0.4, 2.55, -3.35)
+	)
 	bench_light.omni_range = 5.0
 	bench_light.light_color = Color(1.0, 0.68, 0.43)
-	bench_light.light_energy = 1.65
+	bench_light.light_energy = 0.95 if use_imported_workshop else 1.65
 	bench_light.shadow_enabled = true
 	add_child(bench_light)
 
 	var test_light := OmniLight3D.new()
 	test_light.name = "TestAreaLight"
-	test_light.position = Vector3(1.55, 2.75, -0.45)
+	test_light.position = (
+		Vector3(1.55, 2.75, 6.05) if use_imported_workshop
+		else Vector3(1.55, 2.75, -0.45)
+	)
 	test_light.omni_range = 4.6
 	test_light.light_color = Color(0.62, 0.78, 0.92)
-	test_light.light_energy = 1.15
-	test_light.shadow_enabled = true
+	test_light.light_energy = 0.80 if use_imported_workshop else 1.15
+	test_light.shadow_enabled = not use_imported_workshop
 	add_child(test_light)
+
+	if use_imported_workshop:
+		_build_ceiling_panel_lights()
+
+
+func _build_ceiling_panel_lights() -> void:
+	# Los rectángulos blancos exportados de Blender son mallas, no luces.
+	# Ocho focos apuntan hacia abajo desde las luminarias del techo,
+	# repartidos por ambos niveles (14 x 20 m) para evitar rincones oscuros.
+	# Sin sombras adicionales: mejor rendimiento con GL Compatibility/Web.
+	var longitudinal_positions := [-7.5, -2.5, 2.5, 7.5]
+	for row in range(longitudinal_positions.size()):
+		for side in [-1, 1]:
+			var fixture := SpotLight3D.new()
+			fixture.name = "CeilingPanelLight_%s_%02d" % [
+				"L" if side < 0 else "R", row + 1
+			]
+			fixture.position = Vector3(float(side) * 3.35, 5.10, longitudinal_positions[row])
+			# SpotLight3D emite por su -Z local; -90º en X orienta el cono al suelo.
+			fixture.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+			fixture.light_color = Color(1.0, 0.95, 0.87)
+			fixture.light_energy = ceiling_light_energy
+			fixture.spot_range = 8.0
+			fixture.spot_angle = 52.0
+			fixture.spot_attenuation = 0.9
+			fixture.shadow_enabled = false
+			add_child(fixture)
 
 
 func _build_room() -> void:
@@ -93,7 +328,10 @@ func _build_room() -> void:
 
 func _build_workshop_props() -> void:
 	_build_workbench()
-	_build_test_area()
+	# El nuevo GLB ya contiene las marcas del suelo: no duplicar
+	# la alfombra negra ni los bloques de la prueba antigua.
+	if not use_imported_workshop:
+		_build_test_area()
 	_build_kenney_storage()
 
 	var prototype_device := INSPECTABLE_OBJECT.instantiate()

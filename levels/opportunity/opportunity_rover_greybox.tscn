@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://levels/opportunity/opportunity_rover_greybox.gd" id="1_rover"]
+
+[node name="OpportunityRoverGreybox" type="Node3D"]
+script = ExtResource("1_rover")

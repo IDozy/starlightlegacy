@@ -2,6 +2,8 @@ extends CanvasLayer
 
 var _overlay: ColorRect
 var _transitioning := false
+## Bandera efímera para impedir una doble intro tras la opción de video.
+var skip_next_pathfinder_intro := false
 
 
 func _ready() -> void:

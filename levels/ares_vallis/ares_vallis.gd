@@ -3,12 +3,17 @@ extends Node3D
 const PATHFINDER_STORY := preload("res://systems/gameplay/pathfinder_story_point.tscn")
 const SOJOURNER_CHALLENGE := preload("res://systems/gameplay/sojourner_scan_challenge.tscn")
 const SCENE_PORTAL := preload("res://systems/navigation/scene_portal.tscn")
+const PATHFINDER_INTRO_SCRIPT := preload("res://systems/cinematics/pathfinder_intro_controller.gd")
 const ROCK_1_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_1.gltf")
 const ROCK_2_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_2.gltf")
 const ROCK_3_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_3.gltf")
 const ROCK_4_SCENE := preload("res://assets/third_party/quaternius/ultimate_space_kit/Environment/GLTF/Rock_4.gltf")
+const MARS_LANDSCAPE_SCRIPT := preload("res://levels/ares_vallis/ares_vallis_landscape.gd")
 const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_pathfinder_preview.obj")
 const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
+
+@export var use_imported_ares_vallis: bool = true
+@export var enable_pathfinder_intro: bool = true # Cinemática in-engine aprobada para el piloto.
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -30,6 +35,9 @@ const LANDING_SCAR := Color(0.31, 0.15, 0.095)
 var _pathfinder: Node = null
 var _sojourner: Node = null
 var _return_portal: Node = null
+var _mars_landscape: Node3D = null
+var _intro_started := false
+var _intro_controller: Node3D = null
 
 
 func _ready() -> void:
@@ -46,6 +54,31 @@ func _ready() -> void:
 	_pathfinder.call("set_completed_state", pathfinder_done)
 	_sojourner.call("set_completed_state", sojourner_done)
 	_update_progress()
+	if use_imported_ares_vallis:
+		call_deferred("_align_imported_gameplay")
+	else:
+		_start_pathfinder_intro_once()
+
+
+func _start_pathfinder_intro_once() -> void:
+	# Esperar a que el terreno importado y Sojourner estén alineados. Solo
+	# bloquea controles y oculta HUD mientras dure la reconstrucción.
+	if _intro_started or not enable_pathfinder_intro:
+		return
+	# La escena de video es una opción independiente y nunca debe
+	# volver a reproducir la intro 3D al entregarnos Ares Vallis.
+	var transition := get_node_or_null("/root/SceneTransition")
+	if transition != null and bool(transition.get("skip_next_pathfinder_intro")):
+		transition.set("skip_next_pathfinder_intro", false)
+		_intro_started = true
+		return
+	if not is_instance_valid(_pathfinder) or not is_instance_valid(_sojourner):
+		return
+	_intro_started = true
+	_intro_controller = PATHFINDER_INTRO_SCRIPT.new() as Node3D
+	_intro_controller.name = "PathfinderCinematicIntro"
+	add_child(_intro_controller)
+	_intro_controller.call("begin", _pathfinder, _sojourner, player, $HUD)
 
 
 func _on_interaction_prompt_changed(prompt: String) -> void:
@@ -102,6 +135,8 @@ func _unlock_return_portal() -> void:
 	_return_portal = SCENE_PORTAL.instantiate()
 	_return_portal.position = Vector3(-2.2, 0.65, 3.4)
 	add_child(_return_portal)
+	if use_imported_ares_vallis:
+		call_deferred("_align_imported_gameplay")
 
 
 func _has_discovery(discovery_id: String) -> bool:
@@ -117,49 +152,61 @@ func _build_environment() -> void:
 	world_environment.name = "MarsEnvironment"
 
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.46, 0.25, 0.18)
+	# Cielo marciano con gradiente: no usar el antiguo fondo marron plano.
+	# Compatible con el renderer GL Compatibility del proyecto.
+	var mars_sky_material := ProceduralSkyMaterial.new()
+	mars_sky_material.sky_top_color = Color(0.25, 0.17, 0.18)
+	mars_sky_material.sky_horizon_color = Color(0.70, 0.38, 0.27)
+	mars_sky_material.ground_horizon_color = Color(0.57, 0.31, 0.23)
+	mars_sky_material.ground_bottom_color = Color(0.30, 0.17, 0.15)
+	var mars_sky := Sky.new()
+	mars_sky.sky_material = mars_sky_material
+	environment.background_mode = Environment.BG_SKY
+	environment.sky = mars_sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.66, 0.44, 0.34)
-	environment.ambient_light_energy = 0.50
+	environment.ambient_light_color = Color(0.58, 0.44, 0.37)
+	environment.ambient_light_energy = 0.38
 	world_environment.environment = environment
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "MarsSun"
 	sun.rotation_degrees = Vector3(-42.0, -34.0, 0.0)
-	sun.light_color = Color(1.0, 0.80, 0.66)
-	sun.light_energy = 1.12
+	sun.light_color = Color(1.0, 0.79, 0.67)
+	sun.light_energy = 0.85
 	sun.shadow_enabled = true
 	add_child(sun)
 
 
 func _build_ares_vallis() -> void:
-	_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
-	_add_nasa_pathfinder_terrain_preview()
+	if use_imported_ares_vallis:
+		_build_imported_landscape()
+	else:
+		_create_static_box("AresGround", Vector3(0, -0.12, -2), Vector3(38, 0.24, 34), SAND)
+		_add_nasa_pathfinder_terrain_preview()
 
-	# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
-	_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
-	_create_visual_sphere("WestMoundB", Vector3(-13.5, 0.06, -10.5), 3.8, Vector3(1.60, 0.15, 2.05), ROCK)
-	_create_visual_sphere("EastMoundA", Vector3(13.2, 0.06, -3.2), 3.5, Vector3(1.90, 0.17, 2.40), ROCK)
-	_create_visual_sphere("EastMoundB", Vector3(13.0, 0.05, -11.5), 3.7, Vector3(1.65, 0.14, 2.10), SAND_LIGHT)
+		# Rounded edge terrain keeps the walkable flood plain open without boxy ridges.
+		_create_visual_sphere("WestMoundA", Vector3(-12.8, 0.08, -2.5), 3.4, Vector3(1.95, 0.18, 2.55), SAND_LIGHT)
+		_create_visual_sphere("WestMoundB", Vector3(-13.5, 0.06, -10.5), 3.8, Vector3(1.60, 0.15, 2.05), ROCK)
+		_create_visual_sphere("EastMoundA", Vector3(13.2, 0.06, -3.2), 3.5, Vector3(1.90, 0.17, 2.40), ROCK)
+		_create_visual_sphere("EastMoundB", Vector3(13.0, 0.05, -11.5), 3.7, Vector3(1.65, 0.14, 2.10), SAND_LIGHT)
 
-	# Twin Peaks use actual low-poly rock silhouettes instead of sphere placeholders.
-	_create_asset_rock("TwinPeakLeft", ROCK_3_SCENE, Vector3(-5.2, 0.45, -15.7), 1.75, -12.0)
-	_create_asset_rock("TwinPeakRight", ROCK_1_SCENE, Vector3(-0.7, 0.42, -16.8), 1.55, 18.0)
-	_create_asset_rock("HorizonShoulder", ROCK_2_SCENE, Vector3(5.6, 0.0, -15.2), 0.78, -24.0)
+		# Twin Peaks use actual low-poly rock silhouettes instead of sphere placeholders.
+		_create_asset_rock("TwinPeakLeft", ROCK_3_SCENE, Vector3(-5.2, 0.45, -15.7), 1.75, -12.0)
+		_create_asset_rock("TwinPeakRight", ROCK_1_SCENE, Vector3(-0.7, 0.42, -16.8), 1.55, 18.0)
+		_create_asset_rock("HorizonShoulder", ROCK_2_SCENE, Vector3(5.6, 0.0, -15.2), 0.78, -24.0)
 
-	# Scattered rock fields frame the route while leaving a readable corridor.
-	_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
-	_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
-	_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
-	_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
-	_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.2, 0.0, -8.6), 0.15, 65.0)
-	_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(4.6, 0.0, -10.2), 0.19, -8.0)
-	_create_asset_rock("Rock_6", ROCK_4_SCENE, Vector3(-9.4, 0.0, -11.0), 0.28, 28.0)
-	_create_asset_rock("Rock_7", ROCK_3_SCENE, Vector3(9.6, 0.0, -12.2), 0.31, -33.0)
-	_create_asset_rock("Rock_8", ROCK_2_SCENE, Vector3(10.4, 0.0, 0.4), 0.18, 54.0)
-	_create_asset_rock("Rock_9", ROCK_1_SCENE, Vector3(-10.2, 0.0, 4.0), 0.20, -20.0)
+		# Scattered rock fields frame the route while leaving a readable corridor.
+		_create_asset_rock("Rock_0", ROCK_1_SCENE, Vector3(-6.0, 0.0, 1.0), 0.22, 12.0)
+		_create_asset_rock("Rock_1", ROCK_2_SCENE, Vector3(6.8, 0.0, 2.4), 0.28, -18.0)
+		_create_asset_rock("Rock_2", ROCK_3_SCENE, Vector3(-7.2, 0.0, -5.0), 0.18, 36.0)
+		_create_asset_rock("Rock_3", ROCK_4_SCENE, Vector3(7.4, 0.0, -7.0), 0.24, -42.0)
+		_create_asset_rock("Rock_4", ROCK_2_SCENE, Vector3(-2.2, 0.0, -8.6), 0.15, 65.0)
+		_create_asset_rock("Rock_5", ROCK_1_SCENE, Vector3(4.6, 0.0, -10.2), 0.19, -8.0)
+		_create_asset_rock("Rock_6", ROCK_4_SCENE, Vector3(-9.4, 0.0, -11.0), 0.28, 28.0)
+		_create_asset_rock("Rock_7", ROCK_3_SCENE, Vector3(9.6, 0.0, -12.2), 0.31, -33.0)
+		_create_asset_rock("Rock_8", ROCK_2_SCENE, Vector3(10.4, 0.0, 0.4), 0.18, 54.0)
+		_create_asset_rock("Rock_9", ROCK_1_SCENE, Vector3(-10.2, 0.0, 4.0), 0.20, -20.0)
 
 	# Disturbed soil visually anchors the two historical hardware areas.
 	_create_visual_sphere(
@@ -169,13 +216,17 @@ func _build_ares_vallis() -> void:
 		Vector3(1.55, 0.018, 1.08),
 		LANDING_SCAR
 	)
-	_create_visual_sphere(
-		"SojournerSoilPatch",
-		Vector3(3.4, 0.004, -6.0),
-		0.95,
-		Vector3(1.55, 0.015, 1.20),
-		SAND_LIGHT
-	)
+	# El suelo v33 ya tiene su propio relieve. Una esfera aplanada forma
+	# una plataforma circular artificial alrededor de Sojourner.
+	# Conservar la marca solamente en el nivel de geometria provisional.
+	if not use_imported_ares_vallis:
+		_create_visual_sphere(
+			"SojournerSoilPatch",
+			Vector3(3.4, 0.004, -6.0),
+			0.95,
+			Vector3(1.55, 0.015, 1.20),
+			SAND_LIGHT
+		)
 
 	_pathfinder = PATHFINDER_STORY.instantiate()
 	_pathfinder.position = Vector3(-1.8, 0.05, 1.4)
@@ -212,18 +263,23 @@ func _build_ares_vallis() -> void:
 		var t: float = float(step) / 10.0
 		var z_pos: float = lerpf(0.15, -5.55, t)
 		var x_center: float = lerpf(-0.75, 3.05, t)
+		# Las huellas siguen indicando el camino, pero sobre el GLB real
+		# son marcas discretas, no barras negras elevadas del prototipo.
+		var track_height := 0.004 if use_imported_ares_vallis else 0.014
+		var track_size := Vector3(0.047, 0.005, 0.23) if use_imported_ares_vallis else Vector3(0.075, 0.020, 0.34)
+		var track_color := Color(0.38, 0.21, 0.15) if use_imported_ares_vallis else TRACK
 		_create_visual_box(
 			"TrackL_%d" % step,
-			Vector3(x_center - 0.20, 0.014, z_pos),
-			Vector3(0.075, 0.020, 0.34),
-			TRACK,
+			Vector3(x_center - 0.20, track_height, z_pos),
+			track_size,
+			track_color,
 			-34.0
 		)
 		_create_visual_box(
 			"TrackR_%d" % step,
-			Vector3(x_center + 0.20, 0.014, z_pos),
-			Vector3(0.075, 0.020, 0.34),
-			TRACK,
+			Vector3(x_center + 0.20, track_height, z_pos),
+			track_size,
+			track_color,
 			-34.0
 		)
 
@@ -238,6 +294,57 @@ func _build_ares_vallis() -> void:
 	if platform != null:
 		platform.visible = false
 
+
+
+func _build_imported_landscape() -> void:
+	_mars_landscape = MARS_LANDSCAPE_SCRIPT.new() as Node3D
+	_mars_landscape.name = "AresVallisLandscape_v33"
+	add_child(_mars_landscape)
+
+
+func _align_imported_gameplay() -> void:
+	# El GLB viene a escala de Blender. No aplanar el terreno para el gameplay:
+	# apoyar cada elemento en la altura real del suelo, tras crear su colision.
+	await get_tree().physics_frame
+	if not is_instance_valid(_mars_landscape):
+		_start_pathfinder_intro_once()
+		return
+	for child in get_children():
+		if not child is Node3D:
+			continue
+		var obj := child as Node3D
+		if obj == _mars_landscape or obj.has_meta("ares_v33_ground_aligned"):
+			continue
+		var n := str(obj.name)
+		var is_stage_prop := (obj == player or obj == _pathfinder or obj == _sojourner or obj == _return_portal
+			or n.begins_with("TrackL_") or n.begins_with("TrackR_")
+			or n.begins_with("DeflatedAirbag") or n == "PathfinderLandingScar"
+			or n == "SojournerSoilPatch")
+		if not is_stage_prop:
+			continue
+		var ground_y := float(_mars_landscape.call("ground_height_at", obj.global_position.x, obj.global_position.z))
+		obj.position.y += ground_y
+		obj.set_meta("ares_v33_ground_aligned", true)
+		# El centro del reto y las ruedas reales no siempre estan sobre el
+		# mismo punto del relieve: apoyar la malla despues del ajuste del padre.
+		if obj == _sojourner:
+			var rover_visual := _sojourner.get_node_or_null("RoverVisual") as Node3D
+			if rover_visual != null and rover_visual.has_method("snap_to_terrain"):
+				rover_visual.call("snap_to_terrain")
+			# Yogi queda mas adelantada que el centro del reto: la altura
+			# del terreno puede variar bajo la roca. Corregir visual y collider
+			# JUNTOS para evitar que flote o quede enterrada en una pendiente.
+			var yogi_visual := _sojourner.get_node_or_null("Rock") as Node3D
+			var yogi_collision := _sojourner.get_node_or_null("YogiCollision") as CollisionShape3D
+			if yogi_visual != null and yogi_collision != null:
+				var yogi_world_pos := yogi_visual.global_position
+				var yogi_ground_y := float(_mars_landscape.call(
+					"ground_height_at", yogi_world_pos.x, yogi_world_pos.z
+				))
+				var terrain_delta: float = yogi_ground_y - ground_y
+				yogi_visual.position.y += terrain_delta
+				yogi_collision.position.y += terrain_delta
+	_start_pathfinder_intro_once()
 
 
 func _add_nasa_pathfinder_terrain_preview() -> void:

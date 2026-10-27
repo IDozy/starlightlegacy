@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cj3s8g53lvdkr"
+path="res://.godot/imported/Planet_6.obj-87cf7de75cc78f0b83ea4d70b3f95b4c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/Planet_6.obj-87cf7de75cc78f0b83ea4d70b3f95b4c.mesh"]
+
+source_file="res://assets/third_party/quaternius/ultimate_space_kit/Environment/OBJ/Planet_6.obj"
+dest_files=["res://.godot/imported/Planet_6.obj-87cf7de75cc78f0b83ea4d70b3f95b4c.mesh", "res://.godot/imported/Planet_6.obj-87cf7de75cc78f0b83ea4d70b3f95b4c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false
