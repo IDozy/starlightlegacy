@@ -13,7 +13,7 @@ const NASA_PATHFINDER_TERRAIN := preload("res://assets/terrain/ares_vallis/nasa_
 const NASA_PATHFINDER_TEXTURE := preload("res://assets/references/nasa/pathfinder/textures/pi1246925872_007006539lt.jpg")
 
 @export var use_imported_ares_vallis: bool = true
-@export var enable_pathfinder_intro: bool = false # Alternativa 3D preservada, video es ruta principal.
+@export var enable_pathfinder_intro: bool = true # Cinemática in-engine aprobada para el piloto.
 
 const PATHFINDER_DISCOVERY_ID := "mars_pathfinder_lander"
 const SOJOURNER_DISCOVERY_ID := "sojourner_apxs"
@@ -64,6 +64,13 @@ func _start_pathfinder_intro_once() -> void:
 	# Esperar a que el terreno importado y Sojourner estén alineados. Solo
 	# bloquea controles y oculta HUD mientras dure la reconstrucción.
 	if _intro_started or not enable_pathfinder_intro:
+		return
+	# La escena de video es una opción independiente y nunca debe
+	# volver a reproducir la intro 3D al entregarnos Ares Vallis.
+	var transition := get_node_or_null("/root/SceneTransition")
+	if transition != null and bool(transition.get("skip_next_pathfinder_intro")):
+		transition.set("skip_next_pathfinder_intro", false)
+		_intro_started = true
 		return
 	if not is_instance_valid(_pathfinder) or not is_instance_valid(_sojourner):
 		return

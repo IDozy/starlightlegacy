@@ -1,6 +1,8 @@
+> **DECISIÓN VISUAL (26 oct 2026):** tras ver el primer render `draft` en Godot, se prefirió la cinemática **in-engine** anterior. Se restauró el flujo normal taller → `ares_vallis.tscn` → intro in-engine. El video es un experimento opcional al abrir `pathfinder_video_intro.tscn` con F6; no se reproduce mediante F5 y no hace falta volver a renderizarlo. Si se usa esa opción, la entrada al mapa suprime la segunda intro. Si falta el `.ogv`, se utiliza la intro in-engine como respaldo.
+
 # Pathfinder — cinemática renderizada (Capítulo I)
 
-La **secuencia 3D con el greybox** solo se conserva para comparar; este nuevo prototipo crea un **video offline** en Blender con un escenario independiente y lo conecta con Godot.
+Esta es una **alternativa archivada para comparación**, no la entrada principal del juego. El video offline se creó con Blender para evaluar su calidad, pero la prueba favoreció la primera secuencia 3D del mapa.
 
 ## Crear el vídeo en Windows (Blender 5.2)
 
@@ -10,10 +12,10 @@ La **secuencia 3D con el greybox** solo se conserva para comparar; este nuevo pr
    .\scripts\cinematics\render_pathfinder.ps1 -Quality draft
    ```
    Si Blender no se autodetecta, agrega `-BlenderBinary "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe"`.
-3. El resultado `assets/videos/pathfinder/pathfinder_intro.ogv` se importa directamente en Godot. Ejecuta `levels/ares_vallis/pathfinder_video_intro.tscn` con **F6** o la historia normal con F5. Esc/E lo omiten.
+3. El resultado `assets/videos/pathfinder/pathfinder_intro.ogv` se importa directamente en Godot. Para revisar **solo la alternativa de video**, ejecuta `levels/ares_vallis/pathfinder_video_intro.tscn` con **F6**. Para la experiencia **elegida**, usa **F5** (intro in-engine). Esc/E omiten ambas.
 4. Para una versión con mayor resolución: `-Quality final`. Los frames y el `.blend` generado quedan en `renders/pathfinder/`.
 
-**Importante:** no existe un .ogv renderizado y verificado en el repositorio todavía. Este script se ejecuta en el Blender del usuario. La intro está preparada para abrir el mapa normal cuando falte el archivo, sin doble cinemática ni bloqueo. Los PNG, .blend generado y OGV son archivos locales de producción: revisar su tamaño y licencia antes de incorporarlos al PR.
+**Importante:** el usuario ya renderizó y evaluó el primer .ogv en su máquina; no se incluye en el repositorio. La intro de video es opcional y conserva una transición que evita encadenar la intro in-engine si se ha reproducido un .ogv. Los PNG, .blend generado y OGV son archivos locales de producción: revisar su tamaño y licencia antes de incorporarlos al PR.
 
 ## Storyboard — 16 segundos (reconstrucción estilizada, no filmación real)
 

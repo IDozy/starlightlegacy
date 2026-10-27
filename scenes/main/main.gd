@@ -110,8 +110,8 @@ func _on_dialogue_finished(dialogue_id: String) -> void:
 	var target_scene := ""
 	match dialogue_id:
 		"grandfather_intro":
-			# Primero reproducir el video; al terminar abre el mismo mapa jugable.
-			target_scene = "res://levels/ares_vallis/pathfinder_video_intro.tscn"
+			# Intro in-engine elegida para el recuerdo 01; video queda opcional.
+			target_scene = "res://levels/ares_vallis/ares_vallis.tscn"
 		"grandfather_vanguard_1":
 			target_scene = "res://levels/vanguard_1/vanguard_1_memory.tscn"
 		"grandfather_surveyor_1":

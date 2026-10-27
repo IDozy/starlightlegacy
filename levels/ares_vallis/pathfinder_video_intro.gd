@@ -1,7 +1,8 @@
 extends Control
 ## Video del recuerdo 01; usa VideoStreamPlayer (.ogv) de Godot 4.
 ## El video es UNA intro. El nivel y las interacciones siguen en Ares Vallis.
-## Si aún falta render, entra directamente al mapa (sin un softlock).
+## Alternativa OPCIONAL: entrada normal del taller usa la intro in-engine.
+## Sin .ogv se pasa a la intro in-engine sin bloquear el recuerdo.
 
 const VIDEO_PATH := "res://assets/videos/pathfinder/pathfinder_intro.ogv"
 const PLAYABLE_SCENE := "res://levels/ares_vallis/ares_vallis.tscn"
@@ -21,14 +22,15 @@ const CAPTIONS := [
 
 var _leaving := false
 var _last_caption := -1
+var _video_loaded := false
 
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	movie.finished.connect(_complete_video)
 	if not ResourceLoader.exists(VIDEO_PATH):
-		# No reactivar la cinemática in-engine: se conserva solo para comparar.
-		push_warning("Pathfinder: video .ogv aún no renderizado; se abre el nivel directamente.")
+		# La falta del OGV activa la alternativa in-engine al cargar Ares Vallis.
+		push_warning("Pathfinder: video .ogv no disponible; se usará la intro in-engine.")
 		call_deferred("_complete_video")
 		return
 	var resource := load(VIDEO_PATH) as VideoStream
@@ -37,6 +39,7 @@ func _ready() -> void:
 		call_deferred("_complete_video")
 		return
 	movie.stream = resource
+	_video_loaded = true
 	movie.expand = true
 	movie.loop = false
 	_update_caption(0.0)
@@ -84,6 +87,10 @@ func _complete_video() -> void:
 	# La transición ya existente crea un fundido de salida y de entrada.
 	var transition := get_node_or_null("/root/SceneTransition")
 	if transition != null and transition.has_method("fade_to_scene"):
+		# Solo suprimir la intro 3D si realmente había video disponible.
+		transition.set("skip_next_pathfinder_intro", _video_loaded)
 		transition.call("fade_to_scene", PLAYABLE_SCENE, 0.28)
 	else:
+		# La ruta normal siempre tiene SceneTransition autoload;
+		# sin ella no bloquear el acceso al recuerdo.
 		get_tree().change_scene_to_file(PLAYABLE_SCENE)

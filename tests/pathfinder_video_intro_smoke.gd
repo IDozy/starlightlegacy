@@ -1,5 +1,5 @@
 extends SceneTree
-## Contrato de la intro de video. No exige disponer del render final.
+## Contrato de la intro de video OPCIONAL. No exige disponer del render.
 ## godot --headless --path . --script res://tests/pathfinder_video_intro_smoke.gd
 
 var problems: Array[String] = []
@@ -31,11 +31,11 @@ func _run() -> void:
 			intro.free()
 	if memory != null:
 		var level := memory.instantiate() as Node3D
-		_assert(not bool(level.get("enable_pathfinder_intro")),
-			"La intro antigua no debe duplicarse al terminar el video")
+		_assert(bool(level.get("enable_pathfinder_intro")),
+			"La intro in-engine debe ser la opción predeterminada")
 		level.free()
 	if problems.is_empty():
-		print("PASS: video Pathfinder, subtítulos, omisión, mapa y prevención de doble intro")
+		print("PASS: video opcional, intro in-engine predeterminada, skip y mapa")
 		quit(0)
 	else:
 		for problem in problems:
